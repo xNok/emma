@@ -8,8 +8,8 @@
   "exports": {
     ".": "./dist/index.js",
     "./types": "./dist/types/index.js",
-    "./schema": "./dist/schema/index.js",
-    "./utils": "./dist/utils/index.js"
+    "./schema": "./dist/schema/validators.js",
+    "./utils": "./dist/utils/helpers.js"
   },
   "scripts": {
     "build": "tsc",
