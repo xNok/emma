@@ -16,6 +16,7 @@ You will often switch between these roles. The key is to ensure that your work, 
 Your main responsibility is to keep the project documentation in sync with the project's state. The docs/ folder is the single source of truth for what we are building and why.
 
 ### How to Get Started
+
 Navigate to the `docs/` directory.
 
 Find the highest-numbered markdown file (e.g., 01-some-design.md, 02-another-decision.md). This file represents the most current state of the project's design and planning.

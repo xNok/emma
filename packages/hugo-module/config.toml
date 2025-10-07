@@ -1,0 +1,14 @@
+# Emma Hugo Module Configuration
+
+[params.emma]
+  # CDN URL where your forms are hosted
+  cdnUrl = "https://forms.yourdomain.com"
+  
+  # Default CSS class for all forms
+  defaultClass = "emma-form"
+  
+  # Show loading indicator while form loads
+  showLoadingIndicator = true
+  
+  # Fallback message when JavaScript is disabled
+  noJsFallback = "This form requires JavaScript. Please enable it or contact us directly."

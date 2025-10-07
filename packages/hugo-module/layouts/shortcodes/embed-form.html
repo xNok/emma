@@ -1,0 +1,97 @@
+{{- /* 
+  Emma Form Embed Shortcode
+  Usage: {{< embed-form "form-id" >}}
+  
+  Parameters:
+    - First positional argument: formId (required)
+    - class: Additional CSS classes
+    - loading: Custom loading message
+*/ -}}
+
+{{- $formId := .Get 0 -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $cdnUrl := site.Params.emma.cdnUrl | default "https://forms.example.com" -}}
+{{- $defaultClass := site.Params.emma.defaultClass | default "emma-form" -}}
+{{- $showLoading := site.Params.emma.showLoadingIndicator | default true -}}
+{{- $noJsFallback := site.Params.emma.noJsFallback | default "This form requires JavaScript to function." -}}
+{{- $customLoading := .Get "loading" -}}
+
+{{- if not $formId -}}
+  {{- errorf "The 'embed-form' shortcode requires a formId as the first parameter. Usage: {{< embed-form \"your-form-id\" >}}" -}}
+{{- end -}}
+
+<div class="emma-form-wrapper {{ $defaultClass }} {{ $class }}" data-emma-form-wrapper="{{ $formId }}">
+  {{- if $showLoading -}}
+  <div class="emma-form-loading" data-emma-loading="{{ $formId }}">
+    <div class="emma-spinner"></div>
+    <p>{{ $customLoading | default "Loading form..." }}</p>
+  </div>
+  {{- end -}}
+  
+  <div 
+    id="embeddable-form-{{ $formId }}" 
+    class="emma-form-container"
+    data-form-id="{{ $formId }}"
+    data-cdn-url="{{ $cdnUrl }}"
+  ></div>
+  
+  <noscript>
+    <div class="emma-form-noscript">
+      <p>{{ $noJsFallback }}</p>
+    </div>
+  </noscript>
+</div>
+
+<script 
+  src="{{ $cdnUrl }}/{{ $formId }}.js" 
+  async 
+  defer
+  data-emma-form="{{ $formId }}"
+  {{- if $showLoading }}
+  onload="document.querySelector('[data-emma-loading=\'{{ $formId }}\']')?.remove()"
+  onerror="document.querySelector('[data-emma-loading=\'{{ $formId }}\']')?.remove()"
+  {{- end }}
+></script>
+
+{{- /* Include base styles if not already included */ -}}
+{{- if not (.Page.Scratch.Get "emma-styles-loaded") -}}
+  {{- .Page.Scratch.Set "emma-styles-loaded" true -}}
+  <style>
+    .emma-form-wrapper {
+      margin: 2rem 0;
+    }
+    
+    .emma-form-loading {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+    
+    .emma-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: emma-spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    @keyframes emma-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .emma-form-noscript {
+      padding: 1.5rem;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 4px;
+      color: #856404;
+    }
+    
+    .emma-form-container {
+      min-height: 200px;
+    }
+  </style>
+{{- end -}}

@@ -1,0 +1,31 @@
+formId: newsletter-signup-002
+name: "Newsletter Signup"
+version: "1.0.0"
+theme: "minimal"
+apiEndpoint: "https://api.example.com/submit"
+
+fields:
+  - id: email
+    type: email
+    label: "Email Address"
+    placeholder: "Enter your email"
+    required: true
+    validation:
+      pattern: "email"
+  
+  - id: name
+    type: text
+    label: "First Name"
+    placeholder: "Optional"
+    required: false
+    validation:
+      maxLength: 50
+
+settings:
+  submitButtonText: "Subscribe"
+  successMessage: "Thanks for subscribing! Check your email to confirm."
+  errorMessage: "Subscription failed. Please try again."
+  honeypot:
+    enabled: true
+    fieldName: "phone"
+  doubleOptIn: true
