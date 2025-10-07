@@ -37,16 +37,23 @@ emma/
 └── migrations/          → Database schemas
 ```
 
-## 📚 Essential Reading
+## 📚 Documentation
 
-**Start here:**
-1. [00-mvp-embeddable-forms.md](./docs/00-mvp-embeddable-forms.md) - Project vision
-2. [02-technical-architecture.md](./docs/02-technical-architecture.md) - How it works
-3. [FOUNDATION-SUMMARY.md](./docs/FOUNDATION-SUMMARY.md) - What's been done
+### Quick Start
+- **[Quick Start Guide](./docs/developer-guide/quick-start.md)** - Get running in 5 minutes
+- **[Developer Guide](./docs/developer-guide/README.md)** - Complete development documentation
 
-**For specific areas:**
-- Hugo integration: [features/hugo-shortcode.md](./docs/features/hugo-shortcode.md)
-- Infrastructure: [infrastructure/cloudflare.md](./docs/infrastructure/cloudflare.md)
+### Architecture & Design
+- [00-mvp-embeddable-forms.md](./docs/00-mvp-embeddable-forms.md) - Project vision
+- [02-technical-architecture.md](./docs/02-technical-architecture.md) - Technical architecture
+- [FOUNDATION-SUMMARY.md](./docs/FOUNDATION-SUMMARY.md) - Implementation progress
+
+### Specific Topics
+- [Hugo Integration](./docs/features/hugo-shortcode.md) - Embedding forms in Hugo
+- [Cloudflare Infrastructure](./docs/infrastructure/cloudflare.md) - Workers, D1, R2 setup
+- [Field Types](./docs/developer-guide/field-types.md) - All 13 supported field types
+- [API Reference](./docs/developer-guide/api-reference.md) - REST API documentation
+- [Troubleshooting](./docs/developer-guide/troubleshooting.md) - Common issues & solutions
 
 ## 🛠️ Development Workflow
 
