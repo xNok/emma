@@ -47,12 +47,25 @@
   async 
   defer
   data-emma-form="{{ $formId }}"
-  {{- if $showLoading }}
-  onload="document.querySelector('[data-emma-loading=\'{{ $formId }}\']')?.remove()"
-  onerror="document.querySelector('[data-emma-loading=\'{{ $formId }}\']')?.remove()"
-  {{- end }}
+  data-emma-script="{{ $formId }}"
 ></script>
 
+{{- if $showLoading }}
+<script>
+  (function() {
+    var formId = {{ $formId | jsonify }};
+    var script = document.querySelector('script[data-emma-script="' + formId + '"]');
+    var removeLoading = function() {
+      var loading = document.querySelector('[data-emma-loading="' + formId + '"]');
+      if (loading) loading.remove();
+    };
+    if (script) {
+      script.addEventListener('load', removeLoading);
+      script.addEventListener('error', removeLoading);
+    }
+  })();
+</script>
+{{- end }}
 {{- /* Include base styles if not already included */ -}}
 {{- if not (.Page.Scratch.Get "emma-styles-loaded") -}}
   {{- .Page.Scratch.Set "emma-styles-loaded" true -}}
