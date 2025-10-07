@@ -99,7 +99,7 @@ It should render a placeholder <div> and the <script> tag pointing to the correc
 {{- $formId := .Get 0 -}}
 {{- if $formId -}}
 <div id="embeddable-form-{{ $formId }}"></div>
-<script src="[https://your-static-assets.com/](https://your-static-assets.com/){{ $formId }}.js" async defer></script>
+<script src="https://your-static-assets.com/{{ $formId }}.js" async defer></script>
 {{- else -}}
 {{- errorf "The 'embed-form' shortcode requires a formId." -}}
 {{- end -}}
