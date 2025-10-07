@@ -17,11 +17,11 @@ Here's a visual representation of how they interact:
 ```mermaid
 graph TD
     subgraph User's Hugo Website
-        A[Hugo Shortcode <br> `{{< embed-form "formId-123" >}}`] --> B{Renders HTML Placeholder & Script Tag};
+        A[Hugo Shortcode] --> B{Renders HTML Placeholder & Script Tag};
         B --> C[Visitor sees & submits form];
     end
 
-    subgraph Your Service Infrastructure (Cloudflare)
+    subgraph Your Service Infrastructure
         D(Form Builder TUI) -- Generates & Deploys --> E[Static JS Asset <br> `formId-123.js`];
         C -- POST Request --> F(Data Collection API <br> Cloudflare Worker);
         F -- Saves Data --> G[(Database <br> Cloudflare D1)];
