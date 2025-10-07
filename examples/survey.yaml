@@ -1,0 +1,91 @@
+formId: survey-form-003
+name: "Customer Satisfaction Survey"
+version: "1.0.0"
+theme: "default"
+apiEndpoint: "https://api.example.com/submit"
+
+fields:
+  - id: satisfaction
+    type: radio
+    label: "How satisfied are you with our service?"
+    required: true
+    options:
+      - value: "very-satisfied"
+        label: "Very Satisfied"
+      - value: "satisfied"
+        label: "Satisfied"
+      - value: "neutral"
+        label: "Neutral"
+      - value: "dissatisfied"
+        label: "Dissatisfied"
+      - value: "very-dissatisfied"
+        label: "Very Dissatisfied"
+  
+  - id: recommendation
+    type: select
+    label: "How likely are you to recommend us?"
+    required: true
+    options:
+      - value: "10"
+        label: "10 - Extremely likely"
+      - value: "9"
+        label: "9"
+      - value: "8"
+        label: "8"
+      - value: "7"
+        label: "7"
+      - value: "6"
+        label: "6"
+      - value: "5"
+        label: "5 - Neutral"
+      - value: "4"
+        label: "4"
+      - value: "3"
+        label: "3"
+      - value: "2"
+        label: "2"
+      - value: "1"
+        label: "1"
+      - value: "0"
+        label: "0 - Not at all likely"
+  
+  - id: improvements
+    type: checkbox
+    label: "What could we improve? (Select all that apply)"
+    required: false
+    options:
+      - value: "speed"
+        label: "Response speed"
+      - value: "quality"
+        label: "Service quality"
+      - value: "pricing"
+        label: "Pricing"
+      - value: "features"
+        label: "Features"
+      - value: "support"
+        label: "Customer support"
+  
+  - id: comments
+    type: textarea
+    label: "Additional Comments"
+    placeholder: "Feel free to share any additional feedback..."
+    required: false
+    rows: 4
+    validation:
+      maxLength: 1000
+  
+  - id: email
+    type: email
+    label: "Email (optional, for follow-up)"
+    placeholder: "your@email.com"
+    required: false
+    validation:
+      pattern: "email"
+
+settings:
+  submitButtonText: "Submit Survey"
+  successMessage: "Thank you for your feedback!"
+  errorMessage: "Failed to submit. Please try again."
+  honeypot:
+    enabled: true
+    fieldName: "company"

@@ -1,0 +1,52 @@
+formId: contact-form-001
+name: "Contact Form"
+version: "1.0.0"
+theme: "default"
+apiEndpoint: "https://api.example.com/submit"
+
+fields:
+  - id: name
+    type: text
+    label: "Your Name"
+    placeholder: "John Doe"
+    required: true
+    validation:
+      minLength: 2
+      maxLength: 100
+  
+  - id: email
+    type: email
+    label: "Email Address"
+    placeholder: "john@example.com"
+    required: true
+    validation:
+      pattern: "email"
+  
+  - id: subject
+    type: text
+    label: "Subject"
+    placeholder: "What is this regarding?"
+    required: true
+    validation:
+      minLength: 5
+      maxLength: 200
+  
+  - id: message
+    type: textarea
+    label: "Message"
+    placeholder: "Your message here..."
+    required: true
+    rows: 6
+    validation:
+      minLength: 10
+      maxLength: 5000
+
+settings:
+  submitButtonText: "Send Message"
+  successMessage: "Thank you for contacting us! We'll get back to you soon."
+  errorMessage: "Something went wrong. Please try again."
+  honeypot:
+    enabled: true
+    fieldName: "website"
+  reCaptcha:
+    enabled: false
