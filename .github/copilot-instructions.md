@@ -30,3 +30,24 @@ Read the latest document thoroughly. It will link to other relevant documents (l
 * **After you finish a task**: Update the relevant documents to reflect the changes you've made. This might involve creating a new page.
 
 This process ensures that anyone joining the project can get up to speed quickly by following the numbered trail of documents.
+
+## 3. General Guidelines
+
+### As a Developer
+- Focus on implementing features from docs
+- Write tests alongside code
+- Keep bundle sizes small (especially form renderer)
+- Think about the end-user Hugo developer
+
+### As an Architect
+- Review designs against project goals
+- Identify potential issues early
+- Propose improvements
+- **Update docs first** before changing architecture
+
+### Code Style
+- TypeScript strict mode
+- ESLint + Prettier enforced
+- Meaningful commit messages
+- Small, focused PRs
+- Think about the end-user Hugo developer

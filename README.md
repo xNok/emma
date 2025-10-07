@@ -4,76 +4,129 @@
 
 Emma is a system for creating, deploying, and embedding forms into Hugo websites using Cloudflare's edge infrastructure.
 
-## 📋 Project Structure
+1. **Create forms** using a Terminal UI (TUI)
+2. **Deploy forms** to Cloudflare's global edge network
+3. **Embed forms** in Hugo sites with a simple shortcode
+
+**Example:**
+```markdown
+{{< embed-form "contact-form-001" >}}
+```
+
+That's it! The form loads from a CDN and submits to a serverless API.
+
+## 📋 Current Status
+
+✅ **Documentation Complete** - All design docs written  
+✅ **Project Structure** - Monorepo set up  
+✅ **Configuration** - TypeScript, ESLint, Prettier ready  
+⏳ **Implementation** - Ready to start coding
+
+## 🗂️ Project Structure
 
 ```
 emma/
 ├── packages/
-│   ├── form-builder/      # TUI for creating forms
-│   ├── api-worker/        # Cloudflare Worker API
-│   ├── form-renderer/     # Client-side form library
-│   └── hugo-module/       # Hugo integration
-├── shared/                # Shared types and utilities
-├── docs/                  # Documentation
-├── examples/              # Example forms
-└── website/              # Project website
+│   ├── form-builder/    → CLI tool for creating forms
+│   ├── api-worker/      → Cloudflare Worker (handles submissions)
+│   ├── form-renderer/   → Client-side JS (renders forms)
+│   └── hugo-module/     → Hugo shortcode integration
+├── shared/              → Shared TypeScript types
+├── docs/                → All documentation
+├── examples/            → Sample form configs
+└── migrations/          → Database schemas
 ```
 
-## 📚 Documentation
+## 📚 Essential Reading
 
-All project documentation follows a documentation-driven development approach:
+**Start here:**
+1. [00-mvp-embeddable-forms.md](./docs/00-mvp-embeddable-forms.md) - Project vision
+2. [02-technical-architecture.md](./docs/02-technical-architecture.md) - How it works
+3. [FOUNDATION-SUMMARY.md](./docs/FOUNDATION-SUMMARY.md) - What's been done
 
-1. **[00-mvp-embeddable-forms.md](docs/00-mvp-embeddable-forms.md)** - MVP vision and requirements
-2. **[01-project-foundation.md](docs/01-project-foundation.md)** - Project structure and setup
-3. **[02-technical-architecture.md](docs/02-technical-architecture.md)** - Detailed technical design
+**For specific areas:**
+- Hugo integration: [features/hugo-shortcode.md](./docs/features/hugo-shortcode.md)
+- Infrastructure: [infrastructure/cloudflare.md](./docs/infrastructure/cloudflare.md)
 
-### Feature Documentation
+## 🛠️ Development Workflow
 
-- **[Hugo Shortcode](docs/features/hugo-shortcode.md)** - Integration guide
-- **[Cloudflare Infrastructure](docs/infrastructure/cloudflare.md)** - Infrastructure setup
+### 1. Understanding the Flow
 
-## 🚀 Quick Start
+```
+Developer creates form
+    ↓
+TUI builds JS bundle
+    ↓
+Deploy to Cloudflare R2
+    ↓
+Hugo site embeds form
+    ↓
+Visitor fills & submits
+    ↓
+Data saved to D1 database
+```
 
-### Prerequisites
+### 2. Documentation-Driven Development
 
-- Node.js 18+
-- npm 9+
-- Cloudflare account
+**Before writing code:**
+1. Read the latest numbered doc in `/docs`
+2. Understand what's being built and why
+3. If making changes, update docs first
 
-### Installation
+**The rule:** Docs are the single source of truth.
+
+### 3. Working on Packages
+
+Each package is independent:
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/emma.git
-cd emma
+# Work on Form Builder
+cd packages/form-builder
+npm install
+npm run dev
 
+# Work on API Worker  
+cd packages/api-worker
+npm install
+npx wrangler dev
+
+# Work on Form Renderer
+cd packages/form-renderer
+npm install
+npm run dev
+```
+
+## 🧪 Example: Creating Your First Form
+
+Once implemented, this is what it will look like:
+
+```bash
+# 1. Create a form
+$ emma create contact-form
+
+? Form name: Contact Form
+? Add field: name (text)
+? Add field: email (email)  
+? Add field: message (textarea)
+? Theme: default
+✓ Form created: contact-form-001
+
+# 2. Deploy it
+$ emma deploy contact-form-001
+
+✓ Building bundle...
+✓ Uploading to R2...
+✓ Form deployed: https://forms.yourdomain.com/contact-form-001.js
+
+# 3. Use in Hugo
+{{< embed-form "contact-form-001" >}}
+```
+
+## 🔧 Development Commands
+
+```bash
 # Install dependencies
 npm install
-
-# Build all packages
-npm run build
-```
-
-### Form Builder TUI
-
-```bash
-# Install globally
-npm install -g packages/form-builder
-
-# Initialize configuration
-emma init
-
-# Create your first form
-emma create contact-form
-```
-
-## 🏗️ Development
-
-### Workspace Commands
-
-```bash
-# Run development mode for all packages
-npm run dev
 
 # Build all packages
 npm run build
@@ -86,112 +139,37 @@ npm run lint
 
 # Format code
 npm run format
+
+# Type check
+npm run typecheck
 ```
 
-### Package-Specific Development
+## 📦 Package Dependencies
 
-```bash
-# Form Builder
-cd packages/form-builder
-npm run dev
+- **form-builder** depends on: `shared/types`, `shared/schema`
+- **api-worker** depends on: `shared/types`
+- **form-renderer** depends on: `shared/types`
+- **hugo-module** - No dependencies (plain Hugo templates)
 
-# API Worker
-cd packages/api-worker
-npx wrangler dev
+## 🤝 Getting Help
 
-# Form Renderer
-cd packages/form-renderer
-npm run dev
-```
+1. Check the docs in `/docs`
+2. Look at example forms in `/examples`
+3. Read package READMEs
+4. Review the technical architecture
 
-## 🎯 Features
+## ✅ Checklist: Before You Start Coding
 
-- ✅ Interactive TUI for form creation
-- ✅ Cloudflare edge deployment
-- ✅ Hugo shortcode integration
-- ✅ Client-side validation
-- ✅ Spam protection (honeypot)
-- ✅ Rate limiting
-- ✅ Theme support
-- ✅ SQLite database (D1)
+- [ ] Read MVP document (00-mvp-embeddable-forms.md)
+- [ ] Understand the architecture (02-technical-architecture.md)
+- [ ] Review the package you'll work on
+- [ ] Understand the data flow
+- [ ] Know where to update docs if needed
 
-## 🛠️ Technology Stack
+## 🎨 Design Principles
 
-- **TUI:** TypeScript, Ink/Inquirer.js, Commander.js
-- **API:** Cloudflare Workers, D1 (SQLite)
-- **Renderer:** TypeScript, Vanilla JS
-- **Hugo:** Go templates
-- **Infrastructure:** Cloudflare R2, Workers, D1
-
-## 📖 Usage Example
-
-### 1. Create a Form
-
-```bash
-emma create contact-form
-```
-
-### 2. Deploy to Cloudflare
-
-```bash
-emma deploy contact-form-001
-```
-
-### 3. Embed in Hugo
-
-```markdown
-{{< embed-form "contact-form-001" >}}
-```
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run tests for specific package
-npm test --workspace=packages/form-builder
-
-# Run tests in watch mode
-npm test -- --watch
-```
-
-## 📝 Contributing
-
-This project follows a documentation-driven development approach. Before contributing:
-
-1. Read [.github/copilot-instructions.md](.github/copilot-instructions.md)
-2. Review the latest numbered document in `/docs`
-3. Update documentation before making code changes
-
-## Cloud-Based Development
-
-This repository is optimized for cloud-based development environments like Gitpod and GitHub Codespaces. These platforms provide a pre-configured environment with all the necessary dependencies, allowing you to start coding immediately.
-
-### GitHub Codespaces
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=428059888)
-
-### Gitpod
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/jpmorganchase/hugo-quickstart)
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details
-
-## 🔗 Links
-
-- Documentation: `/docs`
-- Examples: `/examples`
-- Issues: GitHub Issues
-
----
-
-**Current Status:** Documentation complete, beginning implementation phase.
-
-**Next Steps:** 
-1. Implement Form Builder TUI
-2. Create Form Renderer library
-3. Deploy API Worker
-4. Build example forms
+1. **Simple** - Easy for Hugo users to integrate
+2. **Fast** - Small bundle sizes, edge deployment
+3. **Secure** - Spam protection, rate limiting, validation
+4. **Flexible** - Themeable, customizable
+5. **Reliable** - Edge computing, global availability
