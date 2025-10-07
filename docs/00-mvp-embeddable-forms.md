@@ -53,12 +53,9 @@ This is the command-line application for creating and deploying the forms.
 * [ ] TUI: Design and build the command-line tool for creating and managing these form definition files.
 * [ ] TUI: Implement a publish command that:
 
-Reads a local form definition file.
-
-Generates the JavaScript embed code as a string, injecting the chosen theme.
-
-Uses the Cloudflare API to upload this file to R2 or a Pages project.
-
+  * Reads a local form definition file.
+  * Generates the JavaScript embed code as a string, injecting the chosen theme.
+  * Uses the Cloudflare API to upload this file to R2 or a Pages project.
 * [ ] DevOps: Set up the Cloudflare R2 bucket or Pages project to serve the JavaScript files.
 * [ ] Theming: Create a few default CSS themes that can be applied to the forms.
 
