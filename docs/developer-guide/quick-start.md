@@ -105,7 +105,7 @@ In your `hugo.toml`, set your Cloudflare Worker URL:
 
 2. **Install dependencies**:
    ```bash
-   npm install
+   yarn install
    ```
 
 3. **Configure Wrangler** in `packages/api-worker/wrangler.toml`:
@@ -122,18 +122,18 @@ In your `hugo.toml`, set your Cloudflare Worker URL:
 
 4. **Create D1 database**:
    ```bash
-   npx wrangler d1 create emma-forms
+   yarn wrangler d1 create emma-forms
    ```
 
 5. **Run migrations**:
    ```bash
-   npx wrangler d1 migrations apply emma-forms --remote
+   yarn wrangler d1 migrations apply emma-forms --remote
    ```
 
 6. **Deploy the worker**:
    ```bash
    cd packages/api-worker
-   npm run deploy
+   yarn deploy
    ```
 
 ## Test Your Form

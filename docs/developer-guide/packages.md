@@ -195,28 +195,28 @@ hugo-module
 
 ### Install Dependencies
 ```bash
-npm install
+yarn install
 ```
 
 ### Build All Packages
 ```bash
-npm run build
+yarn build
 ```
 
 ### Build Individual Package
 ```bash
 cd packages/form-renderer
-npm run build
+yarn build
 ```
 
 ### Run Tests
 ```bash
-npm test
+yarn test
 ```
 
 ### Type Check
 ```bash
-npm run typecheck
+yarn typecheck
 ```
 
 ## Next Steps

@@ -89,18 +89,18 @@ Each package is independent:
 ```bash
 # Work on Form Builder
 cd packages/form-builder
-npm install
-npm run dev
+yarn install
+yarn dev
 
 # Work on API Worker  
 cd packages/api-worker
-npm install
-npx wrangler dev
+yarn install
+yarn wrangler dev
 
 # Work on Form Renderer
 cd packages/form-renderer
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 ## 🧪 Example: Creating Your First Form
@@ -133,22 +133,22 @@ $ emma deploy contact-form-001
 
 ```bash
 # Install dependencies
-npm install
+yarn install
 
 # Build all packages
-npm run build
+yarn build
 
 # Run tests
-npm run test
+yarn test
 
 # Lint code
-npm run lint
+yarn lint
 
 # Format code
-npm run format
+yarn format
 
 # Type check
-npm run typecheck
+yarn typecheck
 ```
 
 ## 📦 Package Dependencies

@@ -269,7 +269,7 @@ wrangler d1 execute emma-submissions --command="SELECT name FROM sqlite_master W
 1. **Check bundle size:**
 ```bash
 cd packages/form-renderer
-npm run build
+yarn build
 
 # Check dist/emma-forms.min.js size
 # Should be < 15KB gzipped
