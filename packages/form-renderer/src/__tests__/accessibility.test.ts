@@ -70,13 +70,17 @@ describe('FormRenderer - Accessibility', () => {
     renderer.render();
 
     const form = container.querySelector('form');
-    form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    form?.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     const input = container.querySelector('input[name="name"]');
     expect(input?.getAttribute('aria-invalid')).toBe('true');
-    expect(input?.getAttribute('aria-describedby')).toContain('emma-error-name');
+    expect(input?.getAttribute('aria-describedby')).toContain(
+      'emma-error-name'
+    );
   });
 
   it('should add role="alert" to message container', () => {

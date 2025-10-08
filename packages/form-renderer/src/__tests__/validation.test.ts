@@ -44,9 +44,11 @@ describe('FormRenderer - Validation', () => {
     renderer.render();
 
     const form = container.querySelector('form');
-    form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    form?.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     const error = container.querySelector('#emma-error-name');
     expect(error?.textContent).toContain('required');
@@ -84,13 +86,17 @@ describe('FormRenderer - Validation', () => {
 
     renderer.render();
 
-    const input = container.querySelector('input[name="username"]') as HTMLInputElement;
+    const input = container.querySelector(
+      'input[name="username"]'
+    ) as HTMLInputElement;
     input.value = 'ab';
 
     const form = container.querySelector('form');
-    form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    form?.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     const error = container.querySelector('#emma-error-username');
     expect(error?.textContent).toContain('at least 3');
@@ -123,18 +129,22 @@ describe('FormRenderer - Validation', () => {
     renderer.render();
 
     const form = container.querySelector('form');
-    form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    form?.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     const error = container.querySelector('#emma-error-name');
     expect(error?.textContent).toContain('required');
 
-    const input = container.querySelector('input[name="name"]') as HTMLInputElement;
+    const input = container.querySelector(
+      'input[name="name"]'
+    ) as HTMLInputElement;
     input.value = 'John';
     input.dispatchEvent(new Event('input', { bubbles: true }));
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     expect(error?.textContent).toBe('');
   });

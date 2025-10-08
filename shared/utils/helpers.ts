@@ -13,7 +13,7 @@ const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 10);
 export function generateFormId(baseName?: string): string {
   const timestamp = Date.now().toString(36);
   const random = nanoid(6);
-  
+
   if (baseName) {
     const slug = baseName
       .toLowerCase()
@@ -21,7 +21,7 @@ export function generateFormId(baseName?: string): string {
       .replace(/^-+|-+$/g, '');
     return `${slug}-${timestamp}${random}`;
   }
-  
+
   return `form-${timestamp}${random}`;
 }
 
@@ -88,7 +88,7 @@ export function parseFormSchema(yamlContent: string): unknown {
  */
 export function toFormData(data: Record<string, string | string[]>): FormData {
   const formData = new FormData();
-  
+
   Object.entries(data).forEach(([key, value]) => {
     if (Array.isArray(value)) {
       value.forEach((v) => formData.append(key, v));
@@ -96,6 +96,6 @@ export function toFormData(data: Record<string, string | string[]>): FormData {
       formData.append(key, value);
     }
   });
-  
+
   return formData;
 }

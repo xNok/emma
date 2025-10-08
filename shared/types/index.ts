@@ -34,7 +34,7 @@ export interface ValidationRules {
   maxLength?: number;
   min?: number;
   max?: number;
-  pattern?: string | 'email' | 'url' | 'tel';
+  pattern?: string;
   custom?: string; // Custom validation function name
 }
 

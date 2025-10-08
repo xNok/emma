@@ -9,7 +9,6 @@ import type {
   SubmissionResponse,
 } from '@emma/shared/types';
 import { validateSubmissionData } from '@emma/shared/schema';
-import { sanitizeInput } from '@emma/shared/utils';
 
 export interface RenderOptions {
   formId: string;
@@ -45,18 +44,20 @@ export class FormRenderer {
     this.container.innerHTML = '';
 
     // Create form element
-    this.form = document.createElement('form');
-    this.form.className = 'emma-form';
-    this.form.setAttribute('novalidate', '');
-    this.form.addEventListener('submit', this.handleSubmit.bind(this));
+    const form = document.createElement('form');
+    form.className = 'emma-form';
+    form.setAttribute('novalidate', '');
+    form.addEventListener('submit', (event: Event) => {
+      void this.handleSubmit(event);
+    });
 
     // Render each field
     this.schema.fields.forEach((field) => {
       if (field.type === 'hidden') {
-        this.form!.appendChild(this.renderHiddenField(field));
+        form.appendChild(this.renderHiddenField(field));
       } else {
         const fieldGroup = this.renderFieldGroup(field);
-        this.form!.appendChild(fieldGroup);
+        form.appendChild(fieldGroup);
       }
     });
 
@@ -65,20 +66,21 @@ export class FormRenderer {
       const honeypot = this.renderHoneypot(
         this.schema.settings.honeypot.fieldName
       );
-      this.form.appendChild(honeypot);
+      form.appendChild(honeypot);
     }
 
     // Add submit button
     const submitButton = this.renderSubmitButton();
-    this.form.appendChild(submitButton);
+    form.appendChild(submitButton);
 
     // Add message containers
     const messageContainer = document.createElement('div');
     messageContainer.className = 'emma-form-messages';
     messageContainer.setAttribute('role', 'alert');
     messageContainer.setAttribute('aria-live', 'polite');
-    this.form.appendChild(messageContainer);
+    form.appendChild(messageContainer);
 
+    this.form = form;
     this.container.appendChild(this.form);
   }
 
@@ -367,8 +369,7 @@ export class FormRenderer {
     const button = document.createElement('button');
     button.type = 'submit';
     button.className = 'emma-form-submit';
-    button.textContent =
-      this.schema.settings?.submitButtonText || 'Submit';
+    button.textContent = this.schema.settings?.submitButtonText || 'Submit';
 
     wrapper.appendChild(button);
     return wrapper;
@@ -399,9 +400,9 @@ export class FormRenderer {
       if (data[key]) {
         // Multiple values (checkbox)
         if (Array.isArray(data[key])) {
-          (data[key] as string[]).push(value as string);
+          data[key].push(value as string);
         } else {
-          data[key] = [data[key] as string, value as string];
+          data[key] = [data[key], value as string];
         }
       } else {
         data[key] = value as string;
@@ -466,12 +467,11 @@ export class FormRenderer {
         }),
       });
 
-      const result: SubmissionResponse = await response.json();
+      const result = (await response.json()) as SubmissionResponse;
 
       if (button) {
         button.removeAttribute('disabled');
-        button.textContent =
-          this.schema.settings?.submitButtonText || 'Submit';
+        button.textContent = this.schema.settings?.submitButtonText || 'Submit';
       }
 
       if (result.success) {
@@ -487,9 +487,10 @@ export class FormRenderer {
         }
 
         // Redirect if configured
-        if (this.schema.settings?.redirectUrl) {
+        const redirectUrl = this.schema.settings?.redirectUrl;
+        if (redirectUrl) {
           setTimeout(() => {
-            window.location.href = this.schema.settings!.redirectUrl!;
+            window.location.href = redirectUrl;
           }, 2000);
         }
       } else {
@@ -499,8 +500,7 @@ export class FormRenderer {
       const button = this.form?.querySelector('.emma-form-submit');
       if (button) {
         button.removeAttribute('disabled');
-        button.textContent =
-          this.schema.settings?.submitButtonText || 'Submit';
+        button.textContent = this.schema.settings?.submitButtonText || 'Submit';
       }
 
       this.showMessage(
@@ -550,9 +550,7 @@ export class FormRenderer {
       errorContainer.style.display = 'block';
     }
 
-    const fieldGroup = this.form?.querySelector(
-      `[data-field-id="${fieldId}"]`
-    );
+    const fieldGroup = this.form?.querySelector(`[data-field-id="${fieldId}"]`);
     if (fieldGroup) {
       fieldGroup.classList.add('emma-form-group--error');
     }
@@ -576,9 +574,7 @@ export class FormRenderer {
       errorContainer.style.display = 'none';
     }
 
-    const fieldGroup = this.form?.querySelector(
-      `[data-field-id="${fieldId}"]`
-    );
+    const fieldGroup = this.form?.querySelector(`[data-field-id="${fieldId}"]`);
     if (fieldGroup) {
       fieldGroup.classList.remove('emma-form-group--error');
     }
