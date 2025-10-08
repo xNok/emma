@@ -309,7 +309,3 @@ function validateFieldValue(
 /**
  * Type guard for ValidationError
  */
-export interface ValidationError {
-  field: string;
-  message: string;
-}
