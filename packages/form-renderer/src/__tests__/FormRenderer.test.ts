@@ -144,7 +144,7 @@ describe('FormRenderer - Core Rendering', () => {
 
     const select = container.querySelector('select[name="country"]');
     expect(select).toBeDefined();
-    
+
     const options = select?.querySelectorAll('option');
     expect(options?.length).toBeGreaterThan(2);
   });
@@ -178,7 +178,9 @@ describe('FormRenderer - Core Rendering', () => {
 
     renderer.render();
 
-    const radios = container.querySelectorAll('input[type="radio"][name="size"]');
+    const radios = container.querySelectorAll(
+      'input[type="radio"][name="size"]'
+    );
     expect(radios.length).toBe(3);
   });
 
@@ -210,7 +212,9 @@ describe('FormRenderer - Core Rendering', () => {
 
     renderer.render();
 
-    const checkboxes = container.querySelectorAll('input[type="checkbox"][name="interests"]');
+    const checkboxes = container.querySelectorAll(
+      'input[type="checkbox"][name="interests"]'
+    );
     expect(checkboxes.length).toBe(2);
   });
 
@@ -239,7 +243,9 @@ describe('FormRenderer - Core Rendering', () => {
 
     renderer.render();
 
-    const hidden = container.querySelector('input[type="hidden"][name="tracking_id"]') as HTMLInputElement;
+    const hidden = container.querySelector(
+      'input[type="hidden"][name="tracking_id"]'
+    ) as HTMLInputElement;
     expect(hidden).toBeDefined();
     expect(hidden?.value).toBe('12345');
   });

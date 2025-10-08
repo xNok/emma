@@ -8,6 +8,7 @@ import type {
   FormField,
   FieldType,
   ValidationRules,
+  ValidationError,
 } from '../types/index.js';
 
 const VALID_FIELD_TYPES: FieldType[] = [
@@ -176,11 +177,7 @@ export function validateValidationRules(
     if (r.max !== undefined && typeof r.max !== 'number') {
       errors.push('max must be a number');
     }
-    if (
-      r.min !== undefined &&
-      r.max !== undefined &&
-      r.min > r.max
-    ) {
+    if (r.min !== undefined && r.max !== undefined && r.min > r.max) {
       errors.push('min cannot be greater than max');
     }
   }

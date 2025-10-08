@@ -367,8 +367,7 @@ export class FormRenderer {
     const button = document.createElement('button');
     button.type = 'submit';
     button.className = 'emma-form-submit';
-    button.textContent =
-      this.schema.settings?.submitButtonText || 'Submit';
+    button.textContent = this.schema.settings?.submitButtonText || 'Submit';
 
     wrapper.appendChild(button);
     return wrapper;
@@ -399,9 +398,9 @@ export class FormRenderer {
       if (data[key]) {
         // Multiple values (checkbox)
         if (Array.isArray(data[key])) {
-          (data[key] as string[]).push(value as string);
+          data[key].push(value as string);
         } else {
-          data[key] = [data[key] as string, value as string];
+          data[key] = [data[key], value as string];
         }
       } else {
         data[key] = value as string;
@@ -470,8 +469,7 @@ export class FormRenderer {
 
       if (button) {
         button.removeAttribute('disabled');
-        button.textContent =
-          this.schema.settings?.submitButtonText || 'Submit';
+        button.textContent = this.schema.settings?.submitButtonText || 'Submit';
       }
 
       if (result.success) {
@@ -499,8 +497,7 @@ export class FormRenderer {
       const button = this.form?.querySelector('.emma-form-submit');
       if (button) {
         button.removeAttribute('disabled');
-        button.textContent =
-          this.schema.settings?.submitButtonText || 'Submit';
+        button.textContent = this.schema.settings?.submitButtonText || 'Submit';
       }
 
       this.showMessage(
@@ -550,9 +547,7 @@ export class FormRenderer {
       errorContainer.style.display = 'block';
     }
 
-    const fieldGroup = this.form?.querySelector(
-      `[data-field-id="${fieldId}"]`
-    );
+    const fieldGroup = this.form?.querySelector(`[data-field-id="${fieldId}"]`);
     if (fieldGroup) {
       fieldGroup.classList.add('emma-form-group--error');
     }
@@ -576,9 +571,7 @@ export class FormRenderer {
       errorContainer.style.display = 'none';
     }
 
-    const fieldGroup = this.form?.querySelector(
-      `[data-field-id="${fieldId}"]`
-    );
+    const fieldGroup = this.form?.querySelector(`[data-field-id="${fieldId}"]`);
     if (fieldGroup) {
       fieldGroup.classList.remove('emma-form-group--error');
     }

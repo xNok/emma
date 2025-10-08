@@ -59,7 +59,7 @@ export default {
 async function handleSubmit(
   request: Request,
   env: Env,
-  ctx: ExecutionContext
+  _ctx: ExecutionContext
 ): Promise<Response> {
   try {
     // Only accept POST
@@ -89,7 +89,7 @@ async function handleSubmit(
     let submissionData: SubmissionData;
 
     if (contentType.includes('application/json')) {
-      submissionData = await request.json();
+      submissionData = (await request.json()) as SubmissionData;
     } else {
       return jsonResponse(
         { success: false, error: 'Content-Type must be application/json' },
@@ -118,7 +118,7 @@ async function handleSubmit(
       return jsonResponse({ success: false, error: 'Form not found' }, 404);
     }
 
-    const formSchema: FormSchema = JSON.parse(formRecord.schema);
+    const formSchema = JSON.parse(formRecord.schema) as FormSchema;
 
     // Check honeypot
     if (formSchema.settings?.honeypot?.enabled) {
@@ -133,10 +133,7 @@ async function handleSubmit(
     }
 
     // Validate submission data
-    const validation = validateSubmissionData(
-      submissionData.data,
-      formSchema
-    );
+    const validation = validateSubmissionData(submissionData.data, formSchema);
     if (!validation.valid) {
       const firstError = validation.errors[0];
       return jsonResponse(
@@ -153,9 +150,9 @@ async function handleSubmit(
     const sanitizedData: Record<string, string | string[]> = {};
     Object.entries(submissionData.data).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        sanitizedData[key] = value.map((v) => sanitizeInput(v));
+        sanitizedData[key] = value.map((v: string) => sanitizeInput(v));
       } else {
-        sanitizedData[key] = sanitizeInput(value);
+        sanitizedData[key] = sanitizeInput(value as string);
       }
     });
 
@@ -165,7 +162,8 @@ async function handleSubmit(
 
     const meta = {
       timestamp: submissionData.meta?.timestamp || new Date().toISOString(),
-      userAgent: submissionData.meta?.userAgent || request.headers.get('User-Agent'),
+      userAgent:
+        submissionData.meta?.userAgent || request.headers.get('User-Agent'),
       referrer: submissionData.meta?.referrer || request.headers.get('Referer'),
       ip: clientIP,
     };
@@ -264,11 +262,7 @@ function handleCORS(request: Request, env: Env): Response {
 /**
  * Helper to create JSON responses with CORS headers
  */
-function jsonResponse(
-  data: unknown,
-  status: number,
-  env?: Env
-): Response {
+function jsonResponse(data: unknown, status: number, env?: Env): Response {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
