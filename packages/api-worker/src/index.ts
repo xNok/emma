@@ -152,6 +152,7 @@ async function handleSubmit(
       if (Array.isArray(value)) {
         sanitizedData[key] = value.map((v: string) => sanitizeInput(v));
       } else {
+        // Type narrowing: value is string since it's not an array
         sanitizedData[key] = sanitizeInput(value);
       }
     });
@@ -237,8 +238,9 @@ async function getFormSchema(
 }
 
 /**
- * Simple rate limiting using cache API
- * In production, consider using Durable Objects for more sophisticated rate limiting
+ * Placeholder for rate limiting
+ * TODO: Implement proper rate limiting using KV or Durable Objects
+ * Currently returns true (allows all requests)
  */
 function checkRateLimit(_ip: string, env: Env): boolean {
   const _limit = parseInt(env.RATE_LIMIT_REQUESTS || '5');
