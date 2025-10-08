@@ -1,0 +1,31 @@
+{
+  "name": "@emma/api-worker",
+  "version": "0.1.0",
+  "description": "Cloudflare Worker for handling form submissions",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "tail": "wrangler tail",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@emma/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0",
+    "wrangler": "^3.22.1"
+  },
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "api",
+    "forms"
+  ]
+}

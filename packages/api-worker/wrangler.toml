@@ -1,0 +1,38 @@
+name = "emma-api"
+main = "src/index.ts"
+compatibility_date = "2025-10-07"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "emma-submissions"
+database_id = "YOUR_DATABASE_ID_HERE" # Replace with actual D1 database ID
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+RATE_LIMIT_REQUESTS = "5"
+RATE_LIMIT_WINDOW = "60" # seconds
+MAX_SUBMISSION_SIZE = "10000" # bytes
+
+# CORS allowed origins (comma-separated)
+ALLOWED_ORIGINS = "*" # Change to specific domains in production
+
+# Development environment
+[env.development]
+name = "emma-api-dev"
+[env.development.vars]
+ENVIRONMENT = "development"
+ALLOWED_ORIGINS = "*"
+
+# Staging environment
+[env.staging]
+name = "emma-api-staging"
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+# Production environment
+[env.production]
+name = "emma-api"
+[env.production.vars]
+ENVIRONMENT = "production"

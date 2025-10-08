@@ -1,0 +1,40 @@
+{
+  "name": "@emma/form-renderer",
+  "version": "0.1.0",
+  "description": "Client-side form rendering library for Emma",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@emma/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/jsdom": "^27",
+    "@types/node": "^20.10.0",
+    "@vitest/ui": "^3.2.4",
+    "happy-dom": "^19.0.2",
+    "jsdom": "^27.0.0",
+    "rollup": "^4.9.2",
+    "rollup-plugin-filesize": "^10.0.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  },
+  "keywords": [
+    "forms",
+    "renderer",
+    "client-side",
+    "validation"
+  ]
+}

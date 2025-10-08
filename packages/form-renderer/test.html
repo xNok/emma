@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emma Form Renderer - Test Page</title>
+  
+  <!-- Load theme -->
+  <link rel="stylesheet" href="./themes/default.css">
+  
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+      line-height: 1.6;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      margin: 0 0 10px 0;
+      font-size: 32px;
+    }
+    
+    .header p {
+      margin: 0;
+      opacity: 0.9;
+    }
+    
+    .test-section {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .test-section h2 {
+      color: #333;
+      margin-top: 0;
+      margin-bottom: 5px;
+      font-size: 24px;
+    }
+    
+    .test-description {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 25px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-left: 3px solid #667eea;
+      border-radius: 4px;
+    }
+    
+    .debug {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 25px;
+      font-family: 'Courier New', Consolas, monospace;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+    
+    .debug h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #4ec9b0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .debug pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .status-ready {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .instructions {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: #856404;
+    }
+    
+    .instructions ol {
+      margin: 10px 0 0 0;
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 8px;
+      color: #856404;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .header {
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .test-section {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧪 Emma Form Renderer</h1>
+    <p>Manual Test Page - All Form Features</p>
+  </div>
+
+  <div class="instructions">
+    <h3>📋 Testing Instructions</h3>
+    <ol>
+      <li><strong>Open Browser Console:</strong> Press F12 or Ctrl+Shift+J (Cmd+Option+J on Mac)</li>
+      <li><strong>Fill out any form below</strong> and click Submit</li>
+      <li><strong>Check the Debug Output</strong> below each form to see captured data</li>
+      <li><strong>Try different scenarios:</strong> Submit empty, submit with errors, submit valid data</li>
+      <li><strong>Test validation:</strong> Leave required fields empty, enter invalid emails, etc.</li>
+    </ol>
+  </div>
+
+  <!-- Test 1: Contact Form -->
+  <div class="test-section">
+    <h2>
+      Test 1: Contact Form
+      <span class="status-badge status-ready">All Field Types</span>
+    </h2>
+    <p class="test-description">
+      <strong>Tests:</strong> Text, Email, Tel, Select, Radio, Textarea, Checkboxes, Validation, Honeypot
+    </p>
+    <div id="contact-form"></div>
+    <div class="debug" id="debug-1">
+      <h3>🔍 Debug Output</h3>
+      <pre id="output-1">No submissions yet. Fill the form above and click "Send Message".</pre>
+    </div>
+  </div>
+
+  <!-- Test 2: Newsletter Form -->
+  <div class="test-section">
+    <h2>
+      Test 2: Newsletter Form
+      <span class="status-badge status-ready">Simple Form</span>
+    </h2>
+    <p class="test-description">
+      <strong>Tests:</strong> Minimal fields, Email validation, Quick submission
+    </p>
+    <div id="newsletter-form"></div>
+    <div class="debug" id="debug-2">
+      <h3>🔍 Debug Output</h3>
+      <pre id="output-2">No submissions yet. Fill the form above and click "Subscribe".</pre>
+    </div>
+  </div>
+
+  <!-- Test 3: Survey Form -->
+  <div class="test-section">
+    <h2>
+      Test 3: Survey Form
+      <span class="status-badge status-ready">Advanced Features</span>
+    </h2>
+    <p class="test-description">
+      <strong>Tests:</strong> Number validation (age 18-120), Rating system, Multiple checkboxes, Hidden fields
+    </p>
+    <div id="survey-form"></div>
+    <div class="debug" id="debug-3">
+      <h3>🔍 Debug Output</h3>
+      <pre id="output-3">No submissions yet. Fill the form above and click "Submit Survey".</pre>
+    </div>
+  </div>
+
+  <!-- Load form renderer -->
+  <script type="module">
+    // Import the form renderer
+    import FormRenderer from './dist/emma-forms.js';
+
+    console.log('🚀 Emma Form Renderer Test Page Loaded');
+    console.log('📦 FormRenderer:', FormRenderer);
+
+    // Test 1: Contact Form - All Field Types
+    const contactSchema = {
+      formId: 'contact-test',
+      name: 'Contact Form Test',
+      version: '1.0.0',
+      theme: 'default',
+      apiEndpoint: 'https://api.example.com/submit/contact',
+      fields: [
+        {
+          id: 'name',
+          type: 'text',
+          label: 'Full Name',
+          placeholder: 'John Doe',
+          required: true,
+          validation: {
+            minLength: 2,
+            maxLength: 100
+          }
+        },
+        {
+          id: 'email',
+          type: 'email',
+          label: 'Email Address',
+          placeholder: 'john@example.com',
+          required: true,
+          autocomplete: 'email',
+          validation: {
+            pattern: 'email'
+          }
+        },
+        {
+          id: 'phone',
+          type: 'tel',
+          label: 'Phone Number',
+          placeholder: '+1 (555) 123-4567',
+          required: false,
+          helpText: 'Optional: We may call you to follow up'
+        },
+        {
+          id: 'subject',
+          type: 'select',
+          label: 'Subject',
+          placeholder: 'Choose a topic...',
+          required: true,
+          options: [
+            { value: 'general', label: 'General Inquiry' },
+            { value: 'support', label: 'Technical Support' },
+            { value: 'sales', label: 'Sales Question' },
+            { value: 'feedback', label: 'Feedback' }
+          ]
+        },
+        {
+          id: 'priority',
+          type: 'radio',
+          label: 'Priority Level',
+          required: true,
+          options: [
+            { value: 'low', label: 'Low - General question' },
+            { value: 'medium', label: 'Medium - Need help soon' },
+            { value: 'high', label: 'High - Urgent issue' }
+          ]
+        },
+        {
+          id: 'message',
+          type: 'textarea',
+          label: 'Message',
+          placeholder: 'Tell us more about your inquiry...',
+          required: true,
+          rows: 5,
+          validation: {
+            minLength: 10,
+            maxLength: 1000
+          }
+        },
+        {
+          id: 'subscribe',
+          type: 'checkbox',
+          label: 'Communications',
+          options: [
+            { value: 'newsletter', label: 'Subscribe to newsletter' },
+            { value: 'updates', label: 'Receive product updates' }
+          ]
+        }
+      ],
+      settings: {
+        submitButtonText: 'Send Message',
+        successMessage: 'Thank you! We\'ll get back to you soon.',
+        errorMessage: 'Oops! Something went wrong. Please try again.',
+        honeypot: {
+          enabled: true,
+          fieldName: 'website'
+        }
+      }
+    };
+
+    try {
+      const contactForm = new FormRenderer({
+        formId: 'contact-test',
+        containerId: 'contact-form',
+        schema: contactSchema,
+        onSubmit: (data) => {
+          console.log('✅ Contact form submitted:', data);
+          document.getElementById('output-1').textContent = JSON.stringify(data, null, 2);
+        },
+        onError: (error) => {
+          console.error('❌ Contact form error:', error);
+          document.getElementById('output-1').textContent = '❌ Error: ' + error.message;
+        }
+      });
+
+      contactForm.render();
+      console.log('✅ Contact form rendered successfully');
+    } catch (error) {
+      console.error('❌ Failed to render contact form:', error);
+      document.getElementById('output-1').textContent = '❌ Failed to render: ' + error.message;
+    }
+
+    // Test 2: Newsletter Form - Simple
+    const newsletterSchema = {
+      formId: 'newsletter-test',
+      name: 'Newsletter Form Test',
+      version: '1.0.0',
+      theme: 'default',
+      apiEndpoint: 'https://api.example.com/submit/newsletter',
+      fields: [
+        {
+          id: 'email',
+          type: 'email',
+          label: 'Email Address',
+          placeholder: 'your@email.com',
+          required: true,
+          helpText: 'We\'ll never share your email with anyone else.',
+          validation: {
+            pattern: 'email'
+          }
+        },
+        {
+          id: 'frequency',
+          type: 'select',
+          label: 'Email Frequency',
+          required: true,
+          placeholder: 'How often would you like to hear from us?',
+          options: [
+            { value: 'daily', label: 'Daily Digest' },
+            { value: 'weekly', label: 'Weekly Summary' },
+            { value: 'monthly', label: 'Monthly Newsletter' }
+          ]
+        }
+      ],
+      settings: {
+        submitButtonText: 'Subscribe',
+        successMessage: 'Welcome! Check your email to confirm subscription.',
+        errorMessage: 'Subscription failed. Please try again.'
+      }
+    };
+
+    try {
+      const newsletterForm = new FormRenderer({
+        formId: 'newsletter-test',
+        containerId: 'newsletter-form',
+        schema: newsletterSchema,
+        onSubmit: (data) => {
+          console.log('✅ Newsletter form submitted:', data);
+          document.getElementById('output-2').textContent = JSON.stringify(data, null, 2);
+        }
+      });
+
+      newsletterForm.render();
+      console.log('✅ Newsletter form rendered successfully');
+    } catch (error) {
+      console.error('❌ Failed to render newsletter form:', error);
+      document.getElementById('output-2').textContent = '❌ Failed to render: ' + error.message;
+    }
+
+    // Test 3: Survey Form - Advanced
+    const surveySchema = {
+      formId: 'survey-test',
+      name: 'Survey Form Test',
+      version: '1.0.0',
+      theme: 'default',
+      apiEndpoint: 'https://api.example.com/submit/survey',
+      fields: [
+        {
+          id: 'age',
+          type: 'number',
+          label: 'Age',
+          placeholder: '25',
+          required: true,
+          validation: {
+            min: 18,
+            max: 120
+          },
+          helpText: 'Must be 18 or older to participate'
+        },
+        {
+          id: 'satisfaction',
+          type: 'radio',
+          label: 'How satisfied are you with our service?',
+          required: true,
+          options: [
+            { value: '5', label: '⭐⭐⭐⭐⭐ Very Satisfied' },
+            { value: '4', label: '⭐⭐⭐⭐ Satisfied' },
+            { value: '3', label: '⭐⭐⭐ Neutral' },
+            { value: '2', label: '⭐⭐ Dissatisfied' },
+            { value: '1', label: '⭐ Very Dissatisfied' }
+          ]
+        },
+        {
+          id: 'features',
+          type: 'checkbox',
+          label: 'Which features do you use regularly? (Select all that apply)',
+          options: [
+            { value: 'feature-a', label: 'Feature A - Dashboard' },
+            { value: 'feature-b', label: 'Feature B - Analytics' },
+            { value: 'feature-c', label: 'Feature C - Reporting' },
+            { value: 'feature-d', label: 'Feature D - Integrations' }
+          ]
+        },
+        {
+          id: 'feedback',
+          type: 'textarea',
+          label: 'Additional Feedback',
+          placeholder: 'Share your thoughts, suggestions, or concerns...',
+          rows: 4,
+          required: false,
+          validation: {
+            maxLength: 500
+          }
+        },
+        {
+          id: 'referral_source',
+          type: 'hidden',
+          label: 'Referral Source',
+          defaultValue: 'test-page'
+        }
+      ],
+      settings: {
+        submitButtonText: 'Submit Survey',
+        successMessage: 'Thank you for your feedback! Your response has been recorded.',
+        errorMessage: 'Failed to submit survey. Please check your inputs and try again.',
+        honeypot: {
+          enabled: true,
+          fieldName: 'url'
+        }
+      }
+    };
+
+    try {
+      const surveyForm = new FormRenderer({
+        formId: 'survey-test',
+        containerId: 'survey-form',
+        schema: surveySchema,
+        onSubmit: (data) => {
+          console.log('✅ Survey form submitted:', data);
+          document.getElementById('output-3').textContent = JSON.stringify(data, null, 2);
+        },
+        onSuccess: (response) => {
+          console.log('✅ Survey submission successful:', response);
+        }
+      });
+
+      surveyForm.render();
+      console.log('✅ Survey form rendered successfully');
+    } catch (error) {
+      console.error('❌ Failed to render survey form:', error);
+      document.getElementById('output-3').textContent = '❌ Failed to render: ' + error.message;
+    }
+
+    console.log('🎉 All forms initialized. Ready for testing!');
+  </script>
+</body>
+</html>

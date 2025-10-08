@@ -1,0 +1,147 @@
+/**
+ * Emma Forms - Minimal Theme
+ * A lightweight, minimalist form theme
+ */
+
+.emma-form {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 100%;
+}
+
+.emma-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.emma-form-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111;
+}
+
+.emma-form-required {
+  color: #dc2626;
+}
+
+.emma-form-help {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  color: #666;
+}
+
+.emma-form-input,
+.emma-form-textarea,
+.emma-form-select {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  color: #111;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.emma-form-input:focus,
+.emma-form-textarea:focus,
+.emma-form-select:focus {
+  outline: 2px solid #000;
+  outline-offset: -1px;
+  border-color: #000;
+}
+
+.emma-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.emma-form-radio-group,
+.emma-form-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emma-form-radio-option,
+.emma-form-checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emma-form-radio-input,
+.emma-form-checkbox-input {
+  width: 1rem;
+  height: 1rem;
+}
+
+.emma-form-radio-label,
+.emma-form-checkbox-label {
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.emma-form-error {
+  display: none;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+
+.emma-form-group--error .emma-form-input,
+.emma-form-group--error .emma-form-textarea,
+.emma-form-group--error .emma-form-select {
+  border-color: #dc2626;
+}
+
+.emma-form-submit {
+  padding: 0.625rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.emma-form-submit:hover {
+  background: #333;
+}
+
+.emma-form-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emma-form-messages {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  display: none;
+}
+
+.emma-form-messages:not(:empty) {
+  display: block;
+}
+
+.emma-form-messages--success {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  color: #15803d;
+}
+
+.emma-form-messages--error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.emma-form-honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+}
