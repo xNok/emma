@@ -50,15 +50,21 @@ describe('FormRenderer - Submission', () => {
 
     renderer.render();
 
-    const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
-    const emailInput = container.querySelector('input[name="email"]') as HTMLInputElement;
+    const nameInput = container.querySelector(
+      'input[name="name"]'
+    ) as HTMLInputElement;
+    const emailInput = container.querySelector(
+      'input[name="email"]'
+    ) as HTMLInputElement;
     nameInput.value = 'John Doe';
     emailInput.value = 'john@example.com';
 
     const form = container.querySelector('form');
-    form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    form?.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     expect(onSubmit).toHaveBeenCalledWith({
       name: 'John Doe',
@@ -101,15 +107,21 @@ describe('FormRenderer - Submission', () => {
 
     renderer.render();
 
-    const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
-    const honeypot = container.querySelector('input[name="website"]') as HTMLInputElement;
+    const nameInput = container.querySelector(
+      'input[name="name"]'
+    ) as HTMLInputElement;
+    const honeypot = container.querySelector(
+      'input[name="website"]'
+    ) as HTMLInputElement;
     nameInput.value = 'Bot Name';
     honeypot.value = 'http://spam.com';
 
     const form = container.querySelector('form');
-    form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    form?.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     expect(onSubmit).not.toHaveBeenCalled();
 
