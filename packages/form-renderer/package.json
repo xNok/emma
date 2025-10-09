@@ -10,7 +10,7 @@
     "dev": "rollup -c --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "@emma/shared": "workspace:*"

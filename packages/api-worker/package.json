@@ -10,7 +10,7 @@
     "deploy:staging": "wrangler deploy --env staging",
     "tail": "wrangler tail",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "@emma/shared": "workspace:*"
