@@ -12,6 +12,39 @@ import type {
 import { validateSubmissionData } from '@emma/shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@emma/shared/utils';
 
+// Cloudflare Workers types
+type ExecutionContext = {
+  waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
+};
+
+type D1Database = {
+  prepare(query: string): D1PreparedStatement;
+  dump(): Promise<ArrayBuffer>;
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]>;
+  exec(query: string): Promise<D1ExecResult>;
+};
+
+type D1PreparedStatement = {
+  bind(...values: unknown[]): D1PreparedStatement;
+  first<T = unknown>(colName?: string): Promise<T | null>;
+  run<T = unknown>(): Promise<D1Result<T>>;
+  all<T = unknown>(): Promise<D1Result<T>>;
+  raw<T = unknown>(): Promise<T[]>;
+};
+
+type D1Result<T = unknown> = {
+  results?: T[];
+  success: boolean;
+  meta?: Record<string, unknown>;
+  error?: string;
+};
+
+type D1ExecResult = {
+  count: number;
+  duration: number;
+};
+
 export interface Env {
   DB: D1Database;
   ENVIRONMENT: string;
@@ -125,10 +158,14 @@ async function handleSubmit(
       const honeypotField = formSchema.settings.honeypot.fieldName;
       if (submissionData.data[honeypotField]) {
         // Silent success for bots
-        return jsonResponse({
-          success: true,
-          submissionId: 'bot_' + Date.now(),
-        });
+        return jsonResponse(
+          {
+            success: true,
+            submissionId: 'bot_' + Date.now(),
+          },
+          200,
+          env
+        );
       }
     }
 
@@ -242,9 +279,9 @@ async function getFormSchema(
  * TODO: Implement proper rate limiting using KV or Durable Objects
  * Currently returns true (allows all requests)
  */
-function checkRateLimit(_ip: string, env: Env): boolean {
-  const _limit = parseInt(env.RATE_LIMIT_REQUESTS || '5');
-  const _window = parseInt(env.RATE_LIMIT_WINDOW || '60');
+function checkRateLimit(_ip: string, _env: Env): boolean {
+  // const limit = parseInt(env.RATE_LIMIT_REQUESTS || '5');
+  // const window = parseInt(env.RATE_LIMIT_WINDOW || '60');
 
   // For now, return true (rate limiting not fully implemented)
   // In production, implement using KV or Durable Objects

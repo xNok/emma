@@ -41,6 +41,7 @@ http://localhost:3000
 ## API Endpoints
 
 The server provides a mock API at:
+
 - `POST /api/submit/:formId` - Accepts form submissions
 
 ## Customization

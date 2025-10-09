@@ -1,87 +1,84 @@
-# Emma Form Renderer - Testing
+# Testing Guide
 
-## ⚡ Quick Start
+Testing documentation for the Emma Forms project.
+
+## Quick Start
 
 ```bash
-# Automated Tests
-cd packages/form-renderer
+# Run all automated tests
 yarn test
-yarn test --coverage
 
-# Manual Testing (Interactive)
+# Run manual test server
+yarn test:manual
+```
+
+## Documentation
+
+- **[Automated Testing](./01-automated-testing.md)** - Unit and integration tests with Vitest
+- **[Manual Testing](./02-manual-testing.md)** - Interactive browser testing
+
+## Test Coverage
+
+**Current Status:**
+
+- ✅ Form Renderer: 19 tests passing
+- ✅ API Worker: 1 test passing
+- 🎯 Target: 80%+ code coverage
+
+View coverage report:
+
+```bash
+yarn workspace @emma/form-renderer test --coverage
+```
+
+## CI/CD
+
+All tests run automatically on:
+
+- Every push to any branch
+- Every pull request
+- Main branch commits
+
+See `.github/workflows/lint-test.yaml` for configuration.
+
+## Manual Testing
+
+The test server provides 5 interactive scenarios with visual checklists:
+
+1. Contact Form - All field types
+2. Newsletter - Simple validation
+3. Survey - Complex interactions
+4. Validation - Error handling
+5. Accessibility - A11y compliance
+
+Start the server:
+
+```bash
+yarn test:manual
+# Opens http://localhost:3000
+```
+
+## Troubleshooting
+
+**Tests not running?**
+
+```bash
+yarn build  # Build dependencies first
+yarn test   # Then run tests
+```
+
+**Test server not starting?**
+
+```bash
 cd packages/form-renderer/test-server
-yarn install  # First time only
-yarn dev
-# Open http://localhost:3000
-```
-
-## � What's Included
-
-**Automated Tests** (`src/__tests__/`)
-- ✅ Core rendering tests
-- ✅ Validation tests  
-- ✅ Submission tests
-- ✅ Accessibility tests
-
-**Manual Test Server** (`test-server/`)
-- ✅ 5 interactive scenarios
-- ✅ Visual test checklists
-- ✅ Real-time feedback
-- ✅ Console logging
-
-## 🧪 Manual Test Scenarios
-
-The test server provides 5 interactive scenarios:
-
-1. **Contact Form** - All field types, complex validation
-2. **Newsletter** - Simple form, email validation  
-3. **Survey** - Number validation, ratings, checkboxes
-4. **Validation** - All validation rules and error handling
-5. **Accessibility** - ARIA attributes, keyboard navigation
-
-Each scenario includes:
-- Visual checklist of things to test
-- Real-time console output
-- Success/error feedback
-- Form reset after submission
-
-## 📊 Coverage
-
-**Target:** 80%+ code coverage
-
-```bash
-yarn test --coverage
-```
-
-Open `coverage/index.html` to see detailed report.
-
----
-
-## � Troubleshooting
-
-```bash
-# Tests not running?
-cd packages/form-renderer
-yarn install
-
-# Test server not starting?
-cd test-server
 yarn install
 yarn dev
+```
 
-# Build errors?
-cd ../..
+**Build errors?**
+
+```bash
+yarn clean
+yarn install
 yarn build
 ```
-
-## CI/CD Integration
-
-```yaml
-# .github/workflows/test.yml
-- name: Test
-  run: yarn workspace @emma/form-renderer test --coverage
-```
-
----
-
-**Status:** ✅ Ready to Test

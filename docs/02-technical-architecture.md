@@ -16,7 +16,7 @@ graph TB
         TUI --> |generates| SCHEMA[Form Schema YAML/JSON]
         TUI --> |builds & uploads| R2[Cloudflare R2]
     end
-    
+
     subgraph Runtime
         HUGO[Hugo Website] --> |renders shortcode| DIV[Form Container DIV]
         DIV --> |loads| R2
@@ -25,13 +25,13 @@ graph TB
         FORM --> |submits data| WORKER[Cloudflare Worker API]
         WORKER --> |validates & stores| D1[Cloudflare D1 Database]
     end
-    
+
     subgraph Visitor Experience
         USER[Website Visitor]
         USER --> |visits| HUGO
         USER --> |fills & submits| FORM
     end
-    
+
     style TUI fill:#e1f5ff
     style WORKER fill:#c8e6c9
     style D1 fill:#fff9c4
@@ -44,6 +44,7 @@ graph TB
 **Purpose:** Command-line tool for creating, managing, and deploying forms.
 
 **Key Responsibilities:**
+
 - Interactive form schema creation
 - Theme selection and customization
 - Form validation rules configuration
@@ -51,12 +52,14 @@ graph TB
 - Deployment to Cloudflare R2
 
 **Technology:**
+
 - TypeScript
 - Ink or Inquirer.js for TUI
 - Commander.js for CLI commands
 - Cloudflare API SDK
 
 **Commands:**
+
 ```bash
 emma init                    # Initialize a new form project
 emma create <form-name>      # Create a new form interactively
@@ -68,44 +71,45 @@ emma delete <form-id>        # Delete a form
 ```
 
 **Form Schema Structure:**
+
 ```yaml
 formId: contact-form-001
-name: "Contact Form"
-version: "1.0.0"
-theme: "default"
-apiEndpoint: "https://api.example.com/submit"
+name: 'Contact Form'
+version: '1.0.0'
+theme: 'default'
+apiEndpoint: 'https://api.example.com/submit'
 
 fields:
   - id: name
     type: text
-    label: "Your Name"
+    label: 'Your Name'
     required: true
     validation:
       minLength: 2
       maxLength: 100
-  
+
   - id: email
     type: email
-    label: "Email Address"
+    label: 'Email Address'
     required: true
     validation:
-      pattern: "email"
-  
+      pattern: 'email'
+
   - id: message
     type: textarea
-    label: "Message"
+    label: 'Message'
     required: true
     validation:
       minLength: 10
       maxLength: 1000
 
 settings:
-  submitButtonText: "Send Message"
+  submitButtonText: 'Send Message'
   successMessage: "Thank you! We'll be in touch soon."
-  errorMessage: "Something went wrong. Please try again."
+  errorMessage: 'Something went wrong. Please try again.'
   honeypot:
     enabled: true
-    fieldName: "website"
+    fieldName: 'website'
 ```
 
 ### 2.2 Form Renderer (JavaScript Library)
@@ -113,6 +117,7 @@ settings:
 **Purpose:** Client-side library that renders forms and handles submissions.
 
 **Key Responsibilities:**
+
 - DOM manipulation and form rendering
 - Client-side validation
 - AJAX submission handling
@@ -120,27 +125,34 @@ settings:
 - Theme application
 
 **Technology:**
+
 - TypeScript compiled to ES5+ JavaScript
 - No framework dependencies (vanilla JS)
 - Bundle size target: < 15KB gzipped
 
 **API:**
+
 ```javascript
 // Generated bundle structure
-(function(window) {
+(function (window) {
   window.EmmaForm = window.EmmaForm || {};
-  
+
   window.EmmaForm.render({
     formId: 'contact-form-001',
     containerId: 'embeddable-form-contact-form-001',
-    schema: { /* form schema */ },
-    theme: { /* CSS theme */ },
-    apiEndpoint: 'https://api.example.com/submit/contact-form-001'
+    schema: {
+      /* form schema */
+    },
+    theme: {
+      /* CSS theme */
+    },
+    apiEndpoint: 'https://api.example.com/submit/contact-form-001',
   });
 })(window);
 ```
 
 **Features:**
+
 - Progressive enhancement (works without JS, better with JS)
 - Accessibility (ARIA labels, keyboard navigation)
 - Mobile responsive
@@ -152,6 +164,7 @@ settings:
 **Purpose:** Serverless API endpoint for receiving and storing form submissions.
 
 **Key Responsibilities:**
+
 - Receive POST requests with form data
 - Validate against form schema
 - Honeypot spam detection
@@ -160,6 +173,7 @@ settings:
 - CORS handling
 
 **Technology:**
+
 - TypeScript
 - Cloudflare Workers
 - Cloudflare D1 (SQLite)
@@ -230,6 +244,7 @@ CREATE INDEX idx_submissions_created_at ON submissions(created_at);
 ```
 
 **Security Measures:**
+
 - Rate limiting: 5 requests per minute per IP
 - Honeypot field validation
 - Schema validation (reject unknown fields)
@@ -242,6 +257,7 @@ CREATE INDEX idx_submissions_created_at ON submissions(created_at);
 **Purpose:** Simple integration for Hugo websites.
 
 **Key Responsibilities:**
+
 - Render form container
 - Inject script tag with correct URL
 - Handle configuration options
@@ -249,32 +265,32 @@ CREATE INDEX idx_submissions_created_at ON submissions(created_at);
 **Implementation:**
 
 ```html
-{{/* layouts/shortcodes/embed-form.html */}}
-{{- $formId := .Get 0 -}}
-{{- $class := .Get "class" | default "" -}}
-{{- $cdnUrl := site.Params.emma.cdnUrl | default "https://forms.example.com" -}}
-
-{{- if $formId -}}
-<div 
-  id="embeddable-form-{{ $formId }}" 
+{{/* layouts/shortcodes/embed-form.html */}} {{- $formId := .Get 0 -}} {{-
+$class := .Get "class" | default "" -}} {{- $cdnUrl := site.Params.emma.cdnUrl |
+default "https://forms.example.com" -}} {{- if $formId -}}
+<div
+  id="embeddable-form-{{ $formId }}"
   class="emma-form-container {{ $class }}"
   data-form-id="{{ $formId }}"
 ></div>
-<script 
-  src="{{ $cdnUrl }}/{{ $formId }}.js" 
-  async 
+<script
+  src="{{ $cdnUrl }}/{{ $formId }}.js"
+  async
   defer
   data-emma-form="{{ $formId }}"
 ></script>
 <noscript>
-  <p>This form requires JavaScript to function. Please enable JavaScript or <a href="mailto:contact@example.com">contact us directly</a>.</p>
+  <p>
+    This form requires JavaScript to function. Please enable JavaScript or
+    <a href="mailto:contact@example.com">contact us directly</a>.
+  </p>
 </noscript>
-{{- else -}}
-{{- errorf "The 'embed-form' shortcode requires a formId as the first parameter." -}}
-{{- end -}}
+{{- else -}} {{- errorf "The 'embed-form' shortcode requires a formId as the
+first parameter." -}} {{- end -}}
 ```
 
 **Usage in Hugo:**
+
 ```markdown
 ---
 title: Contact Us
@@ -292,6 +308,7 @@ Or:
 ```
 
 **Configuration (hugo.toml):**
+
 ```toml
 [params.emma]
   cdnUrl = "https://forms.yourdomain.com"
@@ -349,16 +366,19 @@ sequenceDiagram
 ## 4. Error Handling
 
 ### 4.1 Form Builder Errors
+
 - Invalid schema format → Show validation errors
 - Network failure during deployment → Retry with exponential backoff
 - Authentication failure → Prompt for credentials
 
 ### 4.2 Runtime Errors
+
 - Form JS fails to load → Show fallback message
 - API submission fails → Show user-friendly error, allow retry
 - Validation errors → Highlight fields with specific messages
 
 ### 4.3 API Worker Errors
+
 - Invalid form ID → 404 Not Found
 - Schema mismatch → 400 Bad Request with details
 - Rate limit exceeded → 429 Too Many Requests
@@ -367,16 +387,19 @@ sequenceDiagram
 ## 5. Testing Strategy
 
 ### 5.1 Unit Tests
+
 - Form builder: Schema validation, build process
 - Form renderer: Field rendering, validation logic
 - API worker: Request handling, validation, database operations
 
 ### 5.2 Integration Tests
+
 - End-to-end form submission flow
 - Hugo shortcode rendering
 - Deployment pipeline
 
 ### 5.3 Performance Tests
+
 - Bundle size limits
 - API response time (< 200ms p95)
 - Database query performance
@@ -406,13 +429,14 @@ sequenceDiagram
 - Performance metrics (response times)
 - Database size monitoring
 
-
 ## 🎯 Next Implementation Phases
 
 ### Phase 1: Form Renderer (Start Here!)
+
 **Why first?** It's the core of the system.
 
 Tasks:
+
 - Create TypeScript types from schema
 - Build rendering engine (vanilla JS)
 - Add validation logic
@@ -420,9 +444,11 @@ Tasks:
 - Bundle and optimize
 
 ### Phase 2: API Worker
+
 **Why second?** Backend for form submissions.
 
 Tasks:
+
 - Set up Cloudflare Worker
 - Create submission endpoint
 - Validate incoming data
@@ -430,9 +456,11 @@ Tasks:
 - Add rate limiting
 
 ### Phase 3: Form Builder TUI
+
 **Why third?** Brings it all together.
 
 Tasks:
+
 - Build CLI with Commander.js
 - Interactive form creation
 - Build pipeline
@@ -440,9 +468,11 @@ Tasks:
 - Form management
 
 ### Phase 4: Polish
+
 **Why last?** Make it production-ready.
 
 Tasks:
+
 - Write tests
 - Example Hugo site
 - Documentation site
@@ -450,5 +480,4 @@ Tasks:
 
 ---
 
-**Next:** 
-
+**Next:**

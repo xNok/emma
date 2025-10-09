@@ -7,6 +7,7 @@
 ## What Was Done
 
 ### Problem Identified
+
 - User requested migration from npm to yarn for better performance
 - Yarn 1 (Classic) was initially available but is in maintenance mode
 - Needed to upgrade to modern Yarn (Berry) for latest features and performance
@@ -17,7 +18,7 @@ Upgraded to **Yarn 4.10.3 (Berry)** with proper configuration:
 
 1. **Upgraded Yarn**: Used `yarn policies set-version stable` to upgrade from Yarn 1.22.19 to Yarn 4.10.3
 2. **Configured Yarn Berry**: Created `.yarnrc.yml` with node-modules linker for compatibility
-3. **Updated package.json**: 
+3. **Updated package.json**:
    - Added `packageManager: "yarn@4.10.3"` field
    - Changed engine requirement from npm to yarn
    - Updated workspace scripts to use Yarn 4 syntax (`yarn workspaces foreach`)
@@ -43,6 +44,7 @@ Upgraded to **Yarn 4.10.3 (Berry)** with proper configuration:
 ## Why Yarn 4 (Berry)?
 
 ### Advantages over npm:
+
 1. **Faster installs**: ~25s for 466 packages (Yarn has better caching)
 2. **Workspace improvements**: Better monorepo support with `workspaces foreach`
 3. **Plug'n'Play option**: Can switch to PnP mode for even faster installs (using node-modules for now)
@@ -50,6 +52,7 @@ Upgraded to **Yarn 4.10.3 (Berry)** with proper configuration:
 5. **Modern architecture**: Active development, latest features
 
 ### Advantages over Yarn 1:
+
 1. **Actively maintained**: Yarn 1 is in maintenance mode
 2. **Better performance**: Improved resolution and caching algorithms
 3. **New features**: Constraints, plugins, better workspace commands
@@ -58,18 +61,20 @@ Upgraded to **Yarn 4.10.3 (Berry)** with proper configuration:
 ## Configuration Details
 
 ### .yarnrc.yml
+
 ```yaml
-nodeLinker: node-modules  # Use traditional node_modules (compatible)
-enableGlobalCache: true   # Share cache across projects
-yarnPath: .yarn/releases/yarn-4.10.3.cjs  # Pin specific version
+nodeLinker: node-modules # Use traditional node_modules (compatible)
+enableGlobalCache: true # Share cache across projects
+yarnPath: .yarn/releases/yarn-4.10.3.cjs # Pin specific version
 ```
 
 ### package.json Key Changes
+
 ```json
 {
-  "packageManager": "yarn@4.10.3",  // Ensures correct version
+  "packageManager": "yarn@4.10.3", // Ensures correct version
   "scripts": {
-    "dev": "yarn workspaces foreach -pt run dev",   // Parallel execution
+    "dev": "yarn workspaces foreach -pt run dev", // Parallel execution
     "build": "yarn workspaces foreach -pt run build",
     "test": "yarn workspaces foreach -pt run test"
   }
@@ -78,15 +83,15 @@ yarnPath: .yarn/releases/yarn-4.10.3.cjs  # Pin specific version
 
 ### Command Changes
 
-| npm | Yarn 4 |
-|-----|--------|
-| `npm install` | `yarn install` or `yarn` |
-| `npm run build` | `yarn build` |
-| `npm run dev` | `yarn dev` |
-| `npm test` | `yarn test` |
-| `npx wrangler` | `yarn wrangler` |
-| `npm install package` | `yarn add package` |
-| `npm uninstall package` | `yarn remove package` |
+| npm                     | Yarn 4                   |
+| ----------------------- | ------------------------ |
+| `npm install`           | `yarn install` or `yarn` |
+| `npm run build`         | `yarn build`             |
+| `npm run dev`           | `yarn dev`               |
+| `npm test`              | `yarn test`              |
+| `npx wrangler`          | `yarn wrangler`          |
+| `npm install package`   | `yarn add package`       |
+| `npm uninstall package` | `yarn remove package`    |
 
 ## Documentation Updates
 
@@ -109,10 +114,12 @@ All documentation now uses yarn commands:
 ## Git Tracking
 
 Following Yarn Berry best practices:
+
 - ✅ **Track**: `.yarn/releases/`, `.yarn/plugins/`, `.yarnrc.yml`, `yarn.lock`
 - ❌ **Ignore**: `.yarn/cache/`, `.yarn/install-state.gz`, `.pnp.*`
 
 This ensures:
+
 - Everyone uses the same Yarn version
 - Consistent installs across environments
 - No need to install yarn globally
@@ -121,6 +128,7 @@ This ensures:
 ## Next Steps
 
 The project is now using Yarn 4 with:
+
 - ✅ Faster dependency installation
 - ✅ Better monorepo support
 - ✅ Modern package manager
@@ -128,6 +136,7 @@ The project is now using Yarn 4 with:
 - ✅ Ready for development
 
 Next priorities:
+
 1. **Form Builder TUI** - Ready to implement with yarn
 2. **Integration Testing** - Test with new package manager
 3. **CI/CD Configuration** - Update if needed for Yarn Berry

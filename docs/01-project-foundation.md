@@ -63,6 +63,7 @@ emma/
 Before laying down code, we need to complete these documentation files:
 
 ### 4.1 Technical Architecture (doc 02)
+
 - Component interaction diagrams
 - API contracts and data models
 - Security considerations
@@ -70,6 +71,7 @@ Before laying down code, we need to complete these documentation files:
 - Testing approach
 
 ### 4.2 Infrastructure Documentation (docs/infrastructure/cloudflare.md)
+
 - Cloudflare R2 bucket configuration
 - D1 database schema design
 - Workers deployment strategy
@@ -77,6 +79,7 @@ Before laying down code, we need to complete these documentation files:
 - Environment variables and secrets management
 
 ### 4.3 Feature Documentation (docs/features/hugo-shortcode.md)
+
 - Shortcode implementation specification
 - Configuration options
 - Usage examples
@@ -86,24 +89,28 @@ Before laying down code, we need to complete these documentation files:
 ## 5. Technology Stack
 
 ### Form Builder (TUI)
+
 - **Runtime:** Node.js
 - **Framework:** Ink (React for CLI) or Inquirer.js
 - **Language:** TypeScript
 - **CLI Framework:** Commander.js or Yargs
 
 ### API Worker
+
 - **Platform:** Cloudflare Workers
 - **Language:** TypeScript
 - **Database:** Cloudflare D1 (SQLite)
 - **Validation:** Zod or Joi
 
 ### Form Renderer
+
 - **Language:** TypeScript
 - **Build:** Rollup or esbuild
 - **Styling:** CSS Modules or Tailwind CSS
 - **Output:** Vanilla JS bundle (no framework dependency)
 
 ### Hugo Module
+
 - **Template Engine:** Go templates
 - **Integration:** Hugo shortcodes
 
@@ -134,6 +141,7 @@ Before laying down code, we need to complete these documentation files:
 ## 9. Success Criteria
 
 This foundation phase is complete when:
+
 - [ ] All documentation sections are filled with actionable details
 - [ ] Project structure is created with README files in each package
 - [ ] Package.json files are configured with dependencies

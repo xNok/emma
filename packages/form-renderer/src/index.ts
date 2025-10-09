@@ -159,7 +159,8 @@ export class FormRenderer {
 
     if (field.placeholder) input.placeholder = field.placeholder;
     if (field.required) input.required = true;
-    if (field.autocomplete) input.autocomplete = field.autocomplete;
+    if (field.autocomplete)
+      input.setAttribute('autocomplete', field.autocomplete);
     if (field.defaultValue) input.value = String(field.defaultValue);
 
     // Validation attributes

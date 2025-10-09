@@ -9,13 +9,14 @@
   ],
   "scripts": {
     "dev": "yarn workspaces foreach -pt run dev",
-    "build": "yarn workspaces foreach -pt run build",
-    "test": "yarn workspaces foreach -pt run test",
+    "build": "yarn workspaces foreach -Apt run build",
+    "test": "yarn workspaces foreach -Aipt run test",
+    "test:manual": "yarn workspace @emma/form-renderer exec yarn --cwd test-server dev",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
     "typecheck": "tsc --noEmit",
-    "clean": "yarn workspaces foreach -pt run clean && rm -rf node_modules"
+    "clean": "yarn workspaces foreach -Apt run clean && rm -rf node_modules"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
