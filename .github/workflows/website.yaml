@@ -11,6 +11,8 @@ on:
       - edited
       - ready_for_review
       - synchronize
+    paths:
+      - website/**
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
