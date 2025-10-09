@@ -50,6 +50,7 @@ emma/
 ```
 
 Each package includes:
+
 - README.md with overview and usage
 - Placeholder src/ directories
 - Clear purpose and responsibilities
@@ -67,6 +68,7 @@ Set up development tooling and configuration:
 ### 4. Database Schema ✅
 
 Created initial migration:
+
 - **migrations/0001_initial_schema.sql** - Complete D1 database schema:
   - `forms` table for metadata
   - `submissions` table for form data
@@ -76,6 +78,7 @@ Created initial migration:
 ### 5. Example Forms ✅
 
 Created three example form configurations:
+
 - **examples/contact-form.yaml** - Standard contact form
 - **examples/newsletter.yaml** - Newsletter signup
 - **examples/survey.yaml** - Multi-field survey with various input types
@@ -83,6 +86,7 @@ Created three example form configurations:
 ### 6. Hugo Module ✅
 
 Implemented Hugo shortcode:
+
 - **packages/hugo-module/layouts/shortcodes/embed-form.html** - Complete shortcode with:
   - Loading indicators
   - NoScript fallback
@@ -93,6 +97,7 @@ Implemented Hugo shortcode:
 ### 7. Updated README ✅
 
 Completely rewrote the main README.md with:
+
 - Project overview
 - Documentation structure
 - Quick start guide
@@ -114,6 +119,7 @@ Completely rewrote the main README.md with:
 The project foundation is now complete. We're ready to begin implementation:
 
 ### Phase 1: Form Renderer (Priority: High)
+
 - [ ] Create TypeScript types for form schema
 - [ ] Build form rendering engine
 - [ ] Implement client-side validation
@@ -121,6 +127,7 @@ The project foundation is now complete. We're ready to begin implementation:
 - [ ] Bundle optimization (target: < 15KB)
 
 ### Phase 2: API Worker (Priority: High)
+
 - [ ] Set up Cloudflare Worker project
 - [ ] Implement submission endpoint
 - [ ] Add schema validation
@@ -128,6 +135,7 @@ The project foundation is now complete. We're ready to begin implementation:
 - [ ] Add honeypot spam detection
 
 ### Phase 3: Form Builder TUI (Priority: Medium)
+
 - [ ] Create CLI framework with Commander.js
 - [ ] Build interactive form creator
 - [ ] Implement build pipeline
@@ -135,6 +143,7 @@ The project foundation is now complete. We're ready to begin implementation:
 - [ ] Create form management commands
 
 ### Phase 4: Testing & Polish (Priority: Medium)
+
 - [ ] Write unit tests for all packages
 - [ ] Create integration tests
 - [ ] Build example Hugo site

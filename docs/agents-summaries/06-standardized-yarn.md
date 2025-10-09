@@ -11,7 +11,7 @@ The form-renderer package uses Yarn (part of a Yarn workspace), but the test ser
 # Automated tests
 cd packages/form-renderer && yarn test  # ✅ Yarn
 
-# Manual test server  
+# Manual test server
 cd test-server && npm run dev            # ❌ npm (inconsistent!)
 ```
 
@@ -27,6 +27,7 @@ Converted the test-server to use Yarn as a standalone project:
 ## Why Standalone vs Workspace?
 
 The test-server is **not** added to the root workspace (`packages/*`) because:
+
 - It's a development/testing tool, not a package
 - It has different dependencies (Express, etc.)
 - It doesn't need to be built or published
@@ -37,6 +38,7 @@ However, it now uses Yarn consistently with the rest of the project.
 ## Changes Made
 
 ### Files Modified:
+
 1. **`docs/testing/README.md`**:
    - Changed `npm install` → `yarn install`
    - Changed `npm run dev` → `yarn dev`
@@ -49,19 +51,22 @@ However, it now uses Yarn consistently with the rest of the project.
    - Updated all command examples to use yarn
 
 ### Files Created:
+
 1. **`packages/form-renderer/test-server/.gitignore`**:
-   - Added node_modules, .yarn/, .pnp.*, yarn-error.log
+   - Added node_modules, .yarn/, .pnp.\*, yarn-error.log
 
 2. **`packages/form-renderer/test-server/yarn.lock`**:
    - Created empty file to make it standalone Yarn project
 
 ### Files Removed:
+
 - `package-lock.json` (npm lock file)
 - Old `node_modules/` (npm-installed)
 
 ## Verification
 
 ✅ **Server starts correctly with yarn:**
+
 ```bash
 cd /workspaces/emma/packages/form-renderer/test-server
 yarn install
@@ -71,6 +76,7 @@ yarn dev
 ```
 
 ✅ **All scenarios accessible:**
+
 - Contact Form: http://localhost:3000/test/contact
 - Newsletter Signup: http://localhost:3000/test/newsletter
 - Customer Survey: http://localhost:3000/test/survey
@@ -82,6 +88,7 @@ yarn dev
 ### Consistent Developer Experience
 
 **Before** (inconsistent):
+
 ```bash
 # Automated tests
 yarn test              # Yarn ✅
@@ -92,11 +99,12 @@ npm run dev            # npm ❌
 ```
 
 **After** (consistent):
+
 ```bash
 # Automated tests
 yarn test              # Yarn ✅
 
-# Manual testing  
+# Manual testing
 yarn install           # Yarn ✅
 yarn dev               # Yarn ✅
 ```
@@ -114,12 +122,14 @@ yarn dev               # Yarn ✅
 ### Yarn Workspace vs Standalone
 
 The test-server is a **standalone Yarn project** within a workspace:
+
 - Has its own `yarn.lock` file
 - Not listed in root workspace configuration
 - Still uses Yarn for dependency management
 - Doesn't share dependencies with workspace
 
 This is the recommended approach for dev tools that:
+
 - Are not packages to be published
 - Have unique dependencies
 - Need to be run independently
@@ -127,6 +137,7 @@ This is the recommended approach for dev tools that:
 ### Alternative Considered
 
 We could have added it to the workspace:
+
 ```json
 // root package.json
 "workspaces": [
@@ -137,6 +148,7 @@ We could have added it to the workspace:
 ```
 
 But this would:
+
 - Make it appear as a "package" when it's just a dev tool
 - Add unnecessary complexity to the workspace
 - Couple its dependencies to the workspace
@@ -146,7 +158,7 @@ But this would:
 ✅ **Test server now uses Yarn consistently**  
 ✅ **All documentation updated**  
 ✅ **Server verified working**  
-✅ **Developer experience improved**  
+✅ **Developer experience improved**
 
 ## Next Steps
 

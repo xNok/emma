@@ -30,6 +30,7 @@ packages/form-renderer/src/__tests__/
 **Minimum:** 80% code coverage
 
 View detailed coverage report:
+
 ```bash
 yarn workspace @emma/form-renderer test --coverage
 # Opens coverage/index.html
@@ -38,6 +39,7 @@ yarn workspace @emma/form-renderer test --coverage
 ## CI Integration
 
 Tests run automatically on every push and pull request via GitHub Actions:
+
 - Linting
 - Type checking
 - All test suites

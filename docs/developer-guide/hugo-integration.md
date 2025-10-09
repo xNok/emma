@@ -15,6 +15,7 @@ Add to your `hugo.toml`:
 ```
 
 Then run:
+
 ```bash
 hugo mod get -u
 ```
@@ -26,6 +27,7 @@ git submodule add https://github.com/yourusername/emma-hugo-module.git themes/em
 ```
 
 Add to `hugo.toml`:
+
 ```toml
 theme = ["emma", "your-existing-theme"]
 ```
@@ -33,6 +35,7 @@ theme = ["emma", "your-existing-theme"]
 ### Method 3: Manual Installation
 
 Copy the shortcode file:
+
 ```bash
 cp emma-hugo-module/layouts/shortcodes/embed-form.html layouts/shortcodes/
 ```
@@ -47,13 +50,13 @@ Add Emma configuration to your `hugo.toml`:
 [params.emma]
   # Required: CDN URL where your forms are hosted
   cdnUrl = "https://forms.yourdomain.com"
-  
+
   # Optional: Default CSS class for all forms
   defaultClass = "emma-form"
-  
+
   # Optional: Show loading indicator while form loads
   showLoadingIndicator = true
-  
+
   # Optional: Fallback message when JavaScript is disabled
   noJsFallback = "This form requires JavaScript. Please enable it or contact us at support@example.com"
 ```
@@ -119,6 +122,7 @@ Each form operates independently with its own state and validation.
 ### Default Styles
 
 The shortcode includes minimal default styles:
+
 - Loading spinner
 - NoScript fallback styling
 - Basic container layout
@@ -167,7 +171,7 @@ Use the `class` parameter:
 
 ```css
 .hero-form .emma-form-container {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 ```
 
@@ -181,12 +185,12 @@ Only show form on certain pages:
 
 ```html
 <!-- layouts/partials/contact-form.html -->
-{{- if .Params.showContactForm -}}
-  {{< embed-form "contact-form-001" >}}
-{{- end -}}
+{{- if .Params.showContactForm -}} {{< embed-form "contact-form-001" >}} {{- end
+-}}
 ```
 
 In your content:
+
 ```yaml
 ---
 title: Contact
@@ -199,14 +203,9 @@ showContactForm: true
 Choose form based on page type or parameters:
 
 ```html
-{{- $formId := "default-contact" -}}
-{{- if eq .Type "product" -}}
-  {{- $formId = "product-inquiry" -}}
-{{- else if eq .Type "support" -}}
-  {{- $formId = "support-request" -}}
-{{- end -}}
-
-{{< embed-form $formId >}}
+{{- $formId := "default-contact" -}} {{- if eq .Type "product" -}} {{- $formId =
+"product-inquiry" -}} {{- else if eq .Type "support" -}} {{- $formId =
+"support-request" -}} {{- end -}} {{< embed-form $formId >}}
 ```
 
 ### Localization
@@ -214,16 +213,10 @@ Choose form based on page type or parameters:
 Different forms for different languages:
 
 ```html
-{{- $formId := "" -}}
-{{- if eq .Site.Language.Lang "en" -}}
-  {{- $formId = "contact-en" -}}
-{{- else if eq .Site.Language.Lang "es" -}}
-  {{- $formId = "contact-es" -}}
-{{- else if eq .Site.Language.Lang "fr" -}}
-  {{- $formId = "contact-fr" -}}
-{{- end -}}
-
-{{< embed-form $formId >}}
+{{- $formId := "" -}} {{- if eq .Site.Language.Lang "en" -}} {{- $formId =
+"contact-en" -}} {{- else if eq .Site.Language.Lang "es" -}} {{- $formId =
+"contact-es" -}} {{- else if eq .Site.Language.Lang "fr" -}} {{- $formId =
+"contact-fr" -}} {{- end -}} {{< embed-form $formId >}}
 ```
 
 ---
@@ -239,21 +232,21 @@ Load forms only when they scroll into viewport:
 <div id="form-container" data-lazy-form="contact-form-001"></div>
 
 <script>
-if ('IntersectionObserver' in window) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const formId = entry.target.dataset.lazyForm;
-        // Inject shortcode content here
-        observer.unobserve(entry.target);
-      }
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const formId = entry.target.dataset.lazyForm;
+          // Inject shortcode content here
+          observer.unobserve(entry.target);
+        }
+      });
     });
-  });
-  
-  document.querySelectorAll('[data-lazy-form]').forEach(el => {
-    observer.observe(el);
-  });
-}
+
+    document.querySelectorAll('[data-lazy-form]').forEach((el) => {
+      observer.observe(el);
+    });
+  }
 </script>
 ```
 
@@ -262,7 +255,11 @@ if ('IntersectionObserver' in window) {
 For forms above the fold, add preload hint:
 
 ```html
-<link rel="preload" as="script" href="https://forms.yourdomain.com/contact-form-001.js">
+<link
+  rel="preload"
+  as="script"
+  href="https://forms.yourdomain.com/contact-form-001.js"
+/>
 
 {{< embed-form "contact-form-001" >}}
 ```
@@ -274,6 +271,7 @@ For forms above the fold, add preload hint:
 ### Form Not Appearing
 
 **Check:**
+
 1. Form ID is correct
 2. CDN URL is configured in `hugo.toml`
 3. Form is deployed to R2
@@ -281,6 +279,7 @@ For forms above the fold, add preload hint:
 5. Network tab shows successful JS file load
 
 **Solution:**
+
 ```bash
 # Verify form exists
 curl -I https://forms.yourdomain.com/contact-form-001.js
@@ -298,15 +297,20 @@ Add error handling:
 
 ```html
 <script>
-window.addEventListener('error', function(e) {
-  if (e.filename && e.filename.includes('forms.yourdomain.com')) {
-    console.error('Emma form failed to load:', e.message);
-    const container = document.querySelector('[data-emma-form-wrapper]');
-    if (container) {
-      container.innerHTML = '<p style="color: red;">Form could not be loaded. Please refresh the page or contact us directly.</p>';
-    }
-  }
-}, true);
+  window.addEventListener(
+    'error',
+    function (e) {
+      if (e.filename && e.filename.includes('forms.yourdomain.com')) {
+        console.error('Emma form failed to load:', e.message);
+        const container = document.querySelector('[data-emma-form-wrapper]');
+        if (container) {
+          container.innerHTML =
+            '<p style="color: red;">Form could not be loaded. Please refresh the page or contact us directly.</p>';
+        }
+      }
+    },
+    true
+  );
 </script>
 ```
 
@@ -343,7 +347,7 @@ If your theme's styles conflict:
 ### Manual Testing Checklist
 
 - [ ] Form renders correctly
-- [ ] Form submits successfully  
+- [ ] Form submits successfully
 - [ ] Validation errors display properly
 - [ ] Success message appears
 - [ ] NoScript fallback shows when JS disabled
@@ -394,7 +398,7 @@ Or reach us at: support@example.com
 <aside class="sidebar">
   <h3>Subscribe to Newsletter</h3>
   <p>Get weekly updates delivered to your inbox.</p>
-  
+
   {{< embed-form "newsletter-signup" class="sidebar-form compact" >}}
 </aside>
 ```

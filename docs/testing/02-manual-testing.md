@@ -16,7 +16,7 @@ yarn test:manual
 The test server provides 5 interactive scenarios with visual checklists:
 
 1. **Contact Form** - All field types, complex validation
-2. **Newsletter** - Simple form, email validation  
+2. **Newsletter** - Simple form, email validation
 3. **Survey** - Number validation, ratings, checkboxes
 4. **Validation** - All validation rules and error handling
 5. **Accessibility** - ARIA attributes, keyboard navigation
@@ -24,6 +24,7 @@ The test server provides 5 interactive scenarios with visual checklists:
 ## What to Test
 
 ### Visual Testing
+
 - ✅ All field types render correctly
 - ✅ Labels and help text display properly
 - ✅ Error messages appear inline
@@ -31,6 +32,7 @@ The test server provides 5 interactive scenarios with visual checklists:
 - ✅ Form resets after successful submission
 
 ### Interaction Testing
+
 - ✅ Tab navigation works through all fields
 - ✅ Required field validation triggers
 - ✅ Email/phone/URL patterns validate correctly
@@ -38,6 +40,7 @@ The test server provides 5 interactive scenarios with visual checklists:
 - ✅ Submit button is disabled during submission
 
 ### Accessibility Testing
+
 - ✅ Screen reader announces errors
 - ✅ ARIA labels are present
 - ✅ Keyboard-only navigation works
@@ -47,6 +50,7 @@ The test server provides 5 interactive scenarios with visual checklists:
 ## Console Output
 
 The test server logs submission data to the browser console. Check the console to verify:
+
 - Form data is correctly captured
 - Validation errors are caught
 - Submission flow works as expected
@@ -54,6 +58,7 @@ The test server logs submission data to the browser console. Check the console t
 ## Browser Testing
 
 Test in multiple browsers:
+
 - Chrome/Edge (Chromium)
 - Firefox
 - Safari (if available)

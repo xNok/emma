@@ -13,12 +13,14 @@ Get up and running with Emma Forms in 5 minutes.
 ### Option 1: Hugo Module (Recommended)
 
 1. **Initialize Hugo Modules** (if not already done):
+
    ```bash
    cd your-hugo-site
    hugo mod init github.com/yourusername/your-site
    ```
 
 2. **Add Emma Forms to your Hugo config** (`hugo.toml`):
+
    ```toml
    [module]
      [[module.imports]]
@@ -38,6 +40,7 @@ git submodule add https://github.com/emma-forms/hugo-module themes/emma-forms
 ```
 
 Then add to your `hugo.toml`:
+
 ```toml
 theme = ["emma-forms", "your-existing-theme"]
 ```
@@ -58,14 +61,14 @@ fields:
     type: text
     label: Your Name
     required: true
-    
+
   - name: email
     type: email
     label: Email Address
     required: true
     validation:
       pattern: email
-      
+
   - name: message
     type: textarea
     label: Message
@@ -98,22 +101,25 @@ In your `hugo.toml`, set your Cloudflare Worker URL:
 ## Deploy the API Worker
 
 1. **Clone the Emma repository**:
+
    ```bash
    git clone https://github.com/emma-forms/emma.git
    cd emma
    ```
 
 2. **Install dependencies**:
+
    ```bash
    yarn install
    ```
 
 3. **Configure Wrangler** in `packages/api-worker/wrangler.toml`:
+
    ```toml
    name = "emma-forms-api"
    main = "src/index.ts"
    compatibility_date = "2024-01-01"
-   
+
    [[d1_databases]]
    binding = "DB"
    database_name = "emma-forms"
@@ -121,11 +127,13 @@ In your `hugo.toml`, set your Cloudflare Worker URL:
    ```
 
 4. **Create D1 database**:
+
    ```bash
    yarn wrangler d1 create emma-forms
    ```
 
 5. **Run migrations**:
+
    ```bash
    yarn wrangler d1 migrations apply emma-forms --remote
    ```
@@ -139,6 +147,7 @@ In your `hugo.toml`, set your Cloudflare Worker URL:
 ## Test Your Form
 
 1. **Start Hugo dev server**:
+
    ```bash
    hugo server
    ```
@@ -168,15 +177,19 @@ In your `hugo.toml`, set your Cloudflare Worker URL:
 ## Common Quick Wins
 
 ### Add Honeypot Protection
+
 Already included! Invisible to users, effective against bots.
 
 ### Enable AJAX Submissions
+
 Default behavior - no page reload required.
 
 ### Real-time Validation
+
 Built-in for email, URL, tel, and custom patterns.
 
 ### Accessibility
+
 ARIA labels, keyboard navigation, and screen reader support included.
 
 ---

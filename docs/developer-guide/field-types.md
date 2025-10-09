@@ -5,13 +5,14 @@ Emma supports 13 different field types for building forms.
 ## Text-Based Fields
 
 ### text
+
 Single-line text input.
 
 ```yaml
 - id: name
   type: text
-  label: "Name"
-  placeholder: "John Doe"
+  label: 'Name'
+  placeholder: 'John Doe'
   required: true
   validation:
     minLength: 2
@@ -19,6 +20,7 @@ Single-line text input.
 ```
 
 **Attributes:**
+
 - `minLength`, `maxLength` - Length constraints
 - `pattern` - Regex pattern
 - `autocomplete` - Browser autocomplete hint
@@ -28,15 +30,16 @@ Single-line text input.
 ---
 
 ### email
+
 Email address input with validation.
 
 ```yaml
 - id: email
   type: email
-  label: "Email Address"
+  label: 'Email Address'
   required: true
   validation:
-    pattern: "email"
+    pattern: 'email'
 ```
 
 **Validation:** Automatically validates email format
@@ -45,15 +48,16 @@ Email address input with validation.
 ---
 
 ### tel
+
 Telephone number input.
 
 ```yaml
 - id: phone
   type: tel
-  label: "Phone Number"
-  placeholder: "+1 (555) 123-4567"
+  label: 'Phone Number'
+  placeholder: '+1 (555) 123-4567'
   validation:
-    pattern: "tel"
+    pattern: 'tel'
 ```
 
 **Use cases:** Phone numbers, contact details
@@ -61,15 +65,16 @@ Telephone number input.
 ---
 
 ### url
+
 Website URL input with validation.
 
 ```yaml
 - id: website
   type: url
-  label: "Website"
-  placeholder: "https://example.com"
+  label: 'Website'
+  placeholder: 'https://example.com'
   validation:
-    pattern: "url"
+    pattern: 'url'
 ```
 
 **Validation:** Ensures valid URL format
@@ -78,12 +83,13 @@ Website URL input with validation.
 ---
 
 ### textarea
+
 Multi-line text input.
 
 ```yaml
 - id: message
   type: textarea
-  label: "Message"
+  label: 'Message'
   rows: 6
   required: true
   validation:
@@ -92,6 +98,7 @@ Multi-line text input.
 ```
 
 **Attributes:**
+
 - `rows` - Number of visible rows
 - `minLength`, `maxLength` - Length constraints
 
@@ -100,12 +107,13 @@ Multi-line text input.
 ---
 
 ### number
+
 Numeric input.
 
 ```yaml
 - id: age
   type: number
-  label: "Age"
+  label: 'Age'
   required: true
   validation:
     min: 18
@@ -113,6 +121,7 @@ Numeric input.
 ```
 
 **Attributes:**
+
 - `min`, `max` - Number range
 - `step` - Increment step (future)
 
@@ -123,24 +132,26 @@ Numeric input.
 ## Selection Fields
 
 ### select
+
 Dropdown menu.
 
 ```yaml
 - id: country
   type: select
-  label: "Country"
+  label: 'Country'
   required: true
-  placeholder: "Select a country..."
+  placeholder: 'Select a country...'
   options:
-    - value: "us"
-      label: "United States"
-    - value: "ca"
-      label: "Canada"
-    - value: "uk"
-      label: "United Kingdom"
+    - value: 'us'
+      label: 'United States'
+    - value: 'ca'
+      label: 'Canada'
+    - value: 'uk'
+      label: 'United Kingdom'
 ```
 
 **Attributes:**
+
 - `options` - Array of {value, label, disabled?}
 - `placeholder` - Shown when nothing selected
 
@@ -149,23 +160,25 @@ Dropdown menu.
 ---
 
 ### radio
+
 Radio button group (single selection).
 
 ```yaml
 - id: priority
   type: radio
-  label: "Priority Level"
+  label: 'Priority Level'
   required: true
   options:
-    - value: "low"
-      label: "Low"
-    - value: "medium"
-      label: "Medium"
-    - value: "high"
-      label: "High"
+    - value: 'low'
+      label: 'Low'
+    - value: 'medium'
+      label: 'Medium'
+    - value: 'high'
+      label: 'High'
 ```
 
 **Attributes:**
+
 - `options` - Array of {value, label, disabled?}
 
 **Use cases:** Priorities, preferences, ratings, yes/no questions
@@ -173,23 +186,25 @@ Radio button group (single selection).
 ---
 
 ### checkbox
+
 Checkbox group (multiple selection).
 
 ```yaml
 - id: interests
   type: checkbox
-  label: "Interests"
+  label: 'Interests'
   required: false
   options:
-    - value: "tech"
-      label: "Technology"
-    - value: "design"
-      label: "Design"
-    - value: "business"
-      label: "Business"
+    - value: 'tech'
+      label: 'Technology'
+    - value: 'design'
+      label: 'Design'
+    - value: 'business'
+      label: 'Business'
 ```
 
 **Attributes:**
+
 - `options` - Array of {value, label, disabled?}
 
 **Submission format:** Array of selected values
@@ -200,16 +215,17 @@ Checkbox group (multiple selection).
 ## Date & Time Fields
 
 ### date
+
 Date picker.
 
 ```yaml
 - id: birthdate
   type: date
-  label: "Date of Birth"
+  label: 'Date of Birth'
   required: true
   validation:
-    min: "1900-01-01"
-    max: "2025-12-31"
+    min: '1900-01-01'
+    max: '2025-12-31'
 ```
 
 **Format:** YYYY-MM-DD
@@ -218,12 +234,13 @@ Date picker.
 ---
 
 ### time
+
 Time picker.
 
 ```yaml
 - id: appointment
   type: time
-  label: "Preferred Time"
+  label: 'Preferred Time'
   required: true
 ```
 
@@ -233,12 +250,13 @@ Time picker.
 ---
 
 ### datetime-local
+
 Combined date and time picker.
 
 ```yaml
 - id: event_time
   type: datetime-local
-  label: "Event Date & Time"
+  label: 'Event Date & Time'
   required: true
 ```
 
@@ -250,12 +268,13 @@ Combined date and time picker.
 ## Special Fields
 
 ### hidden
+
 Hidden field (not visible to users).
 
 ```yaml
 - id: source
   type: hidden
-  defaultValue: "website"
+  defaultValue: 'website'
 ```
 
 **Use cases:** Tracking, UTM parameters, form variants
@@ -265,43 +284,45 @@ Hidden field (not visible to users).
 ## Field Options
 
 ### Options Array
+
 For select, radio, and checkbox fields:
 
 ```yaml
 options:
-  - value: "internal-id"      # Value submitted to API
-    label: "User-Visible Text" # Text shown to user
-    disabled: false           # Optional: disable this option
+  - value: 'internal-id' # Value submitted to API
+    label: 'User-Visible Text' # Text shown to user
+    disabled: false # Optional: disable this option
 ```
 
 **Example:**
+
 ```yaml
 options:
-  - value: "1"
-    label: "Very Dissatisfied"
-  - value: "2"
-    label: "Dissatisfied"
-  - value: "3"
-    label: "Neutral"
-  - value: "4"
-    label: "Satisfied"
-  - value: "5"
-    label: "Very Satisfied"
+  - value: '1'
+    label: 'Very Dissatisfied'
+  - value: '2'
+    label: 'Dissatisfied'
+  - value: '3'
+    label: 'Neutral'
+  - value: '4'
+    label: 'Satisfied'
+  - value: '5'
+    label: 'Very Satisfied'
 ```
 
 ## Validation
 
 Each field type supports different validation rules:
 
-| Field Type | Supported Validation |
-|------------|---------------------|
-| text, email, tel, url | required, minLength, maxLength, pattern |
-| textarea | required, minLength, maxLength |
-| number | required, min, max |
-| select, radio | required |
-| checkbox | required (at least one) |
-| date, time, datetime-local | required, min, max |
-| hidden | (none) |
+| Field Type                 | Supported Validation                    |
+| -------------------------- | --------------------------------------- |
+| text, email, tel, url      | required, minLength, maxLength, pattern |
+| textarea                   | required, minLength, maxLength          |
+| number                     | required, min, max                      |
+| select, radio              | required                                |
+| checkbox                   | required (at least one)                 |
+| date, time, datetime-local | required, min, max                      |
+| hidden                     | (none)                                  |
 
 See [Validation](./validation.md) for detailed rules.
 
@@ -312,18 +333,19 @@ HTML5 autocomplete values for better UX:
 ```yaml
 - id: email
   type: email
-  autocomplete: "email"
+  autocomplete: 'email'
 
 - id: name
   type: text
-  autocomplete: "name"
+  autocomplete: 'name'
 
 - id: address
   type: text
-  autocomplete: "street-address"
+  autocomplete: 'street-address'
 ```
 
 Common values:
+
 - `name`, `given-name`, `family-name`
 - `email`
 - `tel`, `tel-national`
@@ -334,27 +356,32 @@ Common values:
 ## Best Practices
 
 ### Choosing Field Types
+
 - Use specific types (email, tel, url) instead of text
 - Use select for < 10 options, radio for 2-5 options
 - Use checkbox for multi-select, radio for single-select
 - Use textarea for > 100 characters of text
 
 ### Required Fields
+
 - Mark only essential fields as required
-- Provide clear indication (* asterisk)
+- Provide clear indication (\* asterisk)
 - Validate on submit, not on blur for required fields
 
 ### Placeholders
+
 - Use as hints, not as labels
 - Show example format: "+1 (555) 123-4567"
 - Keep them short
 
 ### Help Text
+
 - Use for clarification, not instructions
 - Place below the label
 - Keep to one sentence
 
 ### Option Labels
+
 - Be clear and specific
 - Use parallel structure
 - Avoid negatives in labels
@@ -362,6 +389,7 @@ Common values:
 ## Examples
 
 See complete field examples in:
+
 - [/examples/contact-form.yaml](../../examples/contact-form.yaml)
 - [/examples/survey.yaml](../../examples/survey.yaml)
 - [/examples/newsletter.yaml](../../examples/newsletter.yaml)

@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+.yarn/
+.pnp.*
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Third-party code
+website/themes/
+
+# Lock files
+yarn.lock
+package-lock.json
+
+# Logs
+*.log
+
+# OS files
+.DS_Store

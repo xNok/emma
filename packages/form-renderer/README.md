@@ -5,6 +5,7 @@ Client-side JavaScript library that renders forms and handles submissions.
 ## Overview
 
 The Form Renderer is a lightweight, framework-agnostic JavaScript library that:
+
 - Renders forms from schema definitions
 - Handles client-side validation
 - Submits data via AJAX

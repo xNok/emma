@@ -20,11 +20,13 @@ yarn test:manual
 ## Test Coverage
 
 **Current Status:**
+
 - ✅ Form Renderer: 19 tests passing
 - ✅ API Worker: 1 test passing
 - 🎯 Target: 80%+ code coverage
 
 View coverage report:
+
 ```bash
 yarn workspace @emma/form-renderer test --coverage
 ```
@@ -32,6 +34,7 @@ yarn workspace @emma/form-renderer test --coverage
 ## CI/CD
 
 All tests run automatically on:
+
 - Every push to any branch
 - Every pull request
 - Main branch commits
@@ -49,6 +52,7 @@ The test server provides 5 interactive scenarios with visual checklists:
 5. Accessibility - A11y compliance
 
 Start the server:
+
 ```bash
 yarn test:manual
 # Opens http://localhost:3000
@@ -57,12 +61,14 @@ yarn test:manual
 ## Troubleshooting
 
 **Tests not running?**
+
 ```bash
 yarn build  # Build dependencies first
 yarn test   # Then run tests
 ```
 
 **Test server not starting?**
+
 ```bash
 cd packages/form-renderer/test-server
 yarn install
@@ -70,6 +76,7 @@ yarn dev
 ```
 
 **Build errors?**
+
 ```bash
 yarn clean
 yarn install

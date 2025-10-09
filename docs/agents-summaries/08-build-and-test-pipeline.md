@@ -6,6 +6,7 @@
 ## Problem
 
 The `yarn test` command was failing because:
+
 1. Tests require built dependencies (especially `@emma/shared` package)
 2. The `yarn build` command was missing the `-A` (all workspaces) flag
 3. The CI pipeline wasn't building packages before running tests
@@ -31,6 +32,7 @@ Fixed all workspace commands to include the `-A` flag:
 ```
 
 **Flags explained:**
+
 - `-A`: Run in all workspaces
 - `-p`: Run in parallel
 - `-t`: Topological order (respects dependency graph)
@@ -61,6 +63,7 @@ Created `/workspaces/emma/packages/api-worker/src/__tests__/index.test.ts` to en
 ### 4. Updated Test Scripts to Use Non-Watch Mode
 
 Changed both packages to use `vitest run` instead of `vitest` to avoid hanging in watch mode:
+
 - `packages/api-worker/package.json`
 - `packages/form-renderer/package.json`
 
@@ -73,6 +76,7 @@ yarn build && yarn lint && yarn test && yarn typecheck
 ```
 
 **Results:**
+
 - ✅ Build: Both `@emma/shared` and `@emma/form-renderer` build successfully
 - ✅ Lint: Passes (with TypeScript version warning)
 - ✅ Tests: 20 tests passing (1 in api-worker, 19 in form-renderer)
@@ -82,6 +86,7 @@ yarn build && yarn lint && yarn test && yarn typecheck
 ## Build Dependencies
 
 The topological order ensures dependencies are built correctly:
+
 1. `@emma/shared` is built first (has no dependencies)
 2. `@emma/form-renderer` is built second (depends on `@emma/shared`)
 3. `@emma/api-worker` is built third (depends on `@emma/shared`)
@@ -89,6 +94,7 @@ The topological order ensures dependencies are built correctly:
 ## Next Steps
 
 Consider:
+
 1. Running `yarn format` to fix formatting issues before merging
 2. Adding a pre-commit hook to ensure formatting
 3. Making format:check non-blocking or a separate CI job

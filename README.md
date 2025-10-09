@@ -9,6 +9,7 @@ Emma is a system for creating, deploying, and embedding forms into Hugo websites
 3. **Embed forms** in Hugo sites with a simple shortcode
 
 **Example:**
+
 ```markdown
 {{< embed-form "contact-form-001" >}}
 ```
@@ -40,15 +41,18 @@ emma/
 ## 📚 Documentation
 
 ### Quick Start
+
 - **[Quick Start Guide](./docs/developer-guide/quick-start.md)** - Get running in 5 minutes
 - **[Developer Guide](./docs/developer-guide/README.md)** - Complete development documentation
 
 ### Architecture & Design
+
 - [00-mvp-embeddable-forms.md](./docs/00-mvp-embeddable-forms.md) - Project vision
 - [02-technical-architecture.md](./docs/02-technical-architecture.md) - Technical architecture
 - [FOUNDATION-SUMMARY.md](./docs/FOUNDATION-SUMMARY.md) - Implementation progress
 
 ### Specific Topics
+
 - [Hugo Integration](./docs/features/hugo-shortcode.md) - Embedding forms in Hugo
 - [Cloudflare Infrastructure](./docs/infrastructure/cloudflare.md) - Workers, D1, R2 setup
 - [Field Types](./docs/developer-guide/field-types.md) - All 13 supported field types
@@ -76,6 +80,7 @@ Data saved to D1 database
 ### 2. Documentation-Driven Development
 
 **Before writing code:**
+
 1. Read the latest numbered doc in `/docs`
 2. Understand what's being built and why
 3. If making changes, update docs first
@@ -92,7 +97,7 @@ cd packages/form-builder
 yarn install
 yarn dev
 
-# Work on API Worker  
+# Work on API Worker
 cd packages/api-worker
 yarn install
 yarn wrangler dev
@@ -113,7 +118,7 @@ $ emma create contact-form
 
 ? Form name: Contact Form
 ? Add field: name (text)
-? Add field: email (email)  
+? Add field: email (email)
 ? Add field: message (textarea)
 ? Theme: default
 ✓ Form created: contact-form-001

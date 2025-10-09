@@ -5,6 +5,7 @@ Cloudflare Worker that handles form submissions and stores data in D1.
 ## Overview
 
 The API Worker provides:
+
 - Form submission endpoint (`/submit/:formId`)
 - Data validation against form schemas
 - Spam detection (honeypot)
@@ -40,6 +41,7 @@ database_id = "your-database-id"
 Submit form data.
 
 **Request:**
+
 ```json
 {
   "formId": "contact-form-001",
@@ -51,6 +53,7 @@ Submit form data.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,

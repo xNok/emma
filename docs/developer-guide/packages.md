@@ -11,33 +11,35 @@ Emma is organized as a monorepo with multiple packages that work together.
 Core types and utilities used across all packages.
 
 **Key Exports:**
+
 ```typescript
 // Types
-import type { 
-  FormSchema, 
-  FormField, 
+import type {
+  FormSchema,
+  FormField,
   FieldType,
   ValidationRules,
   SubmissionData,
-  SubmissionResponse 
+  SubmissionResponse,
 } from '@emma/shared/types';
 
 // Validators
-import { 
+import {
   validateFormSchema,
-  validateSubmissionData 
+  validateSubmissionData,
 } from '@emma/shared/schema';
 
 // Utilities
-import { 
+import {
   generateFormId,
   generateSubmissionId,
   sanitizeInput,
-  isValidEmail 
+  isValidEmail,
 } from '@emma/shared/utils';
 ```
 
 **Purpose:**
+
 - Shared TypeScript type definitions
 - Form schema validation
 - Submission data validation
@@ -53,6 +55,7 @@ import {
 Client-side JavaScript library that renders forms and handles submissions.
 
 **Usage:**
+
 ```typescript
 import { FormRenderer } from '@emma/form-renderer';
 
@@ -63,13 +66,14 @@ const renderer = new FormRenderer({
   theme: 'default',
   onSuccess: (response) => {
     console.log('Form submitted!', response);
-  }
+  },
 });
 
 renderer.render();
 ```
 
 **Features:**
+
 - Renders all field types dynamically
 - Client-side validation
 - AJAX form submission
@@ -79,6 +83,7 @@ renderer.render();
 - Theme support
 
 **Build Output:**
+
 - `dist/emma-forms.js` - IIFE bundle
 - `dist/emma-forms.min.js` - Minified IIFE
 - `dist/emma-forms.esm.js` - ES Module
@@ -93,12 +98,14 @@ renderer.render();
 Cloudflare Worker that handles form submissions and stores data in D1.
 
 **Endpoints:**
+
 ```
 POST /submit/:formId    # Submit form data
 GET  /health            # Health check
 ```
 
 **Features:**
+
 - Form submission handling
 - Server-side validation
 - Honeypot spam detection
@@ -108,6 +115,7 @@ GET  /health            # Health check
 - Multiple environments
 
 **Deployment:**
+
 ```bash
 cd packages/api-worker
 wrangler deploy
@@ -124,6 +132,7 @@ wrangler deploy
 Terminal User Interface (TUI) for creating and managing forms.
 
 **Planned Commands:**
+
 ```bash
 emma init              # Initialize configuration
 emma create <name>     # Create new form interactively
@@ -135,6 +144,7 @@ emma delete <form-id>  # Delete a form
 ```
 
 **Features (Planned):**
+
 - Interactive form creation
 - YAML schema generation
 - Build pipeline
@@ -152,11 +162,13 @@ emma delete <form-id>  # Delete a form
 Hugo module providing a shortcode for embedding forms.
 
 **Usage:**
+
 ```markdown
 {{< embed-form "contact-form-001" >}}
 ```
 
 **Configuration:**
+
 ```toml
 # hugo.toml
 [params.emma]
@@ -166,6 +178,7 @@ Hugo module providing a shortcode for embedding forms.
 ```
 
 **Features:**
+
 - Simple one-line embedding
 - Loading indicators
 - NoScript fallback
@@ -194,27 +207,32 @@ hugo-module
 ## Development Workflow
 
 ### Install Dependencies
+
 ```bash
 yarn install
 ```
 
 ### Build All Packages
+
 ```bash
 yarn build
 ```
 
 ### Build Individual Package
+
 ```bash
 cd packages/form-renderer
 yarn build
 ```
 
 ### Run Tests
+
 ```bash
 yarn test
 ```
 
 ### Type Check
+
 ```bash
 yarn typecheck
 ```

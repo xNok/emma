@@ -1,6 +1,7 @@
 # Hugo Shortcode Integration
 
 **Related Documents:**
+
 - [00-mvp-embeddable-forms.md](../00-mvp-embeddable-forms.md)
 - [02-technical-architecture.md](../02-technical-architecture.md)
 
@@ -54,13 +55,13 @@ Add Emma configuration to your `hugo.toml`:
 [params.emma]
   # CDN URL where your forms are hosted
   cdnUrl = "https://forms.yourdomain.com"
-  
+
   # Optional: Default CSS class for all forms
   defaultClass = "emma-form"
-  
+
   # Optional: Enable loading indicator
   showLoadingIndicator = true
-  
+
   # Optional: Custom fallback message when JS is disabled
   noJsFallback = "This form requires JavaScript. Please enable it or contact us at support@example.com"
 ```
@@ -72,43 +73,36 @@ Add Emma configuration to your `hugo.toml`:
 File: `layouts/shortcodes/embed-form.html`
 
 ```html
-{{- /* 
-  Emma Form Embed Shortcode
-  Usage: {{< embed-form "form-id" >}}
-  
-  Parameters:
-    - First positional argument: formId (required)
-    - class: Additional CSS classes
-    - loading: Custom loading message
-*/ -}}
+{{- /* Emma Form Embed Shortcode Usage: {{< embed-form "form-id" >}} Parameters:
+- First positional argument: formId (required) - class: Additional CSS classes -
+loading: Custom loading message */ -}} {{- $formId := .Get 0 -}} {{- $class :=
+.Get "class" | default "" -}} {{- $cdnUrl := site.Params.emma.cdnUrl | default
+"https://forms.example.com" -}} {{- $defaultClass :=
+site.Params.emma.defaultClass | default "emma-form" -}} {{- $showLoading :=
+site.Params.emma.showLoadingIndicator | default true -}} {{- $noJsFallback :=
+site.Params.emma.noJsFallback | default "This form requires JavaScript to
+function." -}} {{- $customLoading := .Get "loading" -}} {{- if not $formId -}}
+{{- errorf "The 'embed-form' shortcode requires a formId as the first parameter.
+Usage: {{< embed-form \"your-form-id\" >}}" -}} {{- end -}}
 
-{{- $formId := .Get 0 -}}
-{{- $class := .Get "class" | default "" -}}
-{{- $cdnUrl := site.Params.emma.cdnUrl | default "https://forms.example.com" -}}
-{{- $defaultClass := site.Params.emma.defaultClass | default "emma-form" -}}
-{{- $showLoading := site.Params.emma.showLoadingIndicator | default true -}}
-{{- $noJsFallback := site.Params.emma.noJsFallback | default "This form requires JavaScript to function." -}}
-{{- $customLoading := .Get "loading" -}}
-
-{{- if not $formId -}}
-  {{- errorf "The 'embed-form' shortcode requires a formId as the first parameter. Usage: {{< embed-form \"your-form-id\" >}}" -}}
-{{- end -}}
-
-<div class="emma-form-wrapper {{ $defaultClass }} {{ $class }}" data-emma-form-wrapper="{{ $formId }}">
+<div
+  class="emma-form-wrapper {{ $defaultClass }} {{ $class }}"
+  data-emma-form-wrapper="{{ $formId }}"
+>
   {{- if $showLoading -}}
   <div class="emma-form-loading" data-emma-loading="{{ $formId }}">
     <div class="emma-spinner"></div>
     <p>{{ $customLoading | default "Loading form..." }}</p>
   </div>
   {{- end -}}
-  
-  <div 
-    id="embeddable-form-{{ $formId }}" 
+
+  <div
+    id="embeddable-form-{{ $formId }}"
     class="emma-form-container"
     data-form-id="{{ $formId }}"
     data-cdn-url="{{ $cdnUrl }}"
   ></div>
-  
+
   <noscript>
     <div class="emma-form-noscript">
       <p>{{ $noJsFallback }}</p>
@@ -116,58 +110,67 @@ File: `layouts/shortcodes/embed-form.html`
   </noscript>
 </div>
 
-<script 
-  src="{{ $cdnUrl }}/{{ $formId }}.js" 
-  async 
+<script
+  src="{{ $cdnUrl }}/{{ $formId }}.js"
+  async
   defer
   data-emma-form="{{ $formId }}"
-  {{- if $showLoading }}
+  {{-
+  if
+  $showLoading
+  }}
   onload="document.querySelector('[data-emma-loading=\'{{ $formId }}\']')?.remove()"
   onerror="document.querySelector('[data-emma-loading=\'{{ $formId }}\']')?.remove()"
-  {{- end }}
+  {{-
+  end
+  }}
 ></script>
 
-{{- /* Include base styles if not already included */ -}}
-{{- if not (.Page.Scratch.Get "emma-styles-loaded") -}}
-  {{- .Page.Scratch.Set "emma-styles-loaded" true -}}
-  <style>
-    .emma-form-wrapper {
-      margin: 2rem 0;
+{{- /* Include base styles if not already included */ -}} {{- if not
+(.Page.Scratch.Get "emma-styles-loaded") -}} {{- .Page.Scratch.Set
+"emma-styles-loaded" true -}}
+<style>
+  .emma-form-wrapper {
+    margin: 2rem 0;
+  }
+
+  .emma-form-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+  }
+
+  .emma-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: emma-spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes emma-spin {
+    0% {
+      transform: rotate(0deg);
     }
-    
-    .emma-form-loading {
-      text-align: center;
-      padding: 2rem;
-      color: #666;
+    100% {
+      transform: rotate(360deg);
     }
-    
-    .emma-spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #3498db;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: emma-spin 1s linear infinite;
-      margin: 0 auto 1rem;
-    }
-    
-    @keyframes emma-spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .emma-form-noscript {
-      padding: 1.5rem;
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 4px;
-      color: #856404;
-    }
-    
-    .emma-form-container {
-      min-height: 200px;
-    }
-  </style>
+  }
+
+  .emma-form-noscript {
+    padding: 1.5rem;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    color: #856404;
+  }
+
+  .emma-form-container {
+    min-height: 200px;
+  }
+</style>
 {{- end -}}
 ```
 
@@ -264,7 +267,7 @@ Use the `class` parameter for form-specific styles:
 
 ```css
 .hero-form .emma-form-container {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
 }
 ```
@@ -276,9 +279,8 @@ Use the `class` parameter for form-specific styles:
 Only show form on certain pages:
 
 ```html
-{{- if .Params.showContactForm -}}
-  {{< embed-form "contact-form-001" >}}
-{{- end -}}
+{{- if .Params.showContactForm -}} {{< embed-form "contact-form-001" >}} {{- end
+-}}
 ```
 
 ### 7.2 Dynamic Form Selection
@@ -295,13 +297,9 @@ Choose form based on page type:
 Different forms for different languages:
 
 ```html
-{{- $formId := "" -}}
-{{- if eq .Site.Language.Lang "en" -}}
-  {{- $formId = "contact-en" -}}
-{{- else if eq .Site.Language.Lang "es" -}}
-  {{- $formId = "contact-es" -}}
-{{- end -}}
-{{< embed-form $formId >}}
+{{- $formId := "" -}} {{- if eq .Site.Language.Lang "en" -}} {{- $formId =
+"contact-en" -}} {{- else if eq .Site.Language.Lang "es" -}} {{- $formId =
+"contact-es" -}} {{- end -}} {{< embed-form $formId >}}
 ```
 
 ## 8. Troubleshooting
@@ -309,6 +307,7 @@ Different forms for different languages:
 ### 8.1 Form Not Appearing
 
 **Check:**
+
 1. Form ID is correct
 2. CDN URL is configured in `hugo.toml`
 3. Form is deployed to R2
@@ -320,13 +319,17 @@ Different forms for different languages:
 ```html
 <!-- Add error handling -->
 <script>
-window.addEventListener('error', function(e) {
-  if (e.filename && e.filename.includes('emma')) {
-    console.error('Emma form failed to load:', e.message);
-    document.querySelector('[data-emma-form-wrapper]').innerHTML = 
-      '<p style="color: red;">Form could not be loaded. Please refresh the page.</p>';
-  }
-}, true);
+  window.addEventListener(
+    'error',
+    function (e) {
+      if (e.filename && e.filename.includes('emma')) {
+        console.error('Emma form failed to load:', e.message);
+        document.querySelector('[data-emma-form-wrapper]').innerHTML =
+          '<p style="color: red;">Form could not be loaded. Please refresh the page.</p>';
+      }
+    },
+    true
+  );
 </script>
 ```
 
@@ -346,32 +349,32 @@ headers.set('Access-Control-Allow-Methods', 'GET');
 Load forms only when they scroll into view:
 
 ```html
-<div 
+<div
   id="embeddable-form-{{ $formId }}"
   data-form-lazy="{{ $formId }}"
   data-cdn-url="{{ $cdnUrl }}"
 ></div>
 
 <script>
-if ('IntersectionObserver' in window) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const formId = entry.target.dataset.formLazy;
-        const cdnUrl = entry.target.dataset.cdnUrl;
-        const script = document.createElement('script');
-        script.src = `${cdnUrl}/${formId}.js`;
-        script.async = true;
-        document.head.appendChild(script);
-        observer.unobserve(entry.target);
-      }
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const formId = entry.target.dataset.formLazy;
+          const cdnUrl = entry.target.dataset.cdnUrl;
+          const script = document.createElement('script');
+          script.src = `${cdnUrl}/${formId}.js`;
+          script.async = true;
+          document.head.appendChild(script);
+          observer.unobserve(entry.target);
+        }
+      });
     });
-  });
-  
-  document.querySelectorAll('[data-form-lazy]').forEach(el => {
-    observer.observe(el);
-  });
-}
+
+    document.querySelectorAll('[data-form-lazy]').forEach((el) => {
+      observer.observe(el);
+    });
+  }
 </script>
 ```
 
@@ -380,7 +383,7 @@ if ('IntersectionObserver' in window) {
 For forms above the fold:
 
 ```html
-<link rel="preload" as="script" href="{{ $cdnUrl }}/{{ $formId }}.js">
+<link rel="preload" as="script" href="{{ $cdnUrl }}/{{ $formId }}.js" />
 ```
 
 ## 10. Testing
@@ -412,6 +415,7 @@ hugo --printI18nWarnings --printPathWarnings
 ### 11.1 From Other Form Solutions
 
 **From Formspree:**
+
 ```markdown
 <!-- Before -->
 <form action="https://formspree.io/f/xyz">
@@ -419,10 +423,12 @@ hugo --printI18nWarnings --printPathWarnings
 </form>
 
 <!-- After -->
+
 {{< embed-form "contact-form-001" >}}
 ```
 
 **From Netlify Forms:**
+
 ```markdown
 <!-- Before -->
 <form name="contact" netlify>
@@ -430,6 +436,7 @@ hugo --printI18nWarnings --printPathWarnings
 </form>
 
 <!-- After -->
+
 {{< embed-form "contact-form-001" >}}
 ```
 

@@ -1,23 +1,19 @@
 {
   "image": "mcr.microsoft.com/devcontainers/universal:2.9.0",
-	"features": {
-		"ghcr.io/devcontainers/features/hugo:1": {
-      		"version": "0.136.0",
-			"extended": true
-		},
-		"ghcr.io/devcontainers-contrib/features/actionlint:1": {},
-		"ghcr.io/devcontainers-contrib/features/gh-cli:1": {}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"eliostruyf.vscode-front-matter"
-			]
-		}
-	},
-  "runArgs": [
-    "--env-file", ".devcontainer/.env"
-  ],
+  "features": {
+    "ghcr.io/devcontainers/features/hugo:1": {
+      "version": "0.136.0",
+      "extended": true
+    },
+    "ghcr.io/devcontainers-contrib/features/actionlint:1": {},
+    "ghcr.io/devcontainers-contrib/features/gh-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["eliostruyf.vscode-front-matter"]
+    }
+  },
+  "runArgs": ["--env-file", ".devcontainer/.env"],
   "onCreateCommand": [],
   "postStartCommand": {
     "submodule": "git submodule update --init --recursive",

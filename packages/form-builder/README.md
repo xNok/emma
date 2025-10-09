@@ -5,6 +5,7 @@ Terminal User Interface for creating and managing embeddable forms.
 ## Overview
 
 The Form Builder is a command-line application that allows developers to:
+
 - Create form schemas interactively
 - Apply themes and styling
 - Build form JavaScript bundles

@@ -1,6 +1,7 @@
 # Cloudflare Infrastructure Setup
 
 **Related Documents:**
+
 - [00-mvp-embeddable-forms.md](../00-mvp-embeddable-forms.md)
 - [02-technical-architecture.md](../02-technical-architecture.md)
 
@@ -10,12 +11,12 @@ Emma uses Cloudflare's edge computing platform for hosting, data storage, and AP
 
 ### Services Used
 
-| Service | Purpose | Pricing Tier |
-|---------|---------|-------------|
-| Cloudflare R2 | Store static form JS bundles | Free tier (10GB storage) |
-| Cloudflare Workers | API endpoint for submissions | Free tier (100k requests/day) |
-| Cloudflare D1 | SQLite database for submissions | Free tier (5GB storage) |
-| Cloudflare Pages | Optional: Host form builder dashboard | Free tier |
+| Service            | Purpose                               | Pricing Tier                  |
+| ------------------ | ------------------------------------- | ----------------------------- |
+| Cloudflare R2      | Store static form JS bundles          | Free tier (10GB storage)      |
+| Cloudflare Workers | API endpoint for submissions          | Free tier (100k requests/day) |
+| Cloudflare D1      | SQLite database for submissions       | Free tier (5GB storage)       |
+| Cloudflare Pages   | Optional: Host form builder dashboard | Free tier                     |
 
 ## 2. Prerequisites
 
@@ -34,7 +35,7 @@ Create an API token with the following permissions:
 Token Name: Emma Form Builder
 Permissions:
   - Account - Workers R2 Storage:Edit
-  - Account - Workers Scripts:Edit  
+  - Account - Workers Scripts:Edit
   - Account - D1:Edit
   - Zone - Workers Routes:Edit (if using custom domain)
 
@@ -65,6 +66,7 @@ npx wrangler r2 bucket create emma-forms
 R2 buckets are private by default. To serve form JS bundles publicly:
 
 **Option A: R2 Custom Domain**
+
 ```bash
 # Add custom domain to R2 bucket
 # Dashboard: R2 → emma-forms → Settings → Public access
@@ -81,29 +83,30 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const key = url.pathname.slice(1); // Remove leading slash
-    
+
     // Only allow .js files
     if (!key.endsWith('.js')) {
       return new Response('Not Found', { status: 404 });
     }
-    
+
     const object = await env.FORMS_BUCKET.get(key);
-    
+
     if (!object) {
       return new Response('Form not found', { status: 404 });
     }
-    
+
     const headers = new Headers();
     headers.set('Content-Type', 'application/javascript');
     headers.set('Cache-Control', 'public, max-age=31536000'); // 1 year
     headers.set('Access-Control-Allow-Origin', '*'); // CORS for embedding
-    
+
     return new Response(object.body, { headers });
-  }
+  },
 };
 ```
 
 **wrangler.toml:**
+
 ```toml
 name = "emma-forms-cdn"
 main = "workers/r2-proxy.ts"
@@ -194,7 +197,7 @@ CREATE TABLE metadata (
 );
 
 -- Insert initial metadata
-INSERT INTO metadata (key, value, updated_at) VALUES 
+INSERT INTO metadata (key, value, updated_at) VALUES
   ('schema_version', '1', strftime('%s', 'now')),
   ('created_at', strftime('%s', 'now'), strftime('%s', 'now'));
 ```
@@ -226,10 +229,10 @@ VALUES (?, ?, ?, ?, ?);
 SELECT schema FROM forms WHERE id = ? AND active = 1;
 
 -- Get submissions for a form (paginated)
-SELECT id, data, meta, status, created_at 
-FROM submissions 
-WHERE form_id = ? 
-ORDER BY created_at DESC 
+SELECT id, data, meta, status, created_at
+FROM submissions
+WHERE form_id = ?
+ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
 -- Count submissions by form
@@ -244,6 +247,7 @@ UPDATE forms SET submission_count = submission_count + 1 WHERE id = ?;
 ### 5.1 Submission API Worker
 
 **wrangler.toml:**
+
 ```toml
 name = "emma-api"
 main = "workers/api/index.ts"
@@ -269,7 +273,7 @@ zone_name = "yourdomain.com"
 [env.development]
 vars = { ENVIRONMENT = "development" }
 
-# Production settings  
+# Production settings
 [env.production]
 vars = { ENVIRONMENT = "production" }
 ```
@@ -287,6 +291,7 @@ npx wrangler secret put API_SECRET_KEY
 ```
 
 **Required Secrets:**
+
 - `API_SECRET_KEY`: For authenticating TUI deployments
 - `WEBHOOK_SECRET`: (Optional) For notification webhooks
 
@@ -296,23 +301,20 @@ Implement rate limiting using Durable Objects or KV:
 
 ```typescript
 // Simple rate limiting with KV
-export async function checkRateLimit(
-  env: Env, 
-  ip: string
-): Promise<boolean> {
+export async function checkRateLimit(env: Env, ip: string): Promise<boolean> {
   const key = `ratelimit:${ip}`;
   const current = await env.KV.get(key);
-  
+
   if (!current) {
     await env.KV.put(key, '1', { expirationTtl: 60 });
     return true;
   }
-  
+
   const count = parseInt(current);
   if (count >= 5) {
     return false; // Rate limit exceeded
   }
-  
+
   await env.KV.put(key, String(count + 1), { expirationTtl: 60 });
   return true;
 }
@@ -351,6 +353,7 @@ Setup:
 ### 7.1 Workers Analytics
 
 Access via Dashboard:
+
 - Workers & Pages → Analytics & Logs
 - Metrics: Requests, errors, CPU time, duration
 
@@ -374,7 +377,7 @@ npx wrangler tail emma-api > logs.txt
 npx wrangler d1 info emma-submissions
 
 # Query metrics
-SELECT 
+SELECT
   form_id,
   COUNT(*) as submissions,
   MIN(created_at) as first_submission,
@@ -386,11 +389,13 @@ GROUP BY form_id;
 ## 8. Cost Estimation
 
 **Free Tier Limits:**
+
 - Workers: 100,000 requests/day
 - D1: 5 million reads/day, 100k writes/day
 - R2: 10GB storage, 1 million Class A operations/month
 
 **Estimated Usage (1000 submissions/day):**
+
 - Workers requests: ~1,000/day (well under limit)
 - D1 writes: ~1,000/day (well under limit)
 - R2 storage: ~100MB for 1000 forms (under limit)
