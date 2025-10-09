@@ -15,7 +15,9 @@ export function buildCommand(config: EmmaConfig): Command {
     .option('-w, --watch', 'Watch for changes and rebuild')
     .action(async (formId: string, options) => {
       if (!config.isInitialized()) {
-        console.log(chalk.red('Emma is not initialized. Run "emma init" first.'));
+        console.log(
+          chalk.red('Emma is not initialized. Run "emma init" first.')
+        );
         return;
       }
 
@@ -31,7 +33,7 @@ export function buildCommand(config: EmmaConfig): Command {
       try {
         const result = await builder.build(formId, schema);
         spinner.succeed('Form bundle built successfully');
-        
+
         console.log('');
         console.log(chalk.cyan('Build results:'));
         console.log(`  Bundle: ${result.bundlePath}`);
@@ -44,8 +46,10 @@ export function buildCommand(config: EmmaConfig): Command {
 
         if (options.watch) {
           console.log('');
-          console.log(chalk.yellow('👀 Watching for changes... (Press Ctrl+C to stop)'));
-          
+          console.log(
+            chalk.yellow('👀 Watching for changes... (Press Ctrl+C to stop)')
+          );
+
           // TODO: Implement file watching
           console.log(chalk.dim('Watch mode not yet implemented'));
         }

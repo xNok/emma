@@ -14,7 +14,9 @@ export function deleteCommand(config: EmmaConfig): Command {
     .option('-f, --force', 'Skip confirmation prompt')
     .action(async (formId: string, options) => {
       if (!config.isInitialized()) {
-        console.log(chalk.red('Emma is not initialized. Run "emma init" first.'));
+        console.log(
+          chalk.red('Emma is not initialized. Run "emma init" first.')
+        );
         return;
       }
 

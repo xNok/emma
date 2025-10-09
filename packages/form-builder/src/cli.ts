@@ -51,7 +51,10 @@ async function main() {
 
     await program.parseAsync();
   } catch (error) {
-    console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
+    console.error(
+      chalk.red('Error:'),
+      error instanceof Error ? error.message : error
+    );
     process.exit(1);
   }
 }

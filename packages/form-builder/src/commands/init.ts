@@ -37,7 +37,8 @@ export function initCommand(config: EmmaConfig): Command {
           name: 'defaultTheme',
           message: 'Default theme for new forms:',
           default: config.get('defaultTheme'),
-          validate: (input: string) => input.trim().length > 0 || 'Theme name is required',
+          validate: (input: string) =>
+            input.trim().length > 0 || 'Theme name is required',
         },
         {
           type: 'number',
@@ -56,7 +57,8 @@ export function initCommand(config: EmmaConfig): Command {
           name: 'localServerHost',
           message: 'Local server host:',
           default: config.get('localServerHost'),
-          validate: (input: string) => input.trim().length > 0 || 'Host is required',
+          validate: (input: string) =>
+            input.trim().length > 0 || 'Host is required',
         },
       ]);
 
@@ -75,7 +77,9 @@ export function initCommand(config: EmmaConfig): Command {
       console.log(`  Forms directory: ${config.getFormsDir()}`);
       console.log(`  Builds directory: ${config.getBuildsDir()}`);
       console.log(`  Default theme: ${config.get('defaultTheme')}`);
-      console.log(`  Local server: http://${config.get('localServerHost')}:${config.get('localServerPort')}`);
+      console.log(
+        `  Local server: http://${config.get('localServerHost')}:${config.get('localServerPort')}`
+      );
       console.log('');
       console.log(chalk.cyan('Next steps:'));
       console.log('  $ emma create my-first-form');

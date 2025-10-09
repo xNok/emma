@@ -12,7 +12,9 @@ export function listCommand(config: EmmaConfig): Command {
     .option('-d, --detailed', 'Show detailed information')
     .action(async (options) => {
       if (!config.isInitialized()) {
-        console.log(chalk.red('Emma is not initialized. Run "emma init" first.'));
+        console.log(
+          chalk.red('Emma is not initialized. Run "emma init" first.')
+        );
         return;
       }
 

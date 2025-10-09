@@ -17,17 +17,8 @@ graph TB
         TUI --> |builds & uploads| R2[Cloudflare R2]
     end
 
-    subgraph Runtime
-        HUGO[Hugo Website] --> |renders shortcode| DIV[Form Container DIV]
-        DIV --> |loads| R2
-        R2 --> |serves| JS[Form Renderer JS]
-        JS --> |renders| FORM[Interactive Form]
         FORM --> |submits data| WORKER[Cloudflare Worker API]
         WORKER --> |validates & stores| D1[Cloudflare D1 Database]
-    end
-
-    subgraph Visitor Experience
-        USER[Website Visitor]
         USER --> |visits| HUGO
         USER --> |fills & submits| FORM
     end
@@ -45,18 +36,29 @@ graph TB
 
 **Key Responsibilities:**
 
-- Interactive form schema creation
-- Theme selection and customization
-- Form validation rules configuration
-- Build process orchestration
-- Deployment to Cloudflare R2
 
 **Technology:**
 
-- TypeScript
-- Ink or Inquirer.js for TUI
-- Commander.js for CLI commands
-- Cloudflare API SDK
+
+**Commands:**
+**Technology:**
+- TypeScript with ES2022 modules
+- Inquirer.js for interactive prompts
+- Commander.js for CLI commands  
+- Express.js for local development server
+- fs-extra for file operations
+- js-yaml for schema storage
+
+**Implementation Status:** ✅ **COMPLETE** (Local Development Ready)
+
+**Local Development Features:**
+- Form storage in `~/.emma/` directory (YAML format)
+- JavaScript bundle generation with embedded schemas
+- Local Express.js server for testing
+- Form preview pages with live testing
+- API endpoints for form submissions
+- Honeypot spam protection
+- Support for all 13 field types with validation
 
 **Commands:**
 
@@ -68,6 +70,15 @@ emma deploy <form-id>        # Deploy to Cloudflare R2
 emma list                    # List all forms
 emma preview <form-id>       # Local preview
 emma delete <form-id>        # Delete a form
+```
+```bash
+emma init                    # Initialize Emma configuration  
+emma create <form-name>      # Create a new form interactively
+emma build <form-id>         # Build form JavaScript bundle
+emma deploy <form-id>        # Deploy to local development server
+emma list [--detailed]       # List all forms
+emma preview <form-id>       # Open form preview in browser
+emma delete <form-id>        # Delete a form and build artifacts
 ```
 
 **Form Schema Structure:**

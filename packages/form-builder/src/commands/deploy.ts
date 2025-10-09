@@ -10,13 +10,17 @@ import { LocalDeployment } from '../local-deployment.js';
 
 export function deployCommand(config: EmmaConfig): Command {
   return new Command('deploy')
-    .description('Deploy form to local server (simulates production deployment)')
+    .description(
+      'Deploy form to local server (simulates production deployment)'
+    )
     .argument('<form-id>', 'Form ID to deploy')
     .option('-p, --port <port>', 'Override default port')
     .option('-h, --host <host>', 'Override default host')
     .action(async (formId: string, options) => {
       if (!config.isInitialized()) {
-        console.log(chalk.red('Emma is not initialized. Run "emma init" first.'));
+        console.log(
+          chalk.red('Emma is not initialized. Run "emma init" first.')
+        );
         return;
       }
 
@@ -34,9 +38,9 @@ export function deployCommand(config: EmmaConfig): Command {
         const port = options.port || config.get('localServerPort');
 
         const result = await deployment.deploy(formId, { host, port });
-        
+
         spinner.succeed('Form deployed successfully');
-        
+
         console.log('');
         console.log(chalk.green('🚀 Deployment complete!'));
         console.log('');
@@ -50,7 +54,11 @@ export function deployCommand(config: EmmaConfig): Command {
         console.log(`  {{< embed-form "${formId}" >}}`);
         console.log('');
         console.log(chalk.dim('💡 This is a local deployment simulation.'));
-        console.log(chalk.dim('   In production, forms would be deployed to Cloudflare Edge.'));
+        console.log(
+          chalk.dim(
+            '   In production, forms would be deployed to Cloudflare Edge.'
+          )
+        );
         console.log('');
         console.log(chalk.cyan('Next steps:'));
         console.log(`  $ emma preview ${formId}  # Open form in browser`);

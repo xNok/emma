@@ -29,7 +29,10 @@ export class LocalDeployment {
   /**
    * Deploy a form to local server
    */
-  async deploy(formId: string, options: DeploymentOptions): Promise<DeploymentResult> {
+  async deploy(
+    formId: string,
+    options: DeploymentOptions
+  ): Promise<DeploymentResult> {
     const schema = await this.config.loadFormSchema(formId);
     if (!schema) {
       throw new Error(`Form schema not found: ${formId}`);
@@ -38,7 +41,7 @@ export class LocalDeployment {
     // Build form if not already built
     const buildPath = this.config.getBuildPath(formId);
     const bundlePath = path.join(buildPath, 'form.js');
-    
+
     if (!(await fs.pathExists(bundlePath))) {
       const builder = new FormBuilder(this.config);
       await builder.build(formId, schema);
@@ -61,7 +64,10 @@ export class LocalDeployment {
   /**
    * Ensure form is deployed (build and deploy if needed)
    */
-  async ensureDeployed(formId: string, options: DeploymentOptions): Promise<DeploymentResult> {
+  async ensureDeployed(
+    formId: string,
+    options: DeploymentOptions
+  ): Promise<DeploymentResult> {
     return this.deploy(formId, options);
   }
 
@@ -86,19 +92,21 @@ export class LocalDeployment {
    */
   private async startServer(options: DeploymentOptions): Promise<void> {
     this.app = express();
-    
+
     // Middleware
     this.app.use(express.json());
-    this.app.use(express.static(path.join(__dirname, '../../../form-renderer/themes')));
+    this.app.use(
+      express.static(path.join(__dirname, '../../../form-renderer/themes'))
+    );
 
     // Serve form builds
     const buildsDir = this.config.getBuildsDir();
-    
+
     // Form preview pages
     this.app.get('/forms/:formId', async (req, res) => {
       const formId = req.params.formId;
       const indexPath = path.join(buildsDir, formId, 'index.html');
-      
+
       if (await fs.pathExists(indexPath)) {
         res.sendFile(indexPath);
       } else {
@@ -114,7 +122,7 @@ export class LocalDeployment {
     this.app.get('/forms/:formId/form.js', async (req, res) => {
       const formId = req.params.formId;
       const bundlePath = path.join(buildsDir, formId, 'form.js');
-      
+
       if (await fs.pathExists(bundlePath)) {
         res.type('application/javascript').sendFile(bundlePath);
       } else {
@@ -125,7 +133,11 @@ export class LocalDeployment {
     // Theme CSS files
     this.app.get('/themes/:theme.css', (req, res) => {
       const theme = req.params.theme;
-      const themePath = path.join(__dirname, '../../../form-renderer/themes', `${theme}.css`);
+      const themePath = path.join(
+        __dirname,
+        '../../../form-renderer/themes',
+        `${theme}.css`
+      );
       res.sendFile(themePath);
     });
 
@@ -139,7 +151,7 @@ export class LocalDeployment {
       console.log('Meta:', meta);
 
       // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Basic honeypot check
       const schema = await this.config.loadFormSchema(formId);
@@ -174,14 +186,21 @@ export class LocalDeployment {
     // Root page with form listing
     this.app.get('/', async (_req, res) => {
       const formIds = await this.config.listFormSchemas();
-      
+
       let formsList = '';
       if (formIds.length > 0) {
-        formsList = '<ul>' + formIds.map(id => 
-          `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/form.js">Bundle</a></li>`
-        ).join('') + '</ul>';
+        formsList =
+          '<ul>' +
+          formIds
+            .map(
+              (id) =>
+                `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/form.js">Bundle</a></li>`
+            )
+            .join('') +
+          '</ul>';
       } else {
-        formsList = '<p><em>No forms available. Create one with <code>emma create my-form</code></em></p>';
+        formsList =
+          '<p><em>No forms available. Create one with <code>emma create my-form</code></em></p>';
       }
 
       res.send(`

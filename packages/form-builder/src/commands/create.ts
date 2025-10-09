@@ -6,28 +6,57 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import type { EmmaConfig } from '../config.js';
-import type { FormSchema, FormField, FieldType, ValidationRules } from '@emma/shared/types';
+import type {
+  FormSchema,
+  FormField,
+  FieldType,
+  ValidationRules,
+} from '@emma/shared/types';
 
 // Available field types
 const FIELD_TYPES: { name: string; value: FieldType; description: string }[] = [
   { name: 'Text Input', value: 'text', description: 'Single-line text field' },
-  { name: 'Email', value: 'email', description: 'Email address with validation' },
+  {
+    name: 'Email',
+    value: 'email',
+    description: 'Email address with validation',
+  },
   { name: 'Textarea', value: 'textarea', description: 'Multi-line text field' },
   { name: 'Number', value: 'number', description: 'Numeric input' },
   { name: 'Phone', value: 'tel', description: 'Phone number' },
   { name: 'URL', value: 'url', description: 'Website URL' },
-  { name: 'Select Dropdown', value: 'select', description: 'Dropdown selection' },
-  { name: 'Radio Buttons', value: 'radio', description: 'Single choice from options' },
+  {
+    name: 'Select Dropdown',
+    value: 'select',
+    description: 'Dropdown selection',
+  },
+  {
+    name: 'Radio Buttons',
+    value: 'radio',
+    description: 'Single choice from options',
+  },
   { name: 'Checkboxes', value: 'checkbox', description: 'Multiple selections' },
   { name: 'Date', value: 'date', description: 'Date picker' },
   { name: 'Time', value: 'time', description: 'Time picker' },
-  { name: 'Date & Time', value: 'datetime-local', description: 'Date and time picker' },
-  { name: 'Hidden Field', value: 'hidden', description: 'Hidden value (for tracking)' },
+  {
+    name: 'Date & Time',
+    value: 'datetime-local',
+    description: 'Date and time picker',
+  },
+  {
+    name: 'Hidden Field',
+    value: 'hidden',
+    description: 'Hidden value (for tracking)',
+  },
 ];
 
 const THEMES = [
   { name: 'Default', value: 'default', description: 'Clean, modern styling' },
-  { name: 'Minimal', value: 'minimal', description: 'Minimal, borderless design' },
+  {
+    name: 'Minimal',
+    value: 'minimal',
+    description: 'Minimal, borderless design',
+  },
 ];
 
 export function createCommand(config: EmmaConfig): Command {
@@ -36,7 +65,9 @@ export function createCommand(config: EmmaConfig): Command {
     .argument('[form-name]', 'Base name for the form')
     .action(async (formName?: string) => {
       if (!config.isInitialized()) {
-        console.log(chalk.red('Emma is not initialized. Run "emma init" first.'));
+        console.log(
+          chalk.red('Emma is not initialized. Run "emma init" first.')
+        );
         return;
       }
 
@@ -50,7 +81,8 @@ export function createCommand(config: EmmaConfig): Command {
           name: 'formName',
           message: 'Form display name:',
           default: formName || 'My Form',
-          validate: (input: string) => input.trim().length > 0 || 'Form name is required',
+          validate: (input: string) =>
+            input.trim().length > 0 || 'Form name is required',
         },
         {
           type: 'list',
@@ -74,13 +106,17 @@ export function createCommand(config: EmmaConfig): Command {
       ]);
 
       // Generate unique form ID
-      const baseId = formName || basicInfo.formName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const baseId =
+        formName ||
+        basicInfo.formName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const timestamp = Date.now().toString().slice(-3);
       const formId = `${baseId}-${timestamp}`;
 
       console.log('');
       console.log(chalk.cyan('📋 Adding form fields...'));
-      console.log(chalk.dim('Tip: Press Enter without selecting a field type when done'));
+      console.log(
+        chalk.dim('Tip: Press Enter without selecting a field type when done')
+      );
       console.log('');
 
       const fields: FormField[] = [];
@@ -108,10 +144,15 @@ export function createCommand(config: EmmaConfig): Command {
           continue;
         }
 
-        const field = await createField(fieldType as FieldType, fields.length + 1);
+        const field = await createField(
+          fieldType as FieldType,
+          fields.length + 1
+        );
         fields.push(field);
 
-        console.log(chalk.green(`✅ Added field: ${field.label} (${field.type})`));
+        console.log(
+          chalk.green(`✅ Added field: ${field.label} (${field.type})`)
+        );
       }
 
       if (fields.length === 0) {
@@ -140,7 +181,8 @@ export function createCommand(config: EmmaConfig): Command {
         settings: {
           submitButtonText: basicInfo.submitButtonText,
           successMessage: basicInfo.successMessage,
-          errorMessage: 'There was an error submitting your form. Please try again.',
+          errorMessage:
+            'There was an error submitting your form. Please try again.',
           honeypot: {
             enabled: enableHoneypot,
             fieldName: 'website', // Common honeypot field name
@@ -151,7 +193,7 @@ export function createCommand(config: EmmaConfig): Command {
       // Save form schema
       try {
         await config.saveFormSchema(formId, schema);
-        
+
         console.log('');
         console.log(chalk.green('🎉 Form created successfully!'));
         console.log('');
@@ -165,7 +207,6 @@ export function createCommand(config: EmmaConfig): Command {
         console.log(`  $ emma build ${formId}      # Build the form bundle`);
         console.log(`  $ emma deploy ${formId}     # Deploy to local server`);
         console.log(`  $ emma preview ${formId}    # Open in browser`);
-        
       } catch (error) {
         console.log(chalk.red(`Error saving form: ${error}`));
         process.exit(1);
@@ -173,21 +214,28 @@ export function createCommand(config: EmmaConfig): Command {
     });
 }
 
-async function createField(type: FieldType, fieldNumber: number): Promise<FormField> {
+async function createField(
+  type: FieldType,
+  fieldNumber: number
+): Promise<FormField> {
   const basePrompts = [
     {
       type: 'input',
       name: 'label',
       message: 'Field label:',
       default: `Field ${fieldNumber}`,
-      validate: (input: string) => input.trim().length > 0 || 'Label is required',
+      validate: (input: string) =>
+        input.trim().length > 0 || 'Label is required',
     },
     {
       type: 'input',
       name: 'id',
       message: 'Field ID:',
-      default: (answers: any) => answers.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
-      validate: (input: string) => /^[a-z][a-z0-9_]*$/.test(input) || 'ID must start with letter and contain only letters, numbers, and underscores',
+      default: (answers: any) =>
+        answers.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+      validate: (input: string) =>
+        /^[a-z][a-z0-9_]*$/.test(input) ||
+        'ID must start with letter and contain only letters, numbers, and underscores',
     },
   ];
 
@@ -229,7 +277,8 @@ async function createField(type: FieldType, fieldNumber: number): Promise<FormFi
           name: 'rows',
           message: 'Number of rows:',
           default: 4,
-          validate: (input: number) => input > 0 || 'Rows must be greater than 0',
+          validate: (input: number) =>
+            input > 0 || 'Rows must be greater than 0',
         },
       ]);
       field.rows = textareaAnswers.rows;
@@ -248,7 +297,8 @@ async function createField(type: FieldType, fieldNumber: number): Promise<FormFi
           type: 'input',
           name: 'defaultValue',
           message: 'Hidden value:',
-          validate: (input: string) => input.trim().length > 0 || 'Value is required for hidden fields',
+          validate: (input: string) =>
+            input.trim().length > 0 || 'Value is required for hidden fields',
         },
       ]);
       field.defaultValue = hiddenAnswers.defaultValue;
@@ -268,10 +318,15 @@ async function createField(type: FieldType, fieldNumber: number): Promise<FormFi
 
 async function createFieldOptions() {
   const options = [];
-  console.log(chalk.dim('Add options (press Enter with empty value when done):'));
+  console.log(
+    chalk.dim('Add options (press Enter with empty value when done):')
+  );
 
   while (true) {
-    const { optionValue, optionLabel }: { optionValue: string; optionLabel?: string } = await inquirer.prompt([
+    const {
+      optionValue,
+      optionLabel,
+    }: { optionValue: string; optionLabel?: string } = await inquirer.prompt([
       {
         type: 'input',
         name: 'optionValue',
@@ -297,7 +352,9 @@ async function createFieldOptions() {
   return options;
 }
 
-async function createValidationRules(type: FieldType): Promise<ValidationRules> {
+async function createValidationRules(
+  type: FieldType
+): Promise<ValidationRules> {
   const rules: ValidationRules = {};
 
   const validationPrompts = [];
@@ -309,7 +366,8 @@ async function createValidationRules(type: FieldType): Promise<ValidationRules> 
         type: 'number',
         name: 'minLength',
         message: 'Minimum length (optional):',
-        validate: (input: number) => !input || input >= 0 || 'Must be non-negative',
+        validate: (input: number) =>
+          !input || input >= 0 || 'Must be non-negative',
       },
       {
         type: 'number',
@@ -348,8 +406,8 @@ async function createValidationRules(type: FieldType): Promise<ValidationRules> 
 
     if (addValidation) {
       const answers = await inquirer.prompt(validationPrompts);
-      
-      Object.keys(answers).forEach(key => {
+
+      Object.keys(answers).forEach((key) => {
         if (answers[key] != null && answers[key] !== '') {
           (rules as any)[key] = answers[key];
         }

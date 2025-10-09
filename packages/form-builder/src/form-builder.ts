@@ -25,7 +25,7 @@ export class FormBuilder {
 
     // Generate the form bundle JavaScript
     const bundleContent = this.generateFormBundle(schema);
-    
+
     // Write bundle file
     const bundlePath = path.join(outputDir, 'form.js');
     await fs.writeFile(bundlePath, bundleContent, 'utf8');
@@ -403,10 +403,13 @@ export class FormBuilder {
   /**
    * Copy theme assets to build directory
    */
-  private async copyThemeAssets(theme: string, outputDir: string): Promise<void> {
+  private async copyThemeAssets(
+    theme: string,
+    outputDir: string
+  ): Promise<void> {
     const themesDir = path.join(__dirname, '../../form-renderer/themes');
     const themeFile = path.join(themesDir, `${theme}.css`);
-    
+
     if (await fs.pathExists(themeFile)) {
       const themeOutputDir = path.join(outputDir, 'themes');
       await fs.ensureDir(themeOutputDir);

@@ -26,7 +26,7 @@ export class EmmaConfig {
   constructor() {
     this.configDir = path.join(os.homedir(), '.emma');
     this.configFile = path.join(this.configDir, 'config.json');
-    
+
     // Default configuration
     this.data = {
       initialized: false,
@@ -68,7 +68,7 @@ export class EmmaConfig {
     await fs.ensureDir(this.configDir);
     await fs.ensureDir(this.data.formsDirectory);
     await fs.ensureDir(this.data.buildsDirectory);
-    
+
     this.data.initialized = true;
     await this.save();
   }
@@ -137,7 +137,7 @@ export class EmmaConfig {
    */
   async loadFormSchema(formId: string): Promise<FormSchema | null> {
     const formPath = this.getFormPath(formId);
-    
+
     if (!(await fs.pathExists(formPath))) {
       return null;
     }
@@ -160,8 +160,8 @@ export class EmmaConfig {
 
     const files = await fs.readdir(this.data.formsDirectory);
     return files
-      .filter(file => file.endsWith('.yaml') || file.endsWith('.yml'))
-      .map(file => path.basename(file, path.extname(file)));
+      .filter((file) => file.endsWith('.yaml') || file.endsWith('.yml'))
+      .map((file) => path.basename(file, path.extname(file)));
   }
 
   /**
