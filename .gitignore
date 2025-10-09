@@ -62,3 +62,4 @@ temp/
 # Emma specific
 forms/*.js
 forms/*.json
+node_modules
