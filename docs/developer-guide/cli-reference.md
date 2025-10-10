@@ -332,8 +332,8 @@ When you run `emma deploy` or `emma preview`, a local Express.js server starts w
 ### Form Endpoints
 
 - `GET /forms/<form-id>` - Form preview page
-- `GET /forms/<form-id>/form.js` - JavaScript bundle
-- `GET /themes/<theme>.css` - Theme CSS
+- `GET /forms/<form-id>/<form-id>.js` - JavaScript bundle
+- `GET /forms/<form-id>/themes/<theme>.css` - Theme CSS
 
 ### API Endpoints
 
