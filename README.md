@@ -1,6 +1,6 @@
 # Emma - Embeddable Forms for Hugo
 
-**Status:** � CLI Ready - Local Development Available
+**Status:** ✅ CLI Ready - Local Development Available
 
 Emma is a system for creating, deploying, and embedding forms into Hugo websites. The CLI is now fully functional for local development and testing.
 
