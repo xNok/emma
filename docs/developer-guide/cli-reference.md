@@ -43,6 +43,7 @@ emma init
 - Default theme for new forms
 - Local server port for previews
 - Local server host
+- Optional: Configure deployment provider(s), e.g., Cloudflare R2
 
 **Example:**
 
@@ -60,6 +61,7 @@ Configuration:
   Builds directory: /home/user/.emma/builds
   Default theme: default
   Local server: http://localhost:3333
+  Cloudflare: configured (bucket: emma-forms, publicUrl: https://forms.example.com)
 ```
 
 ---
@@ -214,46 +216,70 @@ Next steps:
 
 ---
 
-### `emma deploy <form-id>`
+### `emma deploy`
 
-Deploy form to local development server.
+Deploy a form either locally (simulation) or to Cloudflare R2 using subcommands.
 
 ```bash
-emma deploy <form-id> [--port <port>] [--host <host>]
+# Default behavior: emma deploy <form-id> -> local
+emma deploy <form-id>
+
+# Explicit subcommands
+emma deploy local <form-id> [--port <port>] [--host <host>]
+emma deploy cloudflare <form-id> --bucket <name> --public-url <url> [--overwrite]
 ```
 
 **Arguments:**
 
 - `form-id` - The form ID to deploy
 
-**Options:**
+**Local Options:**
 
 - `--port`, `-p` - Override default port
 - `--host`, `-h` - Override default host
 
-**What it Does:**
+**Cloudflare Options:**
 
-- Builds form if not already built
-- Starts Express.js development server
-- Serves form preview pages and API endpoints
+- `--bucket` - R2 bucket name (e.g., `emma-forms`)
+- `--public-url` - Base public URL serving the bucket (e.g., `https://forms.example.com`)
+- `--access-key-id`, `--secret-access-key` - R2 S3 credentials (or use env `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`)
+- `--endpoint` - Custom S3 endpoint (defaults to `https://<accountId>.r2.cloudflarestorage.com`)
+- `--account-id` - Cloudflare account ID (falls back to env `CLOUDFLARE_ACCOUNT_ID`)
+- `--api-token` - Cloudflare API token (falls back to env `CLOUDFLARE_API_TOKEN`) [wrangler only]
+- `--overwrite` - Overwrite existing objects in R2
 
-**Example:**
+**Cloudflare Auth:**
+
+You can authenticate via either method:
+
+- S3 (recommended):
+
+  ```
+  export R2_ACCESS_KEY_ID=...
+  export R2_SECRET_ACCESS_KEY=...
+  # Optional if not providing --account-id or --endpoint
+  export R2_ENDPOINT=https://<accountId>.r2.cloudflarestorage.com
+  ```
+
+- Wrangler (fallback):
+  ```
+  export CLOUDFLARE_API_TOKEN=...
+  export CLOUDFLARE_ACCOUNT_ID=...
+  ```
+
+**Examples:**
 
 ```bash
-$ emma deploy contact-form-001
+# Local simulation
+emma deploy local contact-form-001
 
-✓ Form deployed successfully
+# Cloudflare R2
+emma deploy cloudflare contact-form-001 \
+  --bucket emma-forms \
+  --public-url https://forms.example.com
 
-🚀 Deployment complete!
-
-Form URL: http://localhost:3333/forms/contact-form-001
-API Endpoint: http://localhost:3333/api/submit/contact-form-001
-
-Hugo Shortcode:
-  {{< embed-form "contact-form-001" >}}
-
-💡 This is a local deployment simulation.
-   In production, forms would be deployed to Cloudflare Edge.
+If you've previously run `emma init` and configured Cloudflare, you can omit
+`--bucket` and `--public-url`. The saved values from `~/.emma/config.json` will be used.
 ```
 
 ---

@@ -11,6 +11,7 @@ export function initCommand(config: EmmaConfig): Command {
   return new Command('init')
     .description('Initialize Emma configuration')
     .action(async () => {
+      const { getDeploymentProviders } = await import('../deployment/index.js');
       console.log(chalk.cyan('🚀 Initializing Emma Forms CLI...'));
       console.log('');
 
@@ -30,8 +31,12 @@ export function initCommand(config: EmmaConfig): Command {
         }
       }
 
-      // Configuration prompts
-      const answers = (await inquirer.prompt([
+      // Core configuration prompts
+      const answers: {
+        defaultTheme: string;
+        localServerPort: number;
+        localServerHost: string;
+      } = (await inquirer.prompt([
         {
           type: 'input',
           name: 'defaultTheme',
@@ -76,6 +81,28 @@ export function initCommand(config: EmmaConfig): Command {
       config.set('localServerPort', answers.localServerPort);
       config.set('localServerHost', answers.localServerHost);
 
+      // Provider setup
+      const providers = getDeploymentProviders();
+      const providerPrompt = (await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'providerName',
+          message: 'Select a deployment provider to configure:',
+          choices: providers.map(
+            (p: { description: string; name: string }) => ({
+              name: p.description,
+              value: p.name,
+            })
+          ),
+        },
+      ])) as { providerName: string };
+      const selectedProvider = providers.find(
+        (p: { name: string }) => p.name === providerPrompt.providerName
+      );
+      if (selectedProvider?.init) {
+        await selectedProvider.init(config);
+      }
+
       // Initialize directories and save config
       await config.initialize();
 
@@ -89,6 +116,13 @@ export function initCommand(config: EmmaConfig): Command {
       console.log(
         `  Local server: http://${config.get('localServerHost')}:${config.get('localServerPort')}`
       );
+      if (
+        selectedProvider?.name &&
+        selectedProvider.name === 'cloudflare' &&
+        config.get('cloudflare')
+      ) {
+        console.log(`  Provider (cloudflare):`, config.get('cloudflare'));
+      }
       console.log('');
       console.log(chalk.cyan('Next steps:'));
       console.log('  $ emma create my-first-form');

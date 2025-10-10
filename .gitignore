@@ -65,3 +65,4 @@ forms/*.json
 node_modules
 .test-tmp/
 .emma-test*/
+.husky/

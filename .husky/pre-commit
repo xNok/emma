@@ -1,0 +1,14 @@
+# Build all packages
+yarn build
+
+# Run tests
+yarn test
+
+# Format code
+yarn format
+
+# Lint code
+yarn lint
+
+# Type check
+yarn typecheck

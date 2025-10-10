@@ -33,11 +33,35 @@ emma list
 # Build a form bundle
 emma build contact-form-001
 
-# Deploy to production
-emma deploy contact-form-001
+# Deploy locally (simulation)
+emma deploy local contact-form-001
+
+# Deploy to Cloudflare R2
+emma deploy cloudflare contact-form-001 \
+	--bucket emma-forms \
+	--public-url https://forms.example.com
 
 # Preview locally
 emma preview contact-form-001
+```
+
+### Cloudflare Authentication
+
+The deploy command uses Wrangler under the hood. Provide credentials via environment variables or flags:
+
+- CLOUDFLARE_API_TOKEN
+- CLOUDFLARE_ACCOUNT_ID
+
+You can also save defaults in your Emma config via `emma init` updates (coming soon) or by editing `~/.emma/config.json`:
+
+```
+{
+	"cloudflare": {
+		"bucket": "emma-forms",
+		"publicUrl": "https://forms.example.com",
+		"accountId": "xxxxxxxx"
+	}
+}
 ```
 
 ## Technology Stack
@@ -45,7 +69,7 @@ emma preview contact-form-001
 - TypeScript
 - Ink (React for CLI) or Inquirer.js
 - Commander.js
-- Cloudflare API SDK
+- Wrangler CLI (Cloudflare)
 - Rollup/esbuild for bundling
 
 ## Development

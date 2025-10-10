@@ -11,12 +11,14 @@
     "dev": "yarn workspaces foreach -pt run dev",
     "build": "yarn workspaces foreach -Apt run build",
     "test": "yarn workspaces foreach -Aipt run test",
+    "postinstall": "husky",
     "test:manual": "yarn workspace @emma/form-renderer exec yarn --cwd test-server dev",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
     "typecheck": "tsc --noEmit",
-    "clean": "yarn workspaces foreach -Apt run clean && rm -rf node_modules"
+    "clean": "yarn workspaces foreach -Apt run clean && rm -rf node_modules",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -25,6 +27,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.0",
+    "husky": "^9.0.11",
     "prettier": "^3.1.1",
     "typescript": "^5.9.3",
     "vitest": "^1.1.0"
