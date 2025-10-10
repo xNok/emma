@@ -46,7 +46,7 @@ export class EmmaConfig {
       if (await fs.pathExists(this.configFile)) {
         const fileData = (await fs.readJson(this.configFile)) as Record<
           string,
-          any
+          string | number | boolean
         >;
         this.data = { ...this.data, ...fileData };
       }

@@ -107,6 +107,7 @@ export class LocalDeployment {
     const buildsDir = this.config.getBuildsDir();
 
     // Serve all form assets from /forms/:formId/:asset (must come before the general form route)
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.app.get('/forms/:formId/*', async (req, res) => {
       const formId = req.params.formId;
       // Extract the asset path from the full URL
@@ -129,6 +130,7 @@ export class LocalDeployment {
     });
 
     // Form preview pages (must come after the asset route)
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.app.get('/forms/:formId', async (req, res) => {
       const formId = req.params.formId;
       const indexPath = path.join(buildsDir, formId, 'index.html');
@@ -145,9 +147,13 @@ export class LocalDeployment {
     });
 
     // API submission endpoint
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.app.post('/api/submit/:formId', async (req, res) => {
       const formId = req.params.formId;
-      const { data, meta } = req.body;
+      const { data, meta } = req.body as {
+        data: Record<string, unknown>;
+        meta: Record<string, unknown>;
+      };
 
       console.log(`📨 Form submission received for ${formId}:`);
       console.log('Data:', data);
@@ -160,7 +166,7 @@ export class LocalDeployment {
       const schema = await this.config.loadFormSchema(formId);
       if (schema?.settings?.honeypot?.enabled) {
         const honeypotField = schema.settings.honeypot.fieldName;
-        if (data[honeypotField]) {
+        if (data[honeypotField] !== undefined && data[honeypotField] !== '') {
           return res.status(400).json({
             success: false,
             error: 'Spam detected',
@@ -187,6 +193,7 @@ export class LocalDeployment {
     });
 
     // Root page with form listing
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.app.get('/', async (_req, res) => {
       const formIds = await this.config.listFormSchemas();
 
@@ -253,12 +260,13 @@ export class LocalDeployment {
 
     // Start server
     return new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.server = this.app!.listen(options.port, options.host, () => {
         this.currentPort = options.port;
         resolve();
       });
 
-      this.server.on('error', (error: any) => {
+      this.server.on('error', (error: NodeJS.ErrnoException) => {
         if (error.code === 'EADDRINUSE') {
           reject(new Error(`Port ${options.port} is already in use`));
         } else {
@@ -274,6 +282,7 @@ export class LocalDeployment {
   async stopServer(): Promise<void> {
     if (this.server) {
       return new Promise((resolve) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.server!.close(() => {
           this.server = null;
           this.currentPort = null;

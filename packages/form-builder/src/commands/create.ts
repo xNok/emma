@@ -13,6 +13,15 @@ import type {
   ValidationRules,
 } from '@emma/shared/types';
 
+interface InquirerPrompt {
+  type: string;
+  name: string;
+  message: string;
+  default?: unknown;
+  validate?: (input: string) => boolean | string;
+  choices?: (string | { name: string; value: string })[];
+}
+
 interface BasicFormInfo {
   formName: string;
   theme: string;
@@ -36,10 +45,6 @@ interface TextareaAnswer extends FieldAnswer {
 
 interface SelectAnswer extends FieldAnswer {
   defaultValue?: string;
-}
-
-interface InquirerAnswer {
-  [key: string]: any;
 }
 
 // Available field types
@@ -251,7 +256,7 @@ async function createField(
   type: FieldType,
   fieldNumber: number
 ): Promise<FormField> {
-  const basePrompts: any[] = [
+  const basePrompts: InquirerPrompt[] = [
     {
       type: 'input',
       name: 'label',
@@ -264,8 +269,10 @@ async function createField(
       type: 'input',
       name: 'id',
       message: 'Field ID:',
-      default: (answers: Record<string, any>) =>
-        answers.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+      default: (answers: Record<string, unknown>) => {
+        const label = answers.label as string;
+        return label.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      },
       validate: (input: string) =>
         /^[a-z][a-z0-9_]*$/.test(input) ||
         'ID must start with letter and contain only letters, numbers, and underscores',
@@ -320,10 +327,11 @@ async function createField(
 
     case 'select':
     case 'radio':
-    case 'checkbox':
+    case 'checkbox': {
       const options = await createFieldOptions();
       field.options = options;
       break;
+    }
 
     case 'hidden': {
       const hiddenAnswers = (await inquirer.prompt([
@@ -357,6 +365,7 @@ async function createFieldOptions() {
     chalk.dim('Add options (press Enter with empty value when done):')
   );
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const optionAnswers = (await inquirer.prompt([
       {
@@ -368,8 +377,9 @@ async function createFieldOptions() {
         type: 'input',
         name: 'optionLabel',
         message: 'Option label:',
-        when: (answers: Record<string, any>) => !!answers.optionValue,
-        default: (answers: Record<string, any>) => answers.optionValue,
+        when: (answers: Record<string, unknown>) => !!answers.optionValue,
+        default: (answers: Record<string, unknown>) =>
+          answers.optionValue as string,
       },
     ])) as { optionValue: string; optionLabel?: string };
 
@@ -439,12 +449,13 @@ async function createValidationRules(
     if (addValidation) {
       const answers = (await inquirer.prompt(validationPrompts)) as Record<
         string,
-        any
+        string | number | boolean
       >;
 
       Object.keys(answers).forEach((key) => {
         if (answers[key] != null && answers[key] !== '') {
-          (rules as Record<string, any>)[key] = answers[key];
+          (rules as Record<string, string | number | boolean>)[key] =
+            answers[key];
         }
       });
     }

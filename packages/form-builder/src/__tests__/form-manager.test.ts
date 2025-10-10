@@ -10,6 +10,11 @@ import { EmmaConfig } from '../config.js';
 import { FormManager } from '../form-manager.js';
 import type { FormSchema } from '@emma/shared/types';
 
+interface DeploymentService {
+  isRunning(): boolean;
+  stopServer(): Promise<void>;
+}
+
 describe('FormManager', () => {
   let testDir: string;
   let config: EmmaConfig;
@@ -45,10 +50,8 @@ describe('FormManager', () => {
     // Stop any running deployment server
     if (manager.isDeploymentRunning()) {
       // Access private deployment instance to stop server
-      const deployment = (manager as any).deployment as {
-        isRunning(): boolean;
-        stopServer(): Promise<void>;
-      };
+      const deployment = (manager as unknown as Record<string, unknown>)
+        .deployment as DeploymentService;
       if (deployment.isRunning()) {
         await deployment.stopServer();
       }
