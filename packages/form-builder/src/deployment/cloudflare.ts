@@ -142,6 +142,113 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
   name: 'cloudflare',
   description: 'Deploy to Cloudflare R2',
 
+  async init(config) {
+    // Use default import for inquirer
+    const inquirerModule = await import('inquirer');
+    const inquirer = inquirerModule.default || inquirerModule;
+    const chalk = (await import('chalk')).default;
+    console.log(chalk.cyan('\nCloudflare R2 Setup:'));
+    const { setupMode } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'setupMode',
+        message: 'How would you like to configure Cloudflare R2?',
+        choices: [
+          { name: 'Create new bucket (requires API token)', value: 'create' },
+          { name: 'Use existing bucket', value: 'existing' },
+        ],
+      },
+    ]);
+
+    let bucket = '';
+    let publicUrl = '';
+    let accountId = '';
+    // apiToken is not persisted in config
+
+    if (setupMode === 'create') {
+      // Prompt for accountId, apiToken, bucket name
+      const answers = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'accountId',
+          message: 'Cloudflare Account ID:',
+        },
+        {
+          type: 'input',
+          name: 'apiToken',
+          message: 'Cloudflare API Token (with R2 permissions):',
+        },
+        {
+          type: 'input',
+          name: 'bucket',
+          message: 'New R2 bucket name:',
+        },
+        {
+          type: 'input',
+          name: 'publicUrl',
+          message: 'Public base URL for bucket (e.g., https://forms.example.com):',
+        },
+      ]);
+      accountId = answers.accountId;
+      bucket = answers.bucket;
+      publicUrl = answers.publicUrl;
+
+      // Create bucket using wrangler CLI
+      const { spawnSync } = await import('child_process');
+      const result = spawnSync('npx', [
+        '-y',
+        'wrangler',
+        'r2',
+        'bucket',
+        'create',
+        bucket,
+      ], {
+        env: {
+          ...process.env,
+          CLOUDFLARE_ACCOUNT_ID: accountId,
+          CLOUDFLARE_API_TOKEN: answers.apiToken,
+        },
+        stdio: 'inherit',
+      });
+      if (result.status !== 0) {
+        console.log(chalk.red('Failed to create bucket. Please check credentials and try again.'));
+        return;
+      }
+      console.log(chalk.green(`Bucket "${bucket}" created successfully.`));
+    } else {
+      // Use existing bucket
+      const answers = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'bucket',
+          message: 'Existing R2 bucket name:',
+        },
+        {
+          type: 'input',
+          name: 'publicUrl',
+          message: 'Public base URL for bucket (e.g., https://forms.example.com):',
+        },
+        {
+          type: 'input',
+          name: 'accountId',
+          message: 'Cloudflare Account ID (optional):',
+        },
+      ]);
+      bucket = answers.bucket;
+      publicUrl = answers.publicUrl;
+      accountId = answers.accountId;
+    }
+
+    // Save config (apiToken is not persisted)
+    config.set('cloudflare', {
+      bucket,
+      publicUrl,
+      accountId,
+    });
+    await config.save();
+    console.log(chalk.green('\nCloudflare R2 configuration saved!'));
+  },
+
   register(parent: Command, config: EmmaConfigType) {
     parent
       .command('cloudflare')

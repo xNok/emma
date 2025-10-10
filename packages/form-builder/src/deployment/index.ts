@@ -21,6 +21,11 @@ export interface DeploymentProviderDefinition {
     formId: string,
     options: GenericProviderOptions
   ): Promise<void>;
+  /**
+   * Interactive provider setup for emma init
+   * Should prompt for resource creation or config, validate, and save config
+   */
+  init?: (config: EmmaConfig) => Promise<void>;
 }
 
 export function getDeploymentProviders(): DeploymentProviderDefinition[] {

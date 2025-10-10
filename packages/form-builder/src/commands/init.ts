@@ -11,6 +11,7 @@ export function initCommand(config: EmmaConfig): Command {
   return new Command('init')
     .description('Initialize Emma configuration')
     .action(async () => {
+      const { getDeploymentProviders } = await import('../deployment/index.js');
       console.log(chalk.cyan('🚀 Initializing Emma Forms CLI...'));
       console.log('');
 
@@ -30,7 +31,7 @@ export function initCommand(config: EmmaConfig): Command {
         }
       }
 
-      // Configuration prompts
+      // Core configuration prompts
       const answers = (await inquirer.prompt([
         {
           type: 'input',
@@ -76,6 +77,21 @@ export function initCommand(config: EmmaConfig): Command {
       config.set('localServerPort', answers.localServerPort);
       config.set('localServerHost', answers.localServerHost);
 
+      // Provider setup
+      const providers = getDeploymentProviders();
+      const { providerName } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'providerName',
+          message: 'Select a deployment provider to configure:',
+          choices: providers.map((p) => ({ name: p.description, value: p.name })),
+        },
+      ]);
+      const selectedProvider = providers.find((p) => p.name === providerName);
+      if (selectedProvider?.init) {
+        await selectedProvider.init(config);
+      }
+
       // Initialize directories and save config
       await config.initialize();
 
@@ -89,6 +105,9 @@ export function initCommand(config: EmmaConfig): Command {
       console.log(
         `  Local server: http://${config.get('localServerHost')}:${config.get('localServerPort')}`
       );
+      if (selectedProvider?.name && selectedProvider.name === 'cloudflare' && config.get('cloudflare')) {
+        console.log(`  Provider (cloudflare):`, config.get('cloudflare'));
+      }
       console.log('');
       console.log(chalk.cyan('Next steps:'));
       console.log('  $ emma create my-first-form');
