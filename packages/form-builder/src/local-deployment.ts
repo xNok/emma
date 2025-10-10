@@ -43,7 +43,7 @@ export class LocalDeployment {
 
     // Build form if not already built
     const buildPath = this.config.getBuildPath(formId);
-    const bundlePath = path.join(buildPath, 'form.js');
+    const bundlePath = path.join(buildPath, `${formId}.js`);
 
     if (!(await fs.pathExists(bundlePath))) {
       const builder = new FormBuilder(this.config);
@@ -196,7 +196,7 @@ export class LocalDeployment {
           formIds
             .map(
               (id) =>
-                `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/form.js">Bundle</a></li>`
+                `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${id}.js">Bundle</a></li>`
             )
             .join('') +
           '</ul>';

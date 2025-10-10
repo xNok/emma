@@ -162,7 +162,7 @@ describe('LocalDeployment Integration Tests', () => {
       );
 
       const jsContent = jsResponse.text;
-      expect(jsContent).toContain('EmbeddedFormRenderer');
+      expect(jsContent).toContain('window.EmmaForms.FormRenderer');
       expect(jsContent).toContain(mockFormSchema.formId);
 
       // Test theme CSS
@@ -303,8 +303,10 @@ describe('LocalDeployment Integration Tests', () => {
 
       // Check for debug links
       expect(htmlContent).toContain('Debug Assets');
-      expect(htmlContent).toContain(`/forms/${mockFormSchema.formId}/${mockFormSchema.formId}.js`);
-      expect(htmlContent).toContain(`/forms/${mockFormSchema.formId}/themes/${mockFormSchema.theme}.css`);
+      expect(htmlContent).toContain(
+        `/forms/${mockFormSchema.formId}/${mockFormSchema.formId}.js`
+      );
+      expect(htmlContent).toContain('themes/default.css');
       expect(htmlContent).toContain(mockFormSchema.apiEndpoint);
 
       // Verify debug links are clickable
@@ -334,7 +336,7 @@ describe('LocalDeployment Integration Tests', () => {
       // Should not return "Form Not Found" HTML
       const jsContent = jsResponse.text;
       expect(jsContent).not.toContain('Form Not Found');
-      expect(jsContent).toContain('EmbeddedFormRenderer');
+      expect(jsContent).toContain('window.EmmaForms.FormRenderer');
     });
   });
 

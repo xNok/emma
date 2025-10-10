@@ -80,9 +80,7 @@ describe('EmmaConfig', () => {
       expect(config.isInitialized()).toBe(true);
       expect(await fs.pathExists(config.getFormsDir())).toBe(true);
       expect(await fs.pathExists(config.getBuildsDir())).toBe(true);
-      expect(
-        await fs.pathExists(path.join(testDir, 'config.json'))
-      ).toBe(true);
+      expect(await fs.pathExists(path.join(testDir, 'config.json'))).toBe(true);
     });
   });
 

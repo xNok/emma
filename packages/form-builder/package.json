@@ -8,7 +8,7 @@
     "emma": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-templates.mjs",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
     "test": "vitest",

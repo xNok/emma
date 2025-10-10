@@ -203,7 +203,7 @@ describe('LocalDeployment', () => {
         );
 
         const js = await response.text();
-        expect(js).toContain('EmbeddedFormRenderer');
+        expect(js).toContain('window.EmmaForms.FormRenderer');
         expect(js).toContain('test-form-001');
       },
       TIMEOUT

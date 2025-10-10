@@ -114,26 +114,31 @@ describe('FormBuilder', () => {
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
       // Basic syntax check - should not throw
-      expect(() => new Function(bundleContent)).not.toThrow();
+      expect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval
+        return new Function(bundleContent);
+      }).not.toThrow();
     });
 
-    it('should include form renderer functionality', async () => {
+    it('should initialize renderer runtime', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
-      expect(bundleContent).toContain('EmbeddedFormRenderer');
-      expect(bundleContent).toContain('render');
-      expect(bundleContent).toContain('handleSubmit');
-      expect(bundleContent).toContain('renderField');
+      // Uses shared runtime
+      expect(bundleContent).toContain('window.EmmaForms.FormRenderer');
+      // Embeds schema and exposes global initializer
+      expect(bundleContent).toContain('FORM_SCHEMA');
+      expect(bundleContent).toContain("window.EmmaForm['contact-form-001']");
     });
 
-    it('should handle different field types', async () => {
+    it('should embed schema with different field types', async () => {
       const complexSchema: FormSchema = {
         ...mockSchema,
         fields: [
           { id: 'text', type: 'text', label: 'Text' },
           { id: 'email', type: 'email', label: 'Email' },
           { id: 'number', type: 'number', label: 'Number' },
+          { id: 'textarea', type: 'textarea', label: 'Text Area', rows: 5 },
           {
             id: 'select',
             type: 'select',
@@ -173,24 +178,24 @@ describe('FormBuilder', () => {
       const result = await builder.build('complex-form', complexSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
-      // Check that different field types are handled
-      expect(bundleContent).toContain('input.type = field.type');
-      expect(bundleContent).toContain("case 'textarea'");
-      expect(bundleContent).toContain("case 'select'");
-      expect(bundleContent).toContain("case 'radio'");
-      expect(bundleContent).toContain("case 'checkbox'");
+      // Check schema JSON contains various field types
+      expect(bundleContent).toContain('"type": "text"');
+      expect(bundleContent).toContain('"type": "textarea"');
+      expect(bundleContent).toContain('"type": "select"');
+      expect(bundleContent).toContain('"type": "radio"');
+      expect(bundleContent).toContain('"type": "checkbox"');
     });
 
-    it('should include honeypot protection', async () => {
+    it('should include honeypot configuration in schema', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
-      expect(bundleContent).toContain('createHoneypotField');
-      expect(bundleContent).toContain('honeypot?.enabled');
-      expect(bundleContent).toContain('website'); // Default honeypot field name
+      expect(bundleContent).toContain('"honeypot"');
+      expect(bundleContent).toContain('"enabled": true');
+      expect(bundleContent).toContain('"fieldName": "website"');
     });
 
-    it('should handle form without honeypot', async () => {
+    it('should handle form without honeypot settings', async () => {
       const schemaWithoutHoneypot: FormSchema = {
         ...mockSchema,
         settings: {
@@ -208,25 +213,24 @@ describe('FormBuilder', () => {
       );
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
-      expect(bundleContent).toContain('honeypot?.enabled');
+      expect(bundleContent).toContain('"honeypot"');
+      expect(bundleContent).toContain('"enabled": false');
     });
 
-    it('should include validation attributes', async () => {
+    it('should include validation attributes in schema', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
-      expect(bundleContent).toContain('input.required = true');
-      expect(bundleContent).toContain('input.minLength');
-      expect(bundleContent).toContain('input.maxLength');
+      expect(bundleContent).toContain('"required": true');
+      expect(bundleContent).toContain('"minLength"');
+      expect(bundleContent).toContain('"maxLength"');
     });
 
-    it('should create correct API endpoint', async () => {
+    it('should include API endpoint in schema', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
       expect(bundleContent).toContain(mockSchema.apiEndpoint);
-      expect(bundleContent).toContain('POST');
-      expect(bundleContent).toContain('application/json');
     });
   });
 
