@@ -32,7 +32,11 @@ export function initCommand(config: EmmaConfig): Command {
       }
 
       // Core configuration prompts
-      const answers = (await inquirer.prompt([
+      const answers: {
+        defaultTheme: string;
+        localServerPort: number;
+        localServerHost: string;
+      } = (await inquirer.prompt([
         {
           type: 'input',
           name: 'defaultTheme',
@@ -79,15 +83,22 @@ export function initCommand(config: EmmaConfig): Command {
 
       // Provider setup
       const providers = getDeploymentProviders();
-      const { providerName } = await inquirer.prompt([
+      const providerPrompt = (await inquirer.prompt([
         {
           type: 'list',
           name: 'providerName',
           message: 'Select a deployment provider to configure:',
-          choices: providers.map((p) => ({ name: p.description, value: p.name })),
+          choices: providers.map(
+            (p: { description: string; name: string }) => ({
+              name: p.description,
+              value: p.name,
+            })
+          ),
         },
-      ]);
-      const selectedProvider = providers.find((p) => p.name === providerName);
+      ])) as { providerName: string };
+      const selectedProvider = providers.find(
+        (p: { name: string }) => p.name === providerPrompt.providerName
+      );
       if (selectedProvider?.init) {
         await selectedProvider.init(config);
       }
@@ -105,7 +116,11 @@ export function initCommand(config: EmmaConfig): Command {
       console.log(
         `  Local server: http://${config.get('localServerHost')}:${config.get('localServerPort')}`
       );
-      if (selectedProvider?.name && selectedProvider.name === 'cloudflare' && config.get('cloudflare')) {
+      if (
+        selectedProvider?.name &&
+        selectedProvider.name === 'cloudflare' &&
+        config.get('cloudflare')
+      ) {
         console.log(`  Provider (cloudflare):`, config.get('cloudflare'));
       }
       console.log('');
