@@ -41,16 +41,21 @@ export function initCommand(config: EmmaConfig): Command {
             input.trim().length > 0 || 'Theme name is required',
         },
         {
-          type: 'number',
+          type: 'input',
           name: 'localServerPort',
           message: 'Local server port for previews:',
           default: config.get('localServerPort'),
-          validate: (input: number) => {
-            if (input < 1024 || input > 65535) {
+          validate: (input: string) => {
+            const port = parseInt(input, 10);
+            if (isNaN(port)) {
+              return 'Port must be a number';
+            }
+            if (port < 1024 || port > 65535) {
               return 'Port must be between 1024 and 65535';
             }
             return true;
           },
+          filter: (input: string) => parseInt(input, 10),
         },
         {
           type: 'input',
