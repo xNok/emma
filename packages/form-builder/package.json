@@ -1,0 +1,54 @@
+{
+  "name": "@emma/form-builder",
+  "version": "0.1.0",
+  "description": "Terminal User Interface for creating and managing embeddable forms",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "emma": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node scripts/copy-templates.mjs",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src"
+  },
+  "keywords": [
+    "forms",
+    "hugo",
+    "cli",
+    "embeddable",
+    "cloudflare"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@emma/form-renderer": "workspace:*",
+    "@emma/shared": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^9.2.12",
+    "js-yaml": "^4.1.0",
+    "open": "^9.1.0",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node-fetch": "^2.6.13",
+    "eslint": "^8.50.0",
+    "node-fetch": "^3.3.2",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -26,10 +26,10 @@ Read the latest document thoroughly. It will link to other relevant documents (l
 ### Your Responsibility
 
 - **Before you code**: Ensure you understand the requirements as laid out in the documentation.
-    - **Always read**: the highest numbered `docs/XX-.md` before starting any task.
+  - **Always read**: the highest numbered `docs/XX-.md` before starting any task.
 - **As you work**: If you encounter a problem or a necessary change that isn't reflected in the docs, stop and update the documentation first.
-- **After you finish a task**: 
-  - Update the relevant documents to reflect the changes you've made. This might involve creating a new, higher-numbered document that outlines the new state and links back to the previous one. 
+- **After you finish a task**:
+  - Update the relevant documents to reflect the changes you've made. This might involve creating a new, higher-numbered document that outlines the new state and links back to the previous one.
   - Always create a new `docs/agents-summaries/XX-task.md` file to report your accomplishments.
 
 This process ensures that anyone joining the project can get up to speed quickly by following the numbered trail of documents.

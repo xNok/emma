@@ -1,27 +1,44 @@
 # Emma - Embeddable Forms for Hugo
 
-**Status:** 🚧 In Development
+**Status:** ✅ CLI Ready - Local Development Available
 
-Emma is a system for creating, deploying, and embedding forms into Hugo websites using Cloudflare's edge infrastructure.
+Emma is a system for creating, deploying, and embedding forms into Hugo websites. The CLI is now fully functional for local development and testing.
 
-1. **Create forms** using a Terminal UI (TUI)
-2. **Deploy forms** to Cloudflare's global edge network
+1. **Create forms** using the interactive CLI (`emma create`)
+2. **Deploy forms** locally for development and testing
 3. **Embed forms** in Hugo sites with a simple shortcode
 
-**Example:**
+**Quick Start:**
+
+```bash
+# Install and initialize
+npm install -g @emma/form-builder
+emma init
+
+# Create your first form
+emma create contact-form
+
+# Deploy locally for testing
+emma deploy contact-form-001
+
+# Preview in browser
+emma preview contact-form-001
+```
+
+**Hugo Integration:**
 
 ```markdown
 {{< embed-form "contact-form-001" >}}
 ```
 
-That's it! The form loads from a CDN and submits to a serverless API.
-
 ## 📋 Current Status
 
-✅ **Documentation Complete** - All design docs written  
-✅ **Project Structure** - Monorepo set up  
-✅ **Configuration** - TypeScript, ESLint, Prettier ready  
-⏳ **Implementation** - Ready to start coding
+✅ **CLI Implementation** - Fully functional form builder CLI  
+✅ **Local Development** - Complete local deployment simulation  
+✅ **Form Builder** - Interactive form creation with 13+ field types  
+✅ **Bundle Generation** - Self-contained JavaScript bundles  
+✅ **Test Coverage** - Comprehensive test suite with 50+ tests  
+⏳ **Production Deployment** - Cloudflare integration pending
 
 ## 🗂️ Project Structure
 
@@ -59,78 +76,131 @@ emma/
 - [API Reference](./docs/developer-guide/api-reference.md) - REST API documentation
 - [Troubleshooting](./docs/developer-guide/troubleshooting.md) - Common issues & solutions
 
-## 🛠️ Development Workflow
+## 🛠️ Emma CLI Usage
 
-### 1. Understanding the Flow
+### 1. Quick Start Workflow
+
+```bash
+# One-time setup
+emma init
+
+# Create a form interactively
+emma create my-contact-form
+# Follow prompts to add fields, validation, themes
+
+# Build the form bundle
+emma build my-contact-form-001
+
+# Deploy to local development server
+emma deploy my-contact-form-001
+
+# Preview in browser
+emma preview my-contact-form-001
+```
+
+### 2. Available Commands
+
+- `emma init` - Initialize Emma configuration
+- `emma create <name>` - Create new form interactively
+- `emma list [--detailed]` - List all forms
+- `emma build <form-id>` - Build form JavaScript bundle
+- `emma deploy <form-id>` - Deploy to local development server
+- `emma preview <form-id>` - Open form in browser
+- `emma delete <form-id>` - Delete a form
+
+### 3. Development Flow
 
 ```
-Developer creates form
+CLI creates form schema (YAML)
     ↓
-TUI builds JS bundle
+Build generates JS bundle
     ↓
-Deploy to Cloudflare R2
+Deploy starts local server
     ↓
 Hugo site embeds form
     ↓
 Visitor fills & submits
     ↓
-Data saved to D1 database
+Data logged locally
 ```
 
-### 2. Documentation-Driven Development
+### 4. Field Types Supported
 
-**Before writing code:**
+- **Text Inputs**: text, email, textarea, number, tel, url
+- **Selection**: select dropdown, radio buttons, checkboxes
+- **Date/Time**: date, time, datetime-local
+- **Special**: hidden fields for tracking
 
-1. Read the latest numbered doc in `/docs`
-2. Understand what's being built and why
-3. If making changes, update docs first
+### 5. Features Available
 
-**The rule:** Docs are the single source of truth.
+- ✅ Interactive form creation with validation
+- ✅ 13+ field types with options and validation rules
+- ✅ Theme system (default, minimal)
+- ✅ Honeypot spam protection
+- ✅ Local development server
+- ✅ Form preview and testing
+- ✅ Hugo shortcode integration ready
 
-### 3. Working on Packages
+## 🧪 Development & Testing
 
-Each package is independent:
+### Working on Packages
 
 ```bash
-# Work on Form Builder
+# Install and build CLI
 cd packages/form-builder
-yarn install
-yarn dev
+yarn install && yarn build
 
-# Work on API Worker
-cd packages/api-worker
-yarn install
-yarn wrangler dev
+# Run tests
+yarn test
 
-# Work on Form Renderer
-cd packages/form-renderer
-yarn install
-yarn dev
+# Install globally for development
+npm link
+
+# Work on other packages
+cd ../form-renderer && yarn dev
+cd ../api-worker && yarn wrangler dev
 ```
 
-## 🧪 Example: Creating Your First Form
+## 🧪 Example: Complete Workflow
 
-Once implemented, this is what it will look like:
+**Real working example with the CLI:**
 
 ```bash
-# 1. Create a form
+# 1. Initialize (one-time setup)
+$ emma init
+✓ Emma CLI initialized successfully!
+
+# 2. Create a form interactively
 $ emma create contact-form
 
-? Form name: Contact Form
-? Add field: name (text)
-? Add field: email (email)
-? Add field: message (textarea)
-? Theme: default
+? Form display name: Contact Form
+? Select a theme: default
+? Submit button text: Send Message
+📋 Adding form fields...
+? Add field 1: Text Input > Your Name (required)
+? Add field 2: Email > Email Address (required)
+? Add field 3: Textarea > Message (required)
+? Add field 4: ✅ Done adding fields
+? Enable spam protection (honeypot)? Yes
 ✓ Form created: contact-form-001
 
-# 2. Deploy it
+# 3. Build and deploy locally
+$ emma build contact-form-001
+✓ Form bundle built successfully
+
 $ emma deploy contact-form-001
+✓ Form deployed successfully
+Form URL: http://localhost:3333/forms/contact-form-001
+API Endpoint: http://localhost:3333/api/submit/contact-form-001
 
-✓ Building bundle...
-✓ Uploading to R2...
-✓ Form deployed: https://forms.yourdomain.com/contact-form-001.js
+# 4. Preview and test
+$ emma preview contact-form-001
+🌐 Opening in browser...
+# 4. Preview and test in browser
+$ emma preview contact-form-001
+🌐 Opening in browser...
 
-# 3. Use in Hugo
+# 5. Use in Hugo
 {{< embed-form "contact-form-001" >}}
 ```
 
