@@ -240,9 +240,9 @@ export class LocalDeployment {
             <h2>API Endpoints</h2>
             <ul>
               <li><code>GET /forms/:formId</code> - Form preview</li>
-              <li><code>GET /forms/:formId/form.js</code> - Form bundle</li>
+              <li><code>GET /forms/:formId/:formId.js</code> - Form bundle</li>
               <li><code>POST /api/submit/:formId</code> - Form submission</li>
-              <li><code>GET /themes/:theme.css</code> - Theme CSS</li>
+              <li><code>GET /forms/:formId/themes/:theme.css</code> - Theme CSS</li>
               <li><code>GET /api/info</code> - Server info</li>
             </ul>
             
