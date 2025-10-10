@@ -68,7 +68,7 @@ describe('LocalDeployment', () => {
 
     // Save test form
     await config.saveFormSchema('test-form-001', mockSchema);
-    
+
     // Build the form (deployment now requires forms to be pre-built)
     await builder.build('test-form-001', mockSchema);
   });

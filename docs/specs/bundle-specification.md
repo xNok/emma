@@ -26,9 +26,14 @@ Emma Forms uses modern ES Modules (ESM) for both development and production depl
 The core FormRenderer class that provides form rendering capabilities.
 
 **Export:**
+
 ```javascript
-export default class FormRenderer { /* ... */ }
-export class FormRenderer { /* ... */ }
+export default class FormRenderer {
+  /* ... */
+}
+export class FormRenderer {
+  /* ... */
+}
 ```
 
 **Built by:** `@emma/form-renderer` package  
@@ -38,6 +43,7 @@ export class FormRenderer { /* ... */ }
 ### 2. Form Bundle (`<form-id>.js`)
 
 A generated ESM module specific to each form that includes:
+
 - Embedded form schema
 - Auto-initialization logic
 - Import of the runtime module
@@ -63,8 +69,10 @@ const FORM_SCHEMA = __FORM_SCHEMA__;
 
 // Auto-initialization function
 function init() {
-  const containers = document.querySelectorAll('[data-emma-form="__FORM_ID__"]');
-  
+  const containers = document.querySelectorAll(
+    '[data-emma-form="__FORM_ID__"]'
+  );
+
   containers.forEach((container, idx) => {
     const containerId = container.id || `emma-form-__FORM_ID__-${idx}`;
     const renderer = new FormRenderer({
@@ -93,10 +101,10 @@ export default { init, schema: FORM_SCHEMA };
 
 The form builder MUST replace these placeholders:
 
-| Placeholder | Replaced With | Example |
-|-------------|---------------|---------|
-| `__FORM_ID__` | Unique form identifier | `contact-form-001` |
-| `__FORM_SCHEMA__` | Complete JSON schema | `{ formId: "...", fields: [...] }` |
+| Placeholder       | Replaced With          | Example                            |
+| ----------------- | ---------------------- | ---------------------------------- |
+| `__FORM_ID__`     | Unique form identifier | `contact-form-001`                 |
+| `__FORM_SCHEMA__` | Complete JSON schema   | `{ formId: "...", fields: [...] }` |
 
 ## HTML Integration Pattern
 
@@ -111,6 +119,7 @@ The form builder MUST replace these placeholders:
 ```
 
 **How it works:**
+
 1. Browser loads the form bundle as an ES module
 2. Form bundle imports the runtime module
 3. DOMContentLoaded event triggers auto-init
@@ -124,15 +133,15 @@ The form builder MUST replace these placeholders:
 
 <script type="module">
   import formBundle from './contact-form-001.js';
-  
+
   // Access the schema and renderer
   console.log('Schema:', formBundle.schema);
-  
+
   // Manual render
   const renderer = new formBundle.FormRenderer({
     formId: 'contact-form-001',
     containerId: 'my-custom-container',
-    schema: formBundle.schema
+    schema: formBundle.schema,
   });
   renderer.render();
 </script>
@@ -163,7 +172,7 @@ When `emma build` completes, the output directory contains:
 ```html
 <script type="module" src="contact-form-001.js"></script>
 <script nomodule>
-  document.getElementById('form-container').innerHTML = 
+  document.getElementById('form-container').innerHTML =
     'This form requires a modern browser.';
 </script>
 ```
@@ -176,10 +185,10 @@ The Form Builder assumes the FormRenderer follows this interface:
 
 ```typescript
 interface RenderOptions {
-  formId: string;           // Unique form identifier
-  containerId: string;      // DOM element ID to render into
-  schema: FormSchema;       // Complete form schema
-  theme?: string;           // Theme name (optional)
+  formId: string; // Unique form identifier
+  containerId: string; // DOM element ID to render into
+  schema: FormSchema; // Complete form schema
+  theme?: string; // Theme name (optional)
   onSubmit?: (data: Record<string, any>) => void;
   onSuccess?: (response: SubmissionResponse) => void;
   onError?: (error: Error) => void;
@@ -191,7 +200,7 @@ interface RenderOptions {
 ```typescript
 class FormRenderer {
   constructor(options: RenderOptions);
-  render(): void;  // Render the form into the container
+  render(): void; // Render the form into the container
 }
 ```
 
@@ -217,6 +226,7 @@ The form-renderer test server demonstrates correct usage:
 **Run:** `cd packages/form-renderer/test-server && npm run dev`
 
 The test server:
+
 - Uses ESM imports: `import FormRenderer from '/dist/emma-forms.esm.js'`
 - Loads forms using the same pattern as generated bundles
 - Serves as reference implementation
@@ -262,10 +272,10 @@ Both packages follow semantic versioning:
 ### Compatibility Matrix
 
 | Form Builder | Form Renderer | Compatible |
-|--------------|---------------|------------|
-| 1.x.x        | 1.x.x        | ✅ Yes     |
-| 1.x.x        | 2.x.x        | ⚠️ Maybe   |
-| 2.x.x        | 1.x.x        | ❌ No      |
+| ------------ | ------------- | ---------- |
+| 1.x.x        | 1.x.x         | ✅ Yes     |
+| 1.x.x        | 2.x.x         | ⚠️ Maybe   |
+| 2.x.x        | 1.x.x         | ❌ No      |
 
 ## Change Process
 

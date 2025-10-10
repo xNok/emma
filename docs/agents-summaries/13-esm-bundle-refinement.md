@@ -14,6 +14,7 @@ Before implementing the `emma deploy` command, we addressed critical architectur
 ### 1. ESM vs IIFE Bundle Discrepancy
 
 **Problem:**
+
 - **Spec (docs/02-technical-architecture.md):** Described 2 script tags (runtime + bundle)
 - **Form Renderer Test Server:** Used ESM imports: `import FormRenderer from '/dist/emma-forms.esm.js'`
 - **Form Builder Templates:** Generated IIFE bundles expecting `window.EmmaForms.FormRenderer`
@@ -23,6 +24,7 @@ This mismatch meant generated bundles wouldn't work with the renderer's actual A
 ### 2. Test Server Maintainability
 
 **Problem:**
+
 - `server.js` contained ~475 lines with massive inline HTML templates
 - Hard to read, modify, and version control
 - Templates mixed with server logic
@@ -30,6 +32,7 @@ This mismatch meant generated bundles wouldn't work with the renderer's actual A
 ### 3. Lack of Spec Validation
 
 **Problem:**
+
 - No automated way to ensure builder-generated bundles matched renderer expectations
 - Easy for the two packages to drift apart
 - No clear documentation of the bundle contract
@@ -39,6 +42,7 @@ This mismatch meant generated bundles wouldn't work with the renderer's actual A
 ### 1. Migrated to ESM Module Pattern
 
 #### Updated Bundle Template
+
 **File:** `packages/form-builder/src/templates/bundle.template.js`
 
 ```javascript
@@ -53,7 +57,9 @@ import FormRenderer from './emma-forms.esm.js';
 const FORM_SCHEMA = __FORM_SCHEMA__;
 
 function init() {
-  const containers = document.querySelectorAll('[data-emma-form="__FORM_ID__"]');
+  const containers = document.querySelectorAll(
+    '[data-emma-form="__FORM_ID__"]'
+  );
   containers.forEach((container, idx) => {
     const renderer = new FormRenderer({
       formId: '__FORM_ID__',
@@ -78,12 +84,14 @@ export default { init, schema: FORM_SCHEMA };
 ```
 
 **Key Changes:**
+
 - ✅ Uses ESM `import` instead of global `window.EmmaForms`
 - ✅ Exports schema and renderer for manual initialization
 - ✅ Auto-initializes on `[data-emma-form="<id>"]` containers
 - ✅ Better error handling with try/catch
 
 #### Updated Preview Template
+
 **File:** `packages/form-builder/src/templates/preview.template.html`
 
 ```html
@@ -91,18 +99,20 @@ export default { init, schema: FORM_SCHEMA };
 
 <!-- Fallback for browsers without module support -->
 <script nomodule>
-  document.getElementById('form-container').innerHTML = 
+  document.getElementById('form-container').innerHTML =
     'This form requires a modern browser with ES Module support.';
 </script>
 ```
 
 **Key Changes:**
+
 - ✅ Uses `type="module"` attribute
 - ✅ Single script tag (imports the runtime)
 - ✅ Graceful degradation with `nomodule` fallback
 - ✅ Better debug information
 
 #### Updated Form Builder
+
 **File:** `packages/form-builder/src/form-builder.ts`
 
 ```typescript
@@ -112,7 +122,7 @@ private async copyRendererRuntime(outputDir: string): Promise<void> {
     currentDir,
     '../../form-renderer/dist/emma-forms.esm.js'
   );
-  
+
   if (await fs.pathExists(rendererESM)) {
     await fs.copy(rendererESM, path.join(outputDir, 'emma-forms.esm.js'));
   }
@@ -120,6 +130,7 @@ private async copyRendererRuntime(outputDir: string): Promise<void> {
 ```
 
 **Key Changes:**
+
 - ✅ Copies `emma-forms.esm.js` instead of `emma-forms.min.js`
 - ✅ Aligns with bundle template's import statement
 - ✅ Helpful error message if runtime not built
@@ -127,13 +138,16 @@ private async copyRendererRuntime(outputDir: string): Promise<void> {
 ### 2. Extracted Test Server Templates
 
 #### Created Template Directory
+
 **Location:** `packages/form-renderer/test-server/templates/`
 
 **Files Created:**
+
 1. `index.html` - Main test suite page
 2. `test-page.html` - Individual test scenario page
 
 #### Refactored Server
+
 **File:** `packages/form-renderer/test-server/server.js`
 
 **Before:** ~475 lines with inline HTML  
@@ -147,13 +161,16 @@ const loadTemplate = (templateName) => {
 
 app.get('/', (req, res) => {
   const scenariosHtml = scenarios.map(/* ... */).join('');
-  const html = loadTemplate('index.html')
-    .replace('{{SCENARIOS}}', scenariosHtml);
+  const html = loadTemplate('index.html').replace(
+    '{{SCENARIOS}}',
+    scenariosHtml
+  );
   res.send(html);
 });
 ```
 
 **Benefits:**
+
 - ✅ Separation of concerns
 - ✅ Easier to maintain and version HTML
 - ✅ Reusable template system
@@ -164,6 +181,7 @@ app.get('/', (req, res) => {
 **Document:** `docs/specs/bundle-specification.md`
 
 Comprehensive specification covering:
+
 - **Architecture Pattern**: Why ESM modules
 - **Bundle Structure**: Runtime + Form bundle
 - **Template Contract**: Required placeholders and replacements
@@ -176,6 +194,7 @@ Comprehensive specification covering:
 - **Change Process**: How to update the spec
 
 **Key Section - Bundle Structure:**
+
 ```
 Runtime Module (emma-forms.esm.js)
 └── Exports: FormRenderer class
@@ -192,6 +211,7 @@ Form Bundle (<form-id>.js)
 **File:** `packages/form-builder/src/__tests__/integration.test.ts`
 
 Comprehensive test suite validating:
+
 - ✅ Valid ESM bundle generation
 - ✅ Runtime module included in output
 - ✅ Correct ESM import statement
@@ -208,6 +228,7 @@ Comprehensive test suite validating:
 ### 5. Updated Existing Tests
 
 Updated tests in multiple files to match new ESM pattern:
+
 - `form-builder.test.ts`: ESM module checks instead of IIFE
 - `local-deployment.test.ts`: ESM imports instead of window globals
 - `local-deployment.integration.test.ts`: Updated debug link checks
@@ -215,22 +236,26 @@ Updated tests in multiple files to match new ESM pattern:
 ## Impact & Benefits
 
 ### Alignment with Specification
+
 - ✅ Builder now generates exactly what the spec describes
 - ✅ Test server demonstrates correct usage pattern
 - ✅ All components speak the same "language"
 
 ### Maintainability
+
 - ✅ Cleaner separation of templates from code
 - ✅ Easier to update HTML without touching server logic
 - ✅ Better version control diffs
 
 ### Future-Proofing
+
 - ✅ Modern ESM pattern is web standard
 - ✅ No need for complex bundlers in production
 - ✅ Smaller bundles with better optimization
 - ✅ Native browser support (all modern browsers)
 
 ### Developer Experience
+
 - ✅ Clear documentation of bundle format
 - ✅ Integration tests catch mismatches early
 - ✅ Easy to understand generated code
@@ -239,6 +264,7 @@ Updated tests in multiple files to match new ESM pattern:
 ## Files Modified
 
 ### Form Builder Package
+
 - `src/form-builder.ts` - ESM runtime copy logic
 - `src/templates/bundle.template.js` - ESM module format
 - `src/templates/preview.template.html` - Module script tag
@@ -248,28 +274,33 @@ Updated tests in multiple files to match new ESM pattern:
 - `src/__tests__/local-deployment.integration.test.ts` - Updated for ESM
 
 ### Form Renderer Package
+
 - `test-server/templates/index.html` - NEW: Main page template
 - `test-server/templates/test-page.html` - NEW: Test page template
 - `test-server/server.js` - Refactored to use templates
 
 ### Documentation
+
 - `docs/specs/bundle-specification.md` - NEW: Comprehensive spec
 
 ## Verification
 
 ### Build Verification
+
 ```bash
 yarn workspace @emma/form-builder build
 # ✅ Build successful with new templates
 ```
 
 ### Test Verification
+
 ```bash
 yarn workspace @emma/form-builder test --run
 # ✅ 6 test files, 70 tests passed
 ```
 
 ### Manual Verification
+
 ```bash
 cd packages/form-renderer/test-server
 npm run dev
@@ -282,6 +313,7 @@ npm run dev
 > **Question:** How do we make sure the builder respects the spec we define in the renderer?
 
 **Answer:**
+
 1. **Documentation**: Created `docs/specs/bundle-specification.md` as single source of truth
 2. **Integration Tests**: `integration.test.ts` validates generated bundles match spec
 3. **Test Server**: Serves as reference implementation demonstrating correct usage
@@ -290,6 +322,7 @@ npm run dev
 ## Next Steps
 
 With these refinements complete, we now have:
+
 - ✅ Aligned bundle format across all packages
 - ✅ Clean, maintainable codebase
 - ✅ Comprehensive test coverage

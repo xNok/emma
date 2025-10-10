@@ -114,8 +114,10 @@ describe('FormBuilder', () => {
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
       // Should be an ESM module with import statement
-      expect(bundleContent).toContain("import FormRenderer from './emma-forms.esm.js'");
-      
+      expect(bundleContent).toContain(
+        "import FormRenderer from './emma-forms.esm.js'"
+      );
+
       // Basic structure checks (can't use Function constructor with ESM)
       expect(bundleContent).toContain('const FORM_SCHEMA');
       expect(bundleContent).toContain('function init()');
@@ -126,7 +128,9 @@ describe('FormBuilder', () => {
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
       // Uses ESM imports instead of window globals
-      expect(bundleContent).toContain("import FormRenderer from './emma-forms.esm.js'");
+      expect(bundleContent).toContain(
+        "import FormRenderer from './emma-forms.esm.js'"
+      );
       // Embeds schema and exports for manual use
       expect(bundleContent).toContain('FORM_SCHEMA');
       expect(bundleContent).toContain('export { FORM_SCHEMA, FormRenderer }');

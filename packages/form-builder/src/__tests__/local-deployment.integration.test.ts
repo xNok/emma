@@ -112,7 +112,7 @@ describe('LocalDeployment Integration Tests', () => {
     // Create instances
     deployment = new LocalDeployment(config);
     builder = new FormBuilder(config);
-    
+
     // Build the form (deployment now requires forms to be pre-built)
     await builder.build(mockFormSchema.formId, mockFormSchema);
 
@@ -173,7 +173,9 @@ describe('LocalDeployment Integration Tests', () => {
 
       const jsContent = jsResponse.text;
       // Updated to check for ESM pattern instead of IIFE
-      expect(jsContent).toContain("import FormRenderer from './emma-forms.esm.js'");
+      expect(jsContent).toContain(
+        "import FormRenderer from './emma-forms.esm.js'"
+      );
       expect(jsContent).toContain(mockFormSchema.formId);
 
       // Test theme CSS
@@ -347,7 +349,9 @@ describe('LocalDeployment Integration Tests', () => {
       const jsContent = jsResponse.text;
       expect(jsContent).not.toContain('Form Not Found');
       // Updated to check for ESM pattern
-      expect(jsContent).toContain("import FormRenderer from './emma-forms.esm.js'");
+      expect(jsContent).toContain(
+        "import FormRenderer from './emma-forms.esm.js'"
+      );
     });
   });
 

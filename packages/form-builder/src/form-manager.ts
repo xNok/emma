@@ -67,7 +67,7 @@ export class FormManager {
   async needsRebuild(formId: string): Promise<boolean> {
     const buildPath = this.config.getBuildPath(formId);
     const bundlePath = path.join(buildPath, `${formId}.js`);
-    
+
     // Bundle doesn't exist
     if (!(await fs.pathExists(bundlePath))) {
       return true;

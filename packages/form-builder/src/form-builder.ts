@@ -121,13 +121,13 @@ export class FormBuilder {
       currentDir,
       '../../form-renderer/dist/emma-forms.esm.js'
     );
-    
+
     if (await fs.pathExists(rendererESM)) {
       await fs.copy(rendererESM, path.join(outputDir, 'emma-forms.esm.js'));
     } else {
       console.warn(
         '⚠️  Emma Forms runtime (emma-forms.esm.js) not found. ' +
-        'Run "yarn workspace @emma/form-renderer build" first.'
+          'Run "yarn workspace @emma/form-renderer build" first.'
       );
     }
   }
