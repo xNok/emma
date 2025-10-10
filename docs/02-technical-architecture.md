@@ -38,9 +38,6 @@ graph TB
 
 **Technology:**
 
-**Commands:**
-**Technology:**
-
 - TypeScript with ES2022 modules
 - Inquirer.js for interactive prompts
 - Commander.js for CLI commands
