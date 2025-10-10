@@ -8,7 +8,10 @@ import {
   type Mock,
   type SpyInstance,
 } from 'vitest';
-import { cloudflareProvider } from '../../deployment/cloudflare';
+import {
+  cloudflareProvider,
+  CloudflareR2Deployment,
+} from '../../deployment/cloudflare';
 import inquirer from 'inquirer';
 import { EmmaConfig } from '../../config';
 
@@ -98,6 +101,14 @@ describe('cloudflareProvider', () => {
 
   it('should execute deployment', async () => {
     const options = { bucket: 'bucket', publicUrl: 'url' };
+    // Avoid actually calling wrangler in CI by mocking runWrangler to fail
+    vi.spyOn(
+      CloudflareR2Deployment.prototype as unknown as {
+        runWrangler: (args: string[]) => Promise<void>;
+      },
+      'runWrangler'
+    ).mockRejectedValue(new Error('simulated wrangler failure'));
+
     await expect(
       cloudflareProvider.execute(realConfig, 'form-id', options)
     ).rejects.toThrow('process.exit called with "1"');

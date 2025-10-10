@@ -28,6 +28,7 @@ Welcome to the Emma Forms developer documentation. This guide is split into focu
 ### Deployment
 
 - **[Deployment Providers](./deployment-providers.md)** - Provider contract and Cloudflare R2
+- **[Cloudflare Quick Start](./cloudflare-quickstart.md)** - Fast path to R2 setup and deploy
 - **[Cloudflare Setup](./cloudflare-deployment.md)** - Deploying to Cloudflare
 - **[Environment Configuration](./configuration.md)** - Environment variables and settings
 
