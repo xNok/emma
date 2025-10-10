@@ -10,7 +10,6 @@ import type { Server } from 'http';
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 import express from 'express';
 import type { EmmaConfig } from './config.js';
-import { FormBuilder } from './form-builder.js';
 
 export interface DeploymentOptions {
   host: string;
@@ -42,13 +41,15 @@ export class LocalDeployment {
       throw new Error(`Form schema not found: ${formId}`);
     }
 
-    // Build form if not already built
+    // Deployment assumes form is already built
+    // Use FormManager.ensureBuilt() before calling this if needed
     const buildPath = this.config.getBuildPath(formId);
     const bundlePath = path.join(buildPath, `${formId}.js`);
 
     if (!(await fs.pathExists(bundlePath))) {
-      const builder = new FormBuilder(this.config);
-      await builder.build(formId, schema);
+      throw new Error(
+        `Form "${formId}" is not built. Run "emma build ${formId}" first or use FormManager.ensureBuilt()`
+      );
     }
 
     // Start or update server

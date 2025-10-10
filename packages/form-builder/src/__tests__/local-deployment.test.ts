@@ -68,6 +68,9 @@ describe('LocalDeployment', () => {
 
     // Save test form
     await config.saveFormSchema('test-form-001', mockSchema);
+
+    // Build the form (deployment now requires forms to be pre-built)
+    await builder.build('test-form-001', mockSchema);
   });
 
   afterEach(async () => {
@@ -103,7 +106,7 @@ describe('LocalDeployment', () => {
       );
 
       it(
-        'should build form if bundle does not exist',
+        'should throw error if form is not built',
         async () => {
           const options = { host: 'localhost', port: 3335 };
 
@@ -111,14 +114,10 @@ describe('LocalDeployment', () => {
           const buildPath = config.getBuildPath('test-form-001');
           await fs.remove(buildPath);
 
-          const result = await deployment.deploy('test-form-001', options);
-
-          // Should have created the bundle
-          const bundlePath = path.join(buildPath, 'test-form-001.js');
-          expect(await fs.pathExists(bundlePath)).toBe(true);
-          expect(result.formUrl).toBe(
-            'http://localhost:3335/forms/test-form-001'
-          );
+          // Should throw error since form is not built
+          await expect(
+            deployment.deploy('test-form-001', options)
+          ).rejects.toThrow('is not built');
         },
         TIMEOUT
       );
@@ -209,7 +208,7 @@ describe('LocalDeployment', () => {
         );
 
         const js = await response.text();
-        expect(js).toContain('window.EmmaForms.FormRenderer');
+        expect(js).toContain("import FormRenderer from './emma-forms.esm.js'");
         expect(js).toContain('test-form-001');
       },
       TIMEOUT

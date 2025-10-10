@@ -39,9 +39,8 @@ This process ensures that anyone joining the project can get up to speed quickly
 ### As a Developer
 
 - Focus on implementing features from docs
-- Write tests alongside code
-- Keep bundle sizes small (especially form renderer)
-- Think about the end-user Hugo developer
+- important: Write tests alongside code
+- Ensure code quality with linting and formatting
 
 ### As an Architect
 
@@ -49,14 +48,6 @@ This process ensures that anyone joining the project can get up to speed quickly
 - Identify potential issues early
 - Propose improvements
 - **Update docs first** before changing architecture
-
-### Code Style
-
-- TypeScript strict mode
-- ESLint + Prettier enforced
-- Meaningful commit messages
-- Small, focused PRs
-- Think about the end-user Hugo developer
 
 ### Quick Workspace Navigation
 
@@ -77,11 +68,3 @@ cd shared                       # Shared types (dependency for all)
 ls docs/agents-summaries/       # Recent agent work history
 cat docs/02-technical-architecture.md  # Current system design
 ```
-
-### Critical Files to Understand
-
-- `shared/types/index.ts` - Core data models (FormSchema, FormField, etc.)
-- `packages/form-renderer/src/index.ts` - Main FormRenderer class
-- `packages/api-worker/src/index.ts` - Worker request handler
-- `packages/api-worker/wrangler.toml` - Cloudflare configuration
-- `migrations/0001_initial_schema.sql` - Database schema
