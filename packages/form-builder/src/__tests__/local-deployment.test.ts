@@ -209,7 +209,7 @@ describe('LocalDeployment', () => {
         );
 
         const js = await response.text();
-        expect(js).toContain('window.EmmaForms.FormRenderer');
+        expect(js).toContain("import FormRenderer from './emma-forms.esm.js'");
         expect(js).toContain('test-form-001');
       },
       TIMEOUT

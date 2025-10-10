@@ -169,7 +169,8 @@ describe('LocalDeployment Integration Tests', () => {
       );
 
       const jsContent = jsResponse.text;
-      expect(jsContent).toContain('window.EmmaForms.FormRenderer');
+      // Updated to check for ESM pattern instead of IIFE
+      expect(jsContent).toContain("import FormRenderer from './emma-forms.esm.js'");
       expect(jsContent).toContain(mockFormSchema.formId);
 
       // Test theme CSS
@@ -308,17 +309,16 @@ describe('LocalDeployment Integration Tests', () => {
       const response = await makeRequest(deployResult.formUrl);
       const htmlContent = response.text;
 
-      // Check for debug links
+      // Check for debug links (ESM bundle references)
       expect(htmlContent).toContain('Debug Assets');
-      expect(htmlContent).toContain(
-        `/forms/${mockFormSchema.formId}/${mockFormSchema.formId}.js`
-      );
+      expect(htmlContent).toContain(`${mockFormSchema.formId}.js`);
       expect(htmlContent).toContain('themes/default.css');
       expect(htmlContent).toContain(mockFormSchema.apiEndpoint);
 
       // Verify debug links are clickable
       expect(htmlContent).toContain('href=');
-      expect(htmlContent).toContain('target="_blank"');
+      // Links are relative paths, not using target="_blank"
+      expect(htmlContent).toContain(`${mockFormSchema.formId}.js`);
     });
   });
 
@@ -343,7 +343,8 @@ describe('LocalDeployment Integration Tests', () => {
       // Should not return "Form Not Found" HTML
       const jsContent = jsResponse.text;
       expect(jsContent).not.toContain('Form Not Found');
-      expect(jsContent).toContain('window.EmmaForms.FormRenderer');
+      // Updated to check for ESM pattern
+      expect(jsContent).toContain("import FormRenderer from './emma-forms.esm.js'");
     });
   });
 

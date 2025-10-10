@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{FORM_NAME}} - Emma Test</title>
+  <link rel="stylesheet" href="/themes/default.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .nav {
+      margin-bottom: 20px;
+    }
+    
+    .nav a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .nav a:hover {
+      text-decoration: underline;
+    }
+    
+    .header {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .header h1 {
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .test-checklist {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+    
+    .test-checklist h3 {
+      color: #856404;
+      margin-bottom: 12px;
+    }
+    
+    .test-checklist label {
+      display: block;
+      margin: 8px 0;
+      color: #856404;
+      cursor: pointer;
+    }
+    
+    .test-checklist input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+    
+    .results {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 12px;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 30px;
+    }
+    
+    .results h3 {
+      color: #4ec9b0;
+      margin-bottom: 12px;
+    }
+    
+    .results pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a href="/">← Back to all scenarios</a>
+    </div>
+
+    <div class="header">
+      <h1>🧪 {{FORM_NAME}}</h1>
+      <p>{{FORM_DESCRIPTION}}</p>
+    </div>
+
+    {{CHECKLIST}}
+
+    <div class="form-container">
+      <div id="test-form"></div>
+    </div>
+
+    <div class="results">
+      <h3>📊 Test Results</h3>
+      <pre id="output">No submissions yet. Fill out the form above and click submit.</pre>
+    </div>
+  </div>
+
+  <script type="module">
+    import FormRenderer from '/dist/emma-forms.esm.js';
+
+    const schema = {{SCHEMA}};
+
+    console.log('🚀 Loading scenario: {{SCENARIO_ID}}');
+    console.log('📋 Schema:', schema);
+
+    try {
+      const renderer = new FormRenderer({
+        formId: '{{SCENARIO_ID}}-test',
+        containerId: 'test-form',
+        schema: schema,
+        onSubmit: (data) => {
+          console.log('✅ Form submitted:', data);
+          document.getElementById('output').innerHTML = 
+            '<span class="success">✅ SUCCESS</span>\\n\\n' +
+            'Submitted Data:\\n' +
+            JSON.stringify(data, null, 2);
+        },
+        onSuccess: (response) => {
+          console.log('✅ API response:', response);
+        },
+        onError: (error) => {
+          console.error('❌ Form error:', error);
+          document.getElementById('output').innerHTML = 
+            '<span class="error">❌ ERROR</span>\\n\\n' +
+            error.message;
+        }
+      });
+
+      renderer.render();
+      console.log('✅ Form rendered successfully');
+    } catch (error) {
+      console.error('❌ Failed to render form:', error);
+      document.getElementById('output').innerHTML = 
+        '<span class="error">❌ FAILED TO RENDER</span>\\n\\n' +
+        error.message;
+    }
+  </script>
+</body>
+</html>

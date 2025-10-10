@@ -109,26 +109,27 @@ describe('FormBuilder', () => {
       expect(bundleContent).toContain('Email Address');
     });
 
-    it('should generate valid JavaScript', async () => {
+    it('should generate valid JavaScript (ESM module)', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
-      // Basic syntax check - should not throw
-      expect(() => {
-        // eslint-disable-next-line @typescript-eslint/no-implied-eval
-        return new Function(bundleContent);
-      }).not.toThrow();
+      // Should be an ESM module with import statement
+      expect(bundleContent).toContain("import FormRenderer from './emma-forms.esm.js'");
+      
+      // Basic structure checks (can't use Function constructor with ESM)
+      expect(bundleContent).toContain('const FORM_SCHEMA');
+      expect(bundleContent).toContain('function init()');
     });
 
     it('should initialize renderer runtime', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
-      // Uses shared runtime
-      expect(bundleContent).toContain('window.EmmaForms.FormRenderer');
-      // Embeds schema and exposes global initializer
+      // Uses ESM imports instead of window globals
+      expect(bundleContent).toContain("import FormRenderer from './emma-forms.esm.js'");
+      // Embeds schema and exports for manual use
       expect(bundleContent).toContain('FORM_SCHEMA');
-      expect(bundleContent).toContain("window.EmmaForm['contact-form-001']");
+      expect(bundleContent).toContain('export { FORM_SCHEMA, FormRenderer }');
     });
 
     it('should embed schema with different field types', async () => {

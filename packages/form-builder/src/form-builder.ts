@@ -113,24 +113,22 @@ export class FormBuilder {
   }
 
   /**
-   * Copy the form-renderer runtime bundle next to the form bundle
+   * Copy the form-renderer runtime bundle (ESM version) next to the form bundle
    */
   private async copyRendererRuntime(outputDir: string): Promise<void> {
-    const rendererDist = path.resolve(
+    // Copy ESM version - this is what the bundle template imports
+    const rendererESM = path.resolve(
       currentDir,
-      '../../form-renderer/dist/emma-forms.min.js'
+      '../../form-renderer/dist/emma-forms.esm.js'
     );
-    if (await fs.pathExists(rendererDist)) {
-      await fs.copy(rendererDist, path.join(outputDir, 'emma-forms.min.js'));
+    
+    if (await fs.pathExists(rendererESM)) {
+      await fs.copy(rendererESM, path.join(outputDir, 'emma-forms.esm.js'));
     } else {
-      // Fallback to esm build if minified not present
-      const rendererESM = path.resolve(
-        currentDir,
-        '../../form-renderer/dist/emma-forms.js'
+      console.warn(
+        '⚠️  Emma Forms runtime (emma-forms.esm.js) not found. ' +
+        'Run "yarn workspace @emma/form-renderer build" first.'
       );
-      if (await fs.pathExists(rendererESM)) {
-        await fs.copy(rendererESM, path.join(outputDir, 'emma-forms.min.js'));
-      }
     }
   }
 }

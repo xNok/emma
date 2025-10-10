@@ -1,53 +1,58 @@
-(function() {
-  'use strict';
+/**
+ * Emma Form Bundle - ESM Module
+ * Generated bundle for form: __FORM_ID__
+ * This module depends on the Emma Forms runtime (emma-forms.esm.js)
+ */
 
-  // Form schema embedded in bundle
-  const FORM_SCHEMA = __FORM_SCHEMA__;
+import FormRenderer from './emma-forms.esm.js';
 
-  function ensureContainerId(el, index) {
-    if (!el.id) {
-      el.id = `emma-form-__FORM_ID__-${index}`;
-    }
-    return el.id;
+// Form schema embedded in bundle
+const FORM_SCHEMA = __FORM_SCHEMA__;
+
+/**
+ * Ensure container has an ID for targeting
+ */
+function ensureContainerId(el, index) {
+  if (!el.id) {
+    el.id = `emma-form-__FORM_ID__-${index}`;
+  }
+  return el.id;
+}
+
+/**
+ * Initialize all forms with data attribute
+ */
+function init() {
+  const containers = document.querySelectorAll('[data-emma-form="__FORM_ID__"]');
+  
+  if (containers.length === 0) {
+    console.warn('[Emma] No containers found for form "__FORM_ID__". Add data-emma-form="__FORM_ID__" to your container element.');
   }
 
-  function init() {
-    if (!window.EmmaForms || !window.EmmaForms.FormRenderer) {
-      console.error('[Emma] FormRenderer runtime not found. Make sure emma-forms.min.js is loaded before this bundle.');
-      return;
-    }
-
-    const containers = document.querySelectorAll('[data-emma-form="__FORM_ID__"]');
-    containers.forEach((container, idx) => {
-      const containerId = ensureContainerId(container, idx);
-      const renderer = new window.EmmaForms.FormRenderer({
+  containers.forEach((container, idx) => {
+    const containerId = ensureContainerId(container, idx);
+    try {
+      const renderer = new FormRenderer({
         formId: '__FORM_ID__',
         containerId,
         schema: FORM_SCHEMA,
         theme: FORM_SCHEMA.theme,
       });
       renderer.render();
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-  // Global API for manual initialization
-  window.EmmaForm = window.EmmaForm || {};
-  window.EmmaForm['__FORM_ID__'] = function(containerId) {
-    if (!window.EmmaForms || !window.EmmaForms.FormRenderer) {
-      throw new Error('[Emma] FormRenderer runtime not found. Load emma-forms.min.js first.');
+      console.log(`[Emma] Form "__FORM_ID__" rendered in #${containerId}`);
+    } catch (error) {
+      console.error(`[Emma] Failed to render form "__FORM_ID__":`, error);
     }
-    return new window.EmmaForms.FormRenderer({
-      formId: '__FORM_ID__',
-      containerId,
-      schema: FORM_SCHEMA,
-      theme: FORM_SCHEMA.theme,
-    });
-  };
+  });
+}
 
-})();
+// Auto-initialize on DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+// Export for manual initialization
+export { FORM_SCHEMA, FormRenderer };
+export default { init, schema: FORM_SCHEMA };

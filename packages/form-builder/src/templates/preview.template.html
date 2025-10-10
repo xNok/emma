@@ -27,41 +27,93 @@
             color: #666;
             font-size: 14px;
         }
+        .preview-info code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .debug-links {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .debug-links a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .debug-links a:hover {
+            text-decoration: underline;
+        }
         #form-container {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        .instructions {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+        .instructions p {
+            margin: 8px 0;
+        }
+        .instructions code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
     </style>
-    <!-- Optional Theme link for local preview: will be injected by bundle -->
 </head>
 <body>
     <div class="preview-header">
         <h1>📝 Form Preview</h1>
         <div class="preview-info">
-            <strong>Form ID:</strong> __FORM_ID__<br>
-            <strong>Theme:</strong> __THEME__<br>
+            <strong>Form ID:</strong> <code>__FORM_ID__</code><br>
+            <strong>Theme:</strong> <code>__THEME__</code><br>
             <strong>Fields:</strong> __FIELDS_COUNT__<br>
             <strong>API Endpoint:</strong> <code>__API_ENDPOINT__</code>
         </div>
         
-        <div class="debug-links" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+        <div class="debug-links">
             <strong>🔧 Debug Assets:</strong><br>
-            <a href="/forms/__FORM_ID__/__FORM_ID__.js" target="_blank" style="color: #0066cc; text-decoration: none;">📄 JavaScript Bundle</a> |
-            <a href="/forms/__FORM_ID__/themes/__THEME__.css" target="_blank" style="color: #0066cc; text-decoration: none;">🎨 Theme CSS</a> |
-            <a href="__API_ENDPOINT__" target="_blank" style="color: #0066cc; text-decoration: none;">🔗 API Endpoint</a>
+            <a href="__FORM_ID__.js">📄 Form Bundle (ESM)</a>
+            <a href="/forms/__FORM_ID__/emma-forms.esm.js">⚙️ Runtime Module</a>
+            <a href="/forms/__FORM_ID__/themes/__THEME__.css">🎨 Theme CSS</a>
         </div>
     </div>
 
-    <div id="form-container" data-emma-form="__FORM_ID__">
-        <!-- Form will be rendered here -->
+    <div class="instructions">
+        <h3>ℹ️ How This Works (ESM Module Pattern)</h3>
+        <p><strong>1. Runtime:</strong> <code>emma-forms.esm.js</code> - The FormRenderer class</p>
+        <p><strong>2. Bundle:</strong> <code>__FORM_ID__.js</code> - Form-specific code with embedded schema</p>
+        <p>The bundle imports the runtime and auto-initializes on <code>[data-emma-form="__FORM_ID__"]</code> containers.</p>
     </div>
 
-    <!-- Emma Forms runtime -->
-    <script src="/forms/__FORM_ID__/emma-forms.min.js"></script>
-    <!-- Form-specific bundle -->
-    <script src="/forms/__FORM_ID__/__FORM_ID__.js"></script>
+    <div id="form-container" data-emma-form="__FORM_ID__">
+        <!-- Form will be rendered here by the bundle's auto-init -->
+    </div>
+
+    <!-- ESM Module: Load the form bundle which imports the runtime -->
+    <script type="module" src="/forms/__FORM_ID__/__FORM_ID__.js"></script>
+    
+    <!-- Fallback for browsers without module support -->
+    <script nomodule>
+        document.getElementById('form-container').innerHTML = 
+            '<div style="background: #fee; border: 2px solid #c00; padding: 20px; border-radius: 8px; color: #c00;">' +
+            '<strong>⚠️ Browser Not Supported</strong><br>' +
+            'This form requires a modern browser with ES Module support.' +
+            '</div>';
+    </script>
     
 </body>
 </html>
