@@ -201,7 +201,7 @@ emma preview contact-001
 {{< embed-form "contact-001" >}}
 ```
 
-The form will load from: `http://localhost:3333/forms/contact-001/form.js`
+The form will load from: `http://localhost:3333/forms/contact-001/contact-001.js`
 
 ## 🔄 Next Implementation Priorities
 
