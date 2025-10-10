@@ -4,7 +4,13 @@
 
 import fs from 'fs-extra';
 import path from 'path';
-import { spawn } from 'child_process';
+// import { spawn } from 'child_process';
+import {
+  S3Client,
+  PutObjectCommand,
+  HeadObjectCommand,
+  type S3ServiceException,
+} from '@aws-sdk/client-s3';
 import type { EmmaConfig as EmmaConfigType } from '../config.js';
 
 export interface CloudflareDeploymentOptions {
@@ -13,6 +19,10 @@ export interface CloudflareDeploymentOptions {
   accountId?: string | undefined; // Optional explicit account ID
   apiToken?: string | undefined; // Optional explicit API token
   overwrite?: boolean; // Overwrite existing objects
+  // S3-only
+  accessKeyId?: string; // R2 access key id
+  secretAccessKey?: string; // R2 secret access key
+  endpoint?: string; // Optional custom S3 endpoint (defaults to https://<accountId>.r2.cloudflarestorage.com)
 }
 
 export interface CloudflareDeploymentResult {
@@ -46,13 +56,13 @@ export class CloudflareR2Deployment {
       throw new Error(`Bundle not found. Build first: ${bundlePath}`);
     }
 
-    // Upload bundle and optional theme
-    const bundleKey = `${formId}.js`;
+    // Upload bundle and theme under per-form subdirectory
+    const bundleKey = `${formId}/${formId}.js`;
     await this.uploadToR2(bundlePath, options.bucket, bundleKey, options);
 
     let themeKey: string | undefined;
     if (await fs.pathExists(themeCss)) {
-      themeKey = `themes/${path.basename(themeCss)}`;
+      themeKey = `${formId}/themes/${path.basename(themeCss)}`;
       await this.uploadToR2(themeCss, options.bucket, themeKey, options);
     }
 
@@ -81,50 +91,76 @@ export class CloudflareR2Deployment {
     key: string,
     options: CloudflareDeploymentOptions
   ): Promise<void> {
-    // Prefer wrangler CLI for simplicity and reliability
-    // Command: wrangler r2 object put <bucket>/<key> --file <file>
-    const objectPath = `${bucket}/${key}`;
+    await this.uploadViaS3(filePath, bucket, key, options);
+  }
 
-    // Optional overwrite: delete existing first to ensure correct metadata
-    if (options.overwrite) {
-      await this.runWrangler(['r2', 'object', 'delete', objectPath], options, {
-        allowFail: true,
-      });
+  private getS3Client(options: CloudflareDeploymentOptions): S3Client {
+    const endpoint =
+      options.endpoint ||
+      (options.accountId
+        ? `https://${options.accountId}.r2.cloudflarestorage.com`
+        : undefined);
+    if (!endpoint) {
+      throw new Error(
+        'Missing S3 endpoint: provide --endpoint or --account-id to derive R2 endpoint'
+      );
     }
+    if (!options.accessKeyId || !options.secretAccessKey) {
+      throw new Error(
+        'Missing R2 credentials: provide --access-key-id and --secret-access-key or set env vars'
+      );
+    }
+    return new S3Client({
+      region: 'auto',
+      endpoint,
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: options.accessKeyId,
+        secretAccessKey: options.secretAccessKey,
+      },
+    });
+  }
 
-    await this.runWrangler(
-      ['r2', 'object', 'put', objectPath, '--file', filePath],
-      options
+  private async uploadViaS3(
+    filePath: string,
+    bucket: string,
+    key: string,
+    options: CloudflareDeploymentOptions
+  ): Promise<void> {
+    const s3 = this.getS3Client(options);
+    // If not overwriting, check existence
+    if (!options.overwrite) {
+      try {
+        await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+        throw new Error(
+          `Object already exists at ${bucket}/${key}. Use --overwrite to replace.`
+        );
+      } catch (err) {
+        // Not found => proceed; Only rethrow if it's not a 404 style error
+        const e = err as S3ServiceException;
+        const code = e.$metadata?.httpStatusCode;
+        const msg = (e.name || e.message || '').toLowerCase();
+        if (
+          code !== 404 &&
+          !msg.includes('not found') &&
+          !msg.includes('no such key') &&
+          !msg.includes('404')
+        ) {
+          throw err;
+        }
+      }
+    }
+    const body = await fs.readFile(filePath);
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: body,
+      })
     );
   }
 
-  private async runWrangler(
-    args: string[],
-    options: CloudflareDeploymentOptions,
-    extra?: { allowFail?: boolean }
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const env: NodeJS.ProcessEnv = { ...process.env };
-      if (options.accountId) env.CLOUDFLARE_ACCOUNT_ID = options.accountId;
-      if (options.apiToken) env.CLOUDFLARE_API_TOKEN = options.apiToken;
-
-      const child = spawn('npx', ['-y', 'wrangler', ...args], {
-        env,
-        stdio: 'inherit',
-      });
-
-      child.on('error', (err) => {
-        if (extra?.allowFail) return resolve();
-        reject(err);
-      });
-      child.on('exit', (code) => {
-        if (code === 0 || extra?.allowFail) return resolve();
-        reject(
-          new Error(`wrangler ${args.join(' ')} exited with code ${code}`)
-        );
-      });
-    });
-  }
+  // Wrangler support removed: S3-only uploads
 }
 
 // Provider wrapper for registry-based CLI
@@ -152,14 +188,21 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
         '--public-url <url>',
         'Public base URL serving R2 objects (e.g., https://forms.example.com)'
       )
+      // S3-only: no --method flag
+      .option('--access-key-id <id>', 'R2 Access Key ID (env R2_ACCESS_KEY_ID)')
+      .option(
+        '--secret-access-key <key>',
+        'R2 Secret Access Key (env R2_SECRET_ACCESS_KEY)'
+      )
+      .option(
+        '--endpoint <url>',
+        'S3 endpoint (defaults to https://<accountId>.r2.cloudflarestorage.com)'
+      )
       .option(
         '--account-id <id>',
-        'Cloudflare account ID (fallback to env CLOUDFLARE_ACCOUNT_ID)'
+        'Cloudflare account ID (used to derive S3 endpoint)'
       )
-      .option(
-        '--api-token <token>',
-        'Cloudflare API token (fallback to env CLOUDFLARE_API_TOKEN)'
-      )
+      // S3-only: no --api-token flag
       .option('--overwrite', 'Overwrite existing objects in R2', false)
       .action(async (formId: string, options: GenericProviderOptions) => {
         await this.execute(config, formId, options);
@@ -192,12 +235,13 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
       const cfOptions: CloudflareDeploymentOptions = {
         bucket: (options.bucket as string) || cfConfig?.bucket || '',
         publicUrl: (options.publicUrl as string) || cfConfig?.publicUrl || '',
-        accountId:
-          (options.accountId as string) ||
-          cfConfig?.accountId ||
-          process.env.CLOUDFLARE_ACCOUNT_ID,
-        apiToken:
-          (options.apiToken as string) || process.env.CLOUDFLARE_API_TOKEN,
+        accessKeyId:
+          (options.accessKeyId as string) || process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey:
+          (options.secretAccessKey as string) ||
+          process.env.R2_SECRET_ACCESS_KEY,
+        endpoint: (options.endpoint as string) || process.env.R2_ENDPOINT,
+        accountId: (options.accountId as string) || cfConfig?.accountId,
         overwrite: Boolean(options.overwrite),
       };
 
@@ -235,7 +279,7 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
           `Error: ${error instanceof Error ? error.message : String(error)}`
         )
       );
-      process.exit(1);
+      throw error;
     }
   },
 
@@ -244,92 +288,32 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
     const inquirerModule = await import('inquirer');
     const inquirer = inquirerModule.default || inquirerModule;
     console.log(chalk.cyan('\nCloudflare R2 Setup:'));
-    const setupPrompt = (await inquirer.prompt([
+    const answers = (await inquirer.prompt([
+      { type: 'input', name: 'bucket', message: 'R2 bucket name:' },
       {
-        type: 'list',
-        name: 'setupMode',
-        message: 'How would you like to configure Cloudflare R2?',
-        choices: [
-          { name: 'Create new bucket (requires API token)', value: 'create' },
-          { name: 'Use existing bucket', value: 'existing' },
-        ],
+        type: 'input',
+        name: 'publicUrl',
+        message:
+          'Public base URL (e.g., https://<bucket>.r2.cloudflarestorage.com):',
       },
-    ])) as { setupMode: 'create' | 'existing' };
+      {
+        type: 'input',
+        name: 'accountId',
+        message: 'Cloudflare Account ID (optional, for deriving S3 endpoint):',
+      },
+    ])) as { bucket: string; publicUrl: string; accountId?: string };
 
-    let bucket = '';
-    let publicUrl = '';
-    let accountId = '';
-
-    if (setupPrompt.setupMode === 'create') {
-      const createAnswers = (await inquirer.prompt([
-        { type: 'input', name: 'accountId', message: 'Cloudflare Account ID:' },
-        {
-          type: 'input',
-          name: 'apiToken',
-          message: 'Cloudflare API Token (with R2 permissions):',
-        },
-        { type: 'input', name: 'bucket', message: 'New R2 bucket name:' },
-        {
-          type: 'input',
-          name: 'publicUrl',
-          message:
-            'Public base URL for bucket (e.g., https://forms.example.com):',
-        },
-      ])) as {
-        accountId: string;
-        apiToken: string;
-        bucket: string;
-        publicUrl: string;
-      };
-      accountId = createAnswers.accountId;
-      bucket = createAnswers.bucket;
-      publicUrl = createAnswers.publicUrl;
-
-      const { spawnSync } = await import('child_process');
-
-      const result = spawnSync(
-        'npx',
-        ['-y', 'wrangler', 'r2', 'bucket', 'create', bucket],
-        {
-          env: {
-            ...process.env,
-            CLOUDFLARE_ACCOUNT_ID: accountId,
-            CLOUDFLARE_API_TOKEN: createAnswers.apiToken,
-          },
-          stdio: 'inherit',
-        }
-      );
-      if (result.status !== 0) {
-        console.log(
-          chalk.red(
-            'Failed to create bucket. Please check credentials and try again.'
-          )
-        );
-        return;
-      }
-      console.log(chalk.green(`Bucket "${bucket}" created successfully.`));
-    } else {
-      const existingAnswers = (await inquirer.prompt([
-        { type: 'input', name: 'bucket', message: 'Existing R2 bucket name:' },
-        {
-          type: 'input',
-          name: 'publicUrl',
-          message:
-            'Public base URL for bucket (e.g., https://forms.example.com):',
-        },
-        {
-          type: 'input',
-          name: 'accountId',
-          message: 'Cloudflare Account ID (optional):',
-        },
-      ])) as { bucket: string; publicUrl: string; accountId: string };
-      bucket = existingAnswers.bucket;
-      publicUrl = existingAnswers.publicUrl;
-      accountId = existingAnswers.accountId;
-    }
-
-    config.set('cloudflare', { bucket, publicUrl, accountId });
+    config.set('cloudflare', {
+      bucket: answers.bucket,
+      publicUrl: answers.publicUrl,
+      accountId: answers.accountId || '',
+    });
     await config.save();
     console.log(chalk.green('\nCloudflare R2 configuration saved!'));
+    console.log(
+      chalk.dim(
+        'Note: Ensure R2 S3 credentials are set via env (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY).'
+      )
+    );
   },
 };

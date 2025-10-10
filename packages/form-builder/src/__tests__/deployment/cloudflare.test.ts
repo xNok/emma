@@ -1,13 +1,4 @@
-import {
-  describe,
-  it,
-  beforeEach,
-  expect,
-  vi,
-  afterEach,
-  type Mock,
-  type SpyInstance,
-} from 'vitest';
+import { describe, it, beforeEach, expect, vi, type Mock } from 'vitest';
 import {
   cloudflareProvider,
   CloudflareR2Deployment,
@@ -30,18 +21,10 @@ vi.spyOn(realConfig, 'loadFormSchema').mockResolvedValue({
 });
 
 describe('cloudflareProvider', () => {
-  let exitSpy: SpyInstance<[code?: string | number | null | undefined], never>;
   beforeEach(() => {
     vi.clearAllMocks();
-    exitSpy = vi
-      .spyOn(process, 'exit')
-      .mockImplementation((code?: string | number | null | undefined) => {
-        throw new Error(`process.exit called with "${String(code)}"`);
-      });
   });
-  afterEach(() => {
-    exitSpy.mockRestore();
-  });
+  // No afterEach needed
 
   it('should register provider correctly', () => {
     expect(cloudflareProvider.name).toBe('cloudflare');
@@ -49,10 +32,7 @@ describe('cloudflareProvider', () => {
     expect(typeof cloudflareProvider.execute).toBe('function');
   });
 
-  it('should run init and save config', async () => {
-    (inquirer.prompt as unknown as Mock).mockResolvedValueOnce({
-      setupMode: 'existing',
-    });
+  it('should run init and save config (S3-only)', async () => {
     (inquirer.prompt as unknown as Mock).mockResolvedValueOnce({
       bucket: 'test-bucket',
       publicUrl: 'https://test-bucket.r2.cloudflarestorage.com',
@@ -69,48 +49,44 @@ describe('cloudflareProvider', () => {
     expect(saveSpy).toHaveBeenCalled();
   });
 
-  it('should handle bucket creation', async () => {
-    (inquirer.prompt as unknown as Mock).mockResolvedValueOnce({
-      setupMode: 'create',
-    });
-    (inquirer.prompt as unknown as Mock).mockResolvedValueOnce({
-      accountId: 'test-account',
-      apiToken: 'test-token',
-      bucket: 'new-bucket',
-      publicUrl: 'https://new-bucket.r2.cloudflarestorage.com',
-    });
-    // Mock spawnSync for bucket creation
-    vi.mock('child_process', async () => {
-      const actual =
-        await vi.importActual<typeof import('child_process')>('child_process');
+  // S3-only: no bucket creation test needed
 
-      return {
-        ...actual,
-        spawnSync: () => ({ status: 0 }),
-      };
-    });
-    if (typeof cloudflareProvider.init === 'function') {
-      await cloudflareProvider.init(realConfig);
-    }
-    expect(realConfig.get('cloudflare')).toEqual({
-      bucket: 'new-bucket',
-      publicUrl: 'https://new-bucket.r2.cloudflarestorage.com',
+  it('should execute deployment (S3-only, always succeeds)', async () => {
+    const options = {
+      bucket: 'bucket',
+      publicUrl: 'https://bucket.r2.cloudflarestorage.com',
+      accessKeyId: 'fake-key',
+      secretAccessKey: 'fake-secret',
       accountId: 'test-account',
-    });
-  });
-
-  it('should execute deployment', async () => {
-    const options = { bucket: 'bucket', publicUrl: 'url' };
-    // Avoid actually calling wrangler in CI by mocking runWrangler to fail
-    vi.spyOn(
+    };
+    // Mock S3Client and its send method:
+    // - HeadObjectCommand always throws 404 (object not found)
+    // - All other commands resolve
+    // Mock getS3Client on the prototype for all instances
+    (
       CloudflareR2Deployment.prototype as unknown as {
-        runWrangler: (args: string[]) => Promise<void>;
-      },
-      'runWrangler'
-    ).mockRejectedValue(new Error('simulated wrangler failure'));
-
+        getS3Client: () => {
+          send: (cmd: { constructor: { name: string } }) => Promise<unknown>;
+        };
+      }
+    ).getS3Client = () => {
+      return {
+        send: vi
+          .fn()
+          .mockImplementation((cmd: { constructor: { name: string } }) => {
+            if (cmd.constructor.name === 'HeadObjectCommand') {
+              const err = new Error('NotFound') as Error & {
+                $metadata?: { httpStatusCode: number };
+              };
+              err.$metadata = { httpStatusCode: 404 };
+              throw err;
+            }
+            return Promise.resolve({});
+          }),
+      };
+    };
     await expect(
       cloudflareProvider.execute(realConfig, 'form-id', options)
-    ).rejects.toThrow('process.exit called with "1"');
+    ).resolves.not.toThrow();
   });
 });

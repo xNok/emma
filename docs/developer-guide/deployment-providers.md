@@ -32,6 +32,7 @@ Use `config.get('cloudflare')` and `config.set('cloudflare', value)` for access.
 ### Init Flow
 
 `emma init` will offer provider setup. For Cloudflare:
+
 - Create bucket: prompts for accountId, apiToken, bucket, publicUrl, then creates the bucket via Wrangler.
 - Use existing bucket: prompts for bucket, publicUrl, optional accountId.
 

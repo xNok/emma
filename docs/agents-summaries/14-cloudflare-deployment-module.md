@@ -16,7 +16,7 @@ Date: 2025-10-10
 - packages/form-builder/src/deployment/cloudflare.ts
 - packages/form-builder/src/commands/deploy.ts
 - packages/form-builder/src/config.ts
-- packages/form-builder/src/__tests__/cloudflare-deployment.test.ts
+- packages/form-builder/src/**tests**/cloudflare-deployment.test.ts
 - packages/form-builder/README.md
 
 ## Next steps

@@ -242,18 +242,31 @@ emma deploy cloudflare <form-id> --bucket <name> --public-url <url> [--overwrite
 
 - `--bucket` - R2 bucket name (e.g., `emma-forms`)
 - `--public-url` - Base public URL serving the bucket (e.g., `https://forms.example.com`)
+- `--method` - Upload mechanism: `s3` (recommended) or `wrangler` (fallback). Default: auto-detect.
+- `--access-key-id`, `--secret-access-key` - R2 S3 credentials (or use env `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`)
+- `--endpoint` - Custom S3 endpoint (defaults to `https://<accountId>.r2.cloudflarestorage.com`)
 - `--account-id` - Cloudflare account ID (falls back to env `CLOUDFLARE_ACCOUNT_ID`)
-- `--api-token` - Cloudflare API token (falls back to env `CLOUDFLARE_API_TOKEN`)
+- `--api-token` - Cloudflare API token (falls back to env `CLOUDFLARE_API_TOKEN`) [wrangler only]
 - `--overwrite` - Overwrite existing objects in R2
 
 **Cloudflare Auth:**
 
-Set environment variables before running:
+You can authenticate via either method:
 
-```
-export CLOUDFLARE_API_TOKEN=... # required
-export CLOUDFLARE_ACCOUNT_ID=... # optional if wrangler is already configured
-```
+- S3 (recommended):
+
+  ```
+  export R2_ACCESS_KEY_ID=...
+  export R2_SECRET_ACCESS_KEY=...
+  # Optional if not providing --account-id or --endpoint
+  export R2_ENDPOINT=https://<accountId>.r2.cloudflarestorage.com
+  ```
+
+- Wrangler (fallback):
+  ```
+  export CLOUDFLARE_API_TOKEN=...
+  export CLOUDFLARE_ACCOUNT_ID=...
+  ```
 
 **Examples:**
 

@@ -13,7 +13,7 @@ Date: 2025-10-10
 
 ## Files added/updated
 
-- packages/form-builder/src/__tests__/deployment/cloudflare.test.ts — new tests
+- packages/form-builder/src/**tests**/deployment/cloudflare.test.ts — new tests
 - packages/form-builder/package.json — test script now `vitest --run`
 - docs/developer-guide/deployment-providers.md — new provider contract & Cloudflare docs
 - docs/developer-guide/cli-reference.md — updated init and deploy sections to reflect provider configuration
