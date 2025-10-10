@@ -68,6 +68,10 @@ Add Emma configuration to your `hugo.toml`:
 
 ## 4. Shortcode Implementation
 
+Note: The `cdnUrl` should point to the host that serves your deployed bundles.
+If you're using the Cloudflare R2 provider, this would be the public base URL
+you entered during `emma init` (e.g., `https://forms.example.com`).
+
 ### 4.1 Basic Shortcode
 
 File: `layouts/shortcodes/embed-form.html`

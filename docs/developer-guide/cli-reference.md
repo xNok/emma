@@ -43,6 +43,7 @@ emma init
 - Default theme for new forms
 - Local server port for previews
 - Local server host
+- Optional: Configure deployment provider(s), e.g., Cloudflare R2
 
 **Example:**
 
@@ -60,6 +61,7 @@ Configuration:
   Builds directory: /home/user/.emma/builds
   Default theme: default
   Local server: http://localhost:3333
+  Cloudflare: configured (bucket: emma-forms, publicUrl: https://forms.example.com)
 ```
 
 ---
@@ -263,6 +265,9 @@ emma deploy local contact-form-001
 emma deploy cloudflare contact-form-001 \
   --bucket emma-forms \
   --public-url https://forms.example.com
+
+If you've previously run `emma init` and configured Cloudflare, you can omit
+`--bucket` and `--public-url`. The saved values from `~/.emma/config.json` will be used.
 ```
 
 ---
