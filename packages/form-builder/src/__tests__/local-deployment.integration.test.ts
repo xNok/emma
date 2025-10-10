@@ -112,6 +112,9 @@ describe('LocalDeployment Integration Tests', () => {
     // Create instances
     deployment = new LocalDeployment(config);
     builder = new FormBuilder(config);
+    
+    // Build the form (deployment now requires forms to be pre-built)
+    await builder.build(mockFormSchema.formId, mockFormSchema);
 
     // Use random port to avoid conflicts
     testPort = 3000 + Math.floor(Math.random() * 1000);

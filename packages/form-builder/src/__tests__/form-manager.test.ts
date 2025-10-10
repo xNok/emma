@@ -131,6 +131,8 @@ describe('FormManager', () => {
   describe('form deployment', () => {
     beforeEach(async () => {
       await manager.createForm('manager-test-001', mockSchema);
+      // Build the form before deploying
+      await manager.buildForm('manager-test-001');
     });
 
     it('should deploy form', async () => {

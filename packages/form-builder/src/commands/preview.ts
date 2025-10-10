@@ -6,7 +6,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import open from 'open';
 import type { EmmaConfig } from '../config.js';
-import { LocalDeployment } from '../local-deployment.js';
+import { FormManager } from '../form-manager.js';
 
 interface PreviewOptions {
   port?: string;
@@ -29,22 +29,29 @@ export function previewCommand(config: EmmaConfig): Command {
         return;
       }
 
-      const schema = await config.loadFormSchema(formId);
-      if (!schema) {
-        console.log(chalk.red(`Form "${formId}" not found.`));
-        return;
-      }
-
-      const deployment = new LocalDeployment(config);
+      const manager = new FormManager(config);
 
       try {
+        // Check if form exists
+        const schema = await manager.getForm(formId);
+        if (!schema) {
+          console.log(chalk.red(`Form "${formId}" not found.`));
+          return;
+        }
+
+        // Ensure form is built (will build if needed)
+        const wasRebuilt = await manager.ensureBuilt(formId);
+        if (wasRebuilt) {
+          console.log(chalk.green(`✅ Built form "${formId}"\n`));
+        }
+
         const host = options.host || config.get('localServerHost');
         const port = options.port
           ? parseInt(options.port, 10)
           : config.get('localServerPort');
 
-        // Ensure form is deployed/built
-        const result = await deployment.ensureDeployed(formId, { host, port });
+        // Deploy to local server
+        const result = await manager.deployForm(formId, { host, port });
 
         console.log(chalk.cyan('📝 Form Preview'));
         console.log('');
