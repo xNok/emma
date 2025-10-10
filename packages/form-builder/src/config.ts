@@ -16,6 +16,12 @@ export interface EmmaConfigData {
   localServerHost: string;
   formsDirectory: string;
   buildsDirectory: string;
+  // Optional deployment provider defaults
+  cloudflare?: {
+    bucket?: string;
+    publicUrl?: string;
+    accountId?: string;
+  };
 }
 
 export class EmmaConfig {

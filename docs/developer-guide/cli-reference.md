@@ -214,46 +214,55 @@ Next steps:
 
 ---
 
-### `emma deploy <form-id>`
+### `emma deploy`
 
-Deploy form to local development server.
+Deploy a form either locally (simulation) or to Cloudflare R2 using subcommands.
 
 ```bash
-emma deploy <form-id> [--port <port>] [--host <host>]
+# Default behavior: emma deploy <form-id> -> local
+emma deploy <form-id>
+
+# Explicit subcommands
+emma deploy local <form-id> [--port <port>] [--host <host>]
+emma deploy cloudflare <form-id> --bucket <name> --public-url <url> [--overwrite]
 ```
 
 **Arguments:**
 
 - `form-id` - The form ID to deploy
 
-**Options:**
+**Local Options:**
 
 - `--port`, `-p` - Override default port
 - `--host`, `-h` - Override default host
 
-**What it Does:**
+**Cloudflare Options:**
 
-- Builds form if not already built
-- Starts Express.js development server
-- Serves form preview pages and API endpoints
+- `--bucket` - R2 bucket name (e.g., `emma-forms`)
+- `--public-url` - Base public URL serving the bucket (e.g., `https://forms.example.com`)
+- `--account-id` - Cloudflare account ID (falls back to env `CLOUDFLARE_ACCOUNT_ID`)
+- `--api-token` - Cloudflare API token (falls back to env `CLOUDFLARE_API_TOKEN`)
+- `--overwrite` - Overwrite existing objects in R2
 
-**Example:**
+**Cloudflare Auth:**
+
+Set environment variables before running:
+
+```
+export CLOUDFLARE_API_TOKEN=... # required
+export CLOUDFLARE_ACCOUNT_ID=... # optional if wrangler is already configured
+```
+
+**Examples:**
 
 ```bash
-$ emma deploy contact-form-001
+# Local simulation
+emma deploy local contact-form-001
 
-✓ Form deployed successfully
-
-🚀 Deployment complete!
-
-Form URL: http://localhost:3333/forms/contact-form-001
-API Endpoint: http://localhost:3333/api/submit/contact-form-001
-
-Hugo Shortcode:
-  {{< embed-form "contact-form-001" >}}
-
-💡 This is a local deployment simulation.
-   In production, forms would be deployed to Cloudflare Edge.
+# Cloudflare R2
+emma deploy cloudflare contact-form-001 \
+  --bucket emma-forms \
+  --public-url https://forms.example.com
 ```
 
 ---

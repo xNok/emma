@@ -1,83 +1,45 @@
 /**
- * Deploy Command - Deploy form to local server (simulation)
+ * Deploy Command - Subcommands per target (local, cloudflare)
  */
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import ora from 'ora';
 import type { EmmaConfig } from '../config.js';
-import { LocalDeployment } from '../local-deployment.js';
+import {
+  getDefaultProvider,
+  getDeploymentProviders,
+} from '../deployment/index.js';
 
-interface DeployOptions {
-  port?: string;
-  host?: string;
-}
+// No provider-specific types here; providers register their own flags
 
 export function deployCommand(config: EmmaConfig): Command {
-  return new Command('deploy')
-    .description(
-      'Deploy form to local server (simulates production deployment)'
-    )
-    .argument('<form-id>', 'Form ID to deploy')
-    .option('-p, --port <port>', 'Override default port')
-    .option('-h, --host <host>', 'Override default host')
-    .action(async (formId: string, options: DeployOptions) => {
-      if (!config.isInitialized()) {
+  const cmd = new Command('deploy').description(
+    'Deploy a form to a target environment'
+  );
+
+  // Default: emma deploy <form-id> routes to default provider
+  cmd
+    .argument('[form-id]', 'Form ID to deploy')
+    .action(async (formId?: string) => {
+      if (!formId) {
+        const providers = getDeploymentProviders()
+          .map((p) => p.name)
+          .join(' | ');
         console.log(
-          chalk.red('Emma is not initialized. Run "emma init" first.')
+          chalk.yellow(
+            `Usage: emma deploy <provider> <form-id> where <provider> is one of: ${providers}`
+          )
         );
         return;
       }
-
-      const schema = await config.loadFormSchema(formId);
-      if (!schema) {
-        console.log(chalk.red(`Form "${formId}" not found.`));
-        return;
-      }
-
-      const deployment = new LocalDeployment(config);
-      const spinner = ora('Deploying form...').start();
-
-      try {
-        const host = options.host || config.get('localServerHost');
-        const port = options.port
-          ? parseInt(options.port, 10)
-          : config.get('localServerPort');
-
-        const result = await deployment.deploy(formId, { host, port });
-
-        spinner.succeed('Form deployed successfully');
-
-        console.log('');
-        console.log(chalk.green('🚀 Deployment complete!'));
-        console.log('');
-        console.log(chalk.cyan('Form URL:'));
-        console.log(`  ${result.formUrl}`);
-        console.log('');
-        console.log(chalk.cyan('API Endpoint:'));
-        console.log(`  ${result.apiUrl}`);
-        console.log('');
-        console.log(chalk.cyan('Hugo Shortcode:'));
-        console.log(`  {{< embed-form "${formId}" >}}`);
-        console.log('');
-        console.log(chalk.dim('💡 This is a local deployment simulation.'));
-        console.log(
-          chalk.dim(
-            '   In production, forms would be deployed to Cloudflare Edge.'
-          )
-        );
-        console.log('');
-        console.log(chalk.cyan('Next steps:'));
-        console.log(`  $ emma preview ${formId}  # Open form in browser`);
-        console.log(`  $ curl -X POST ${result.apiUrl}  # Test API endpoint`);
-      } catch (error) {
-        spinner.fail('Deployment failed');
-        console.log(
-          chalk.red(
-            `Error: ${error instanceof Error ? error.message : String(error)}`
-          )
-        );
-        process.exit(1);
-      }
+      const def = getDefaultProvider();
+      await def.execute(config, formId, {});
     });
+
+  // Register all providers as subcommands
+  for (const provider of getDeploymentProviders()) {
+    provider.register(cmd, config);
+  }
+
+  return cmd;
 }
