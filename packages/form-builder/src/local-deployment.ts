@@ -100,6 +100,7 @@ export class LocalDeployment {
     // Middleware
     this.app.use(express.json());
     this.app.use(
+      '/themes',
       express.static(path.resolve(currentDir, '../../../form-renderer/themes'))
     );
 
