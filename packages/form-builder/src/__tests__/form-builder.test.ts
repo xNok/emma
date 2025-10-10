@@ -62,20 +62,9 @@ describe('FormBuilder', () => {
     testDir = path.join(os.tmpdir(), `emma-test-${Date.now()}`);
     await fs.ensureDir(testDir);
 
-    // Mock homedir to use test directory
-    const originalHomedir = os.homedir;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (os as any).homedir = () => testDir;
-
-    config = new EmmaConfig();
+    config = new EmmaConfig(testDir);
     await config.initialize();
     builder = new FormBuilder(config);
-
-    // Restore after each test
-    afterEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (os as any).homedir = originalHomedir;
-    });
   });
 
   afterEach(async () => {

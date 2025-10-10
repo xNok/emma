@@ -395,8 +395,8 @@ export class FormBuilder {
         
         <div class="debug-links" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
             <strong>🔧 Debug Assets:</strong><br>
-            <a href="${schema.formId}.js" target="_blank" style="color: #0066cc; text-decoration: none;">📄 JavaScript Bundle</a> |
-            <a href="themes/${schema.theme}.css" target="_blank" style="color: #0066cc; text-decoration: none;">🎨 Theme CSS</a> |
+            <a href="/forms/${schema.formId}/${schema.formId}.js" target="_blank" style="color: #0066cc; text-decoration: none;">📄 JavaScript Bundle</a> |
+            <a href="/forms/${schema.formId}/themes/${schema.theme}.css" target="_blank" style="color: #0066cc; text-decoration: none;">🎨 Theme CSS</a> |
             <a href="${schema.apiEndpoint}" target="_blank" style="color: #0066cc; text-decoration: none;">🔗 API Endpoint</a>
         </div>
     </div>
@@ -405,7 +405,7 @@ export class FormBuilder {
         <!-- Form will be rendered here -->
     </div>
 
-    <script src="${schema.formId}.js"></script>
+    <script src="/forms/${schema.formId}/${schema.formId}.js"></script>
 </body>
 </html>`;
   }

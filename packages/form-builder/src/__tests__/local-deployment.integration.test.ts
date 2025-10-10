@@ -96,13 +96,7 @@ describe('LocalDeployment Integration Tests', () => {
     await fs.ensureDir(tempDir);
 
     // Initialize config with temp directory
-    config = new EmmaConfig();
-
-    // Override config paths for testing
-    (config as any).configDir = tempDir;
-    (config as any).data.formsDirectory = path.join(tempDir, 'forms');
-    (config as any).data.buildsDirectory = path.join(tempDir, 'builds');
-
+    config = new EmmaConfig(tempDir);
     await config.initialize();
 
     // Save test form schema
@@ -309,8 +303,8 @@ describe('LocalDeployment Integration Tests', () => {
 
       // Check for debug links
       expect(htmlContent).toContain('Debug Assets');
-      expect(htmlContent).toContain(`${mockFormSchema.formId}.js`);
-      expect(htmlContent).toContain(`themes/${mockFormSchema.theme}.css`);
+      expect(htmlContent).toContain(`/forms/${mockFormSchema.formId}/${mockFormSchema.formId}.js`);
+      expect(htmlContent).toContain(`/forms/${mockFormSchema.formId}/themes/${mockFormSchema.theme}.css`);
       expect(htmlContent).toContain(mockFormSchema.apiEndpoint);
 
       // Verify debug links are clickable

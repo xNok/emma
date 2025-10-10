@@ -23,8 +23,8 @@ export class EmmaConfig {
   private configFile: string;
   private data: EmmaConfigData;
 
-  constructor() {
-    this.configDir = path.join(os.homedir(), '.emma');
+  constructor(customConfigDir?: string) {
+    this.configDir = customConfigDir || path.join(os.homedir(), '.emma');
     this.configFile = path.join(this.configDir, 'config.json');
 
     // Default configuration

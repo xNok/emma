@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { EmmaConfig, type EmmaConfigData } from '../config.js';
+import { EmmaConfig } from '../config.js';
 import type { FormSchema } from '@emma/shared/types';
 
 describe('EmmaConfig', () => {
@@ -18,18 +18,7 @@ describe('EmmaConfig', () => {
     testDir = path.join(os.tmpdir(), `emma-test-${Date.now()}`);
     await fs.ensureDir(testDir);
 
-    // Mock homedir to use test directory
-    const originalHomedir = os.homedir;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (os as any).homedir = () => testDir;
-
-    config = new EmmaConfig();
-
-    // Restore after each test
-    afterEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (os as any).homedir = originalHomedir;
-    });
+    config = new EmmaConfig(testDir);
   });
 
   afterEach(async () => {
@@ -46,9 +35,8 @@ describe('EmmaConfig', () => {
     });
 
     it('should set correct directory paths', () => {
-      const expectedConfigDir = path.join(testDir, '.emma');
-      const expectedFormsDir = path.join(expectedConfigDir, 'forms');
-      const expectedBuildsDir = path.join(expectedConfigDir, 'builds');
+      const expectedFormsDir = path.join(testDir, 'forms');
+      const expectedBuildsDir = path.join(testDir, 'builds');
 
       expect(config.getFormsDir()).toBe(expectedFormsDir);
       expect(config.getBuildsDir()).toBe(expectedBuildsDir);
@@ -66,7 +54,7 @@ describe('EmmaConfig', () => {
       config.set('localServerPort', 4000);
       await config.save();
 
-      const newConfig = new EmmaConfig();
+      const newConfig = new EmmaConfig(testDir);
       await newConfig.load();
 
       expect(newConfig.get('defaultTheme')).toBe('minimal');
@@ -93,7 +81,7 @@ describe('EmmaConfig', () => {
       expect(await fs.pathExists(config.getFormsDir())).toBe(true);
       expect(await fs.pathExists(config.getBuildsDir())).toBe(true);
       expect(
-        await fs.pathExists(path.join(testDir, '.emma', 'config.json'))
+        await fs.pathExists(path.join(testDir, 'config.json'))
       ).toBe(true);
     });
   });
@@ -167,12 +155,12 @@ describe('EmmaConfig', () => {
   describe('path methods', () => {
     it('should return correct form path', () => {
       const formPath = config.getFormPath('test-form');
-      expect(formPath).toMatch(/\.emma\/forms\/test-form\.yaml$/);
+      expect(formPath).toMatch(/forms\/test-form\.yaml$/);
     });
 
     it('should return correct build path', () => {
       const buildPath = config.getBuildPath('test-form');
-      expect(buildPath).toMatch(/\.emma\/builds\/test-form$/);
+      expect(buildPath).toMatch(/builds\/test-form$/);
     });
   });
 });
