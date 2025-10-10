@@ -1,10 +1,2 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Run fast checks first
-echo "🔎 Running lint..."
-yarn lint || exit 1
-
-# Ensure tests pass (non-watch)
-echo "🧪 Running tests..."
-yarn test --run || exit 1
+yarn lint
+yarn test --run
