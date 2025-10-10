@@ -319,7 +319,9 @@ async function createField(
           default: 4,
           validate: (input: string) => {
             const value = Number(input);
-            return Number.isInteger(value) && value > 0 ? true : 'Rows must be a positive integer';
+            return Number.isInteger(value) && value > 0
+              ? true
+              : 'Rows must be a positive integer';
           },
           filter: (input: string) => Number(input),
         },
