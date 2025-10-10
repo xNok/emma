@@ -36,15 +36,14 @@ graph TB
 
 **Key Responsibilities:**
 
-
 **Technology:**
-
 
 **Commands:**
 **Technology:**
+
 - TypeScript with ES2022 modules
 - Inquirer.js for interactive prompts
-- Commander.js for CLI commands  
+- Commander.js for CLI commands
 - Express.js for local development server
 - fs-extra for file operations
 - js-yaml for schema storage
@@ -52,6 +51,7 @@ graph TB
 **Implementation Status:** ✅ **COMPLETE** (Local Development Ready)
 
 **Local Development Features:**
+
 - Form storage in `~/.emma/` directory (YAML format)
 - JavaScript bundle generation with embedded schemas
 - Local Express.js server for testing
@@ -71,8 +71,9 @@ emma list                    # List all forms
 emma preview <form-id>       # Local preview
 emma delete <form-id>        # Delete a form
 ```
+
 ```bash
-emma init                    # Initialize Emma configuration  
+emma init                    # Initialize Emma configuration
 emma create <form-name>      # Create a new form interactively
 emma build <form-id>         # Build form JavaScript bundle
 emma deploy <form-id>        # Deploy to local development server

@@ -105,12 +105,12 @@ describe('FormManager', () => {
 
     it('should delete form', async () => {
       await manager.createForm('manager-test-001', mockSchema);
-      
+
       // Verify form exists
       expect(await manager.getForm('manager-test-001')).toBeDefined();
-      
+
       await manager.deleteForm('manager-test-001');
-      
+
       // Verify form is deleted
       expect(await manager.getForm('manager-test-001')).toBeNull();
     });
@@ -126,7 +126,7 @@ describe('FormManager', () => {
 
       // Check that build artifacts exist
       const buildPath = config.getBuildPath('manager-test-001');
-      const bundlePath = path.join(buildPath, 'form.js');
+      const bundlePath = path.join(buildPath, 'manager-test-001.js');
       const htmlPath = path.join(buildPath, 'index.html');
 
       expect(await fs.pathExists(bundlePath)).toBe(true);
@@ -134,8 +134,9 @@ describe('FormManager', () => {
     });
 
     it('should throw error for non-existent form', async () => {
-      await expect(manager.buildForm('non-existent'))
-        .rejects.toThrow('Form not found: non-existent');
+      await expect(manager.buildForm('non-existent')).rejects.toThrow(
+        'Form not found: non-existent'
+      );
     });
   });
 
@@ -148,8 +149,12 @@ describe('FormManager', () => {
       const options = { host: 'localhost', port: 3341 };
       const result = await manager.deployForm('manager-test-001', options);
 
-      expect(result.formUrl).toBe('http://localhost:3341/forms/manager-test-001');
-      expect(result.apiUrl).toBe('http://localhost:3341/api/submit/manager-test-001');
+      expect(result.formUrl).toBe(
+        'http://localhost:3341/forms/manager-test-001'
+      );
+      expect(result.apiUrl).toBe(
+        'http://localhost:3341/api/submit/manager-test-001'
+      );
       expect(result.serverUrl).toBe('http://localhost:3341');
       expect(manager.isDeploymentRunning()).toBe(true);
     }, 10000);
@@ -171,10 +176,15 @@ describe('FormManager', () => {
       // Build
       await manager.buildForm(formId);
       const buildPath = config.getBuildPath(formId);
-      expect(await fs.pathExists(path.join(buildPath, 'form.js'))).toBe(true);
+      expect(await fs.pathExists(path.join(buildPath, `${formId}.js`))).toBe(
+        true
+      );
 
       // Deploy
-      const deployResult = await manager.deployForm(formId, { host: 'localhost', port: 3342 });
+      const deployResult = await manager.deployForm(formId, {
+        host: 'localhost',
+        port: 3342,
+      });
       expect(deployResult.formUrl).toContain(formId);
       expect(manager.isDeploymentRunning()).toBe(true);
 

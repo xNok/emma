@@ -39,11 +39,13 @@ emma init
 ```
 
 **Prompts:**
+
 - Default theme for new forms
-- Local server port for previews  
+- Local server port for previews
 - Local server host
 
 **Example:**
+
 ```bash
 $ emma init
 🚀 Initializing Emma Forms CLI...
@@ -71,22 +73,26 @@ emma create [form-name]
 ```
 
 **Arguments:**
+
 - `form-name` (optional) - Base name for the form
 
 **Interactive Flow:**
+
 1. Form display name and theme selection
 2. Submit button text and success message
 3. Field creation loop with validation
 4. Spam protection settings
 
 **Field Types Available:**
+
 - Text Input, Email, Textarea
 - Number, Phone, URL
-- Select Dropdown, Radio Buttons, Checkboxes  
+- Select Dropdown, Radio Buttons, Checkboxes
 - Date, Time, Date & Time
 - Hidden Field
 
 **Example:**
+
 ```bash
 $ emma create contact-form
 
@@ -112,7 +118,7 @@ $ emma create contact-form
   ? Field ID: email
   ? Required field? Yes
 
-? Add field 3: Textarea  
+? Add field 3: Textarea
   ? Field label: Message
   ? Field ID: message
   ? Number of rows: 5
@@ -142,9 +148,11 @@ emma list [--detailed]
 ```
 
 **Options:**
+
 - `--detailed`, `-d` - Show detailed information about each form
 
 **Example:**
+
 ```bash
 $ emma list --detailed
 
@@ -174,17 +182,21 @@ emma build <form-id> [--watch]
 ```
 
 **Arguments:**
+
 - `form-id` - The form ID to build
 
 **Options:**
+
 - `--watch`, `-w` - Watch for changes and rebuild (not implemented)
 
 **What it Creates:**
+
 - `~/.emma/builds/<form-id>/form.js` - JavaScript bundle
 - `~/.emma/builds/<form-id>/index.html` - Preview HTML
 - `~/.emma/builds/<form-id>/themes/` - Theme CSS files
 
 **Example:**
+
 ```bash
 $ emma build contact-form-001
 
@@ -211,18 +223,22 @@ emma deploy <form-id> [--port <port>] [--host <host>]
 ```
 
 **Arguments:**
+
 - `form-id` - The form ID to deploy
 
 **Options:**
+
 - `--port`, `-p` - Override default port
 - `--host`, `-h` - Override default host
 
 **What it Does:**
+
 - Builds form if not already built
 - Starts Express.js development server
 - Serves form preview pages and API endpoints
 
 **Example:**
+
 ```bash
 $ emma deploy contact-form-001
 
@@ -250,22 +266,25 @@ Open form preview in browser.
 emma preview <form-id> [--port <port>] [--host <host>] [--no-open]
 ```
 
-**Arguments:**  
+**Arguments:**
+
 - `form-id` - The form ID to preview
 
 **Options:**
+
 - `--port`, `-p` - Override default port
-- `--host`, `-h` - Override default host  
+- `--host`, `-h` - Override default host
 - `--no-open` - Don't open browser automatically
 
 **Example:**
+
 ```bash
 $ emma preview contact-form-001
 
 📝 Form Preview
 
 Name: Contact Form
-Theme: default  
+Theme: default
 Fields: 3
 
 URLs:
@@ -289,12 +308,15 @@ emma delete <form-id> [--force]
 ```
 
 **Arguments:**
+
 - `form-id` - The form ID to delete
 
 **Options:**
+
 - `--force`, `-f` - Skip confirmation prompt
 
 **Example:**
+
 ```bash
 $ emma delete contact-form-001
 
@@ -308,15 +330,18 @@ $ emma delete contact-form-001
 When you run `emma deploy` or `emma preview`, a local Express.js server starts with these endpoints:
 
 ### Form Endpoints
+
 - `GET /forms/<form-id>` - Form preview page
 - `GET /forms/<form-id>/form.js` - JavaScript bundle
 - `GET /themes/<theme>.css` - Theme CSS
 
-### API Endpoints  
+### API Endpoints
+
 - `POST /api/submit/<form-id>` - Form submission
 - `GET /api/info` - Server information
 
 ### Admin Endpoints
+
 - `GET /` - Server dashboard with form listing
 
 ## Form Schema Format
@@ -365,12 +390,12 @@ Each field can have validation rules:
 
 ```yaml
 validation:
-  required: true          # Required field
-  minLength: 2           # Minimum text length  
-  maxLength: 100         # Maximum text length
-  min: 18                # Minimum number value
-  max: 120               # Maximum number value
-  pattern: "^[a-z]+$"    # Regex pattern
+  required: true # Required field
+  minLength: 2 # Minimum text length
+  maxLength: 100 # Maximum text length
+  min: 18 # Minimum number value
+  max: 120 # Maximum number value
+  pattern: '^[a-z]+$' # Regex pattern
 ```
 
 ## Hugo Integration
@@ -396,6 +421,7 @@ The shortcode will load the form JavaScript bundle and render the form in the pa
 ### Common Issues
 
 **Command not found: emma**
+
 ```bash
 # If installed globally
 npm install -g @emma/form-builder
@@ -405,12 +431,14 @@ cd packages/form-builder && npm link
 ```
 
 **Port already in use**
+
 ```bash
 # Use different port
 emma deploy my-form --port 3334
 ```
 
 **Form not found**
+
 ```bash
 # List available forms
 emma list
@@ -420,6 +448,7 @@ emma preview correct-form-id-001
 ```
 
 **Bundle errors**
+
 ```bash
 # Rebuild form
 emma build my-form-001

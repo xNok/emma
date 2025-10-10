@@ -101,7 +101,7 @@ emma preview my-contact-form-001
 ### 2. Available Commands
 
 - `emma init` - Initialize Emma configuration
-- `emma create <name>` - Create new form interactively  
+- `emma create <name>` - Create new form interactively
 - `emma list [--detailed]` - List all forms
 - `emma build <form-id>` - Build form JavaScript bundle
 - `emma deploy <form-id>` - Deploy to local development server
@@ -127,7 +127,7 @@ Data logged locally
 ### 4. Field Types Supported
 
 - **Text Inputs**: text, email, textarea, number, tel, url
-- **Selection**: select dropdown, radio buttons, checkboxes  
+- **Selection**: select dropdown, radio buttons, checkboxes
 - **Date/Time**: date, time, datetime-local
 - **Special**: hidden fields for tracking
 
@@ -178,7 +178,7 @@ $ emma create contact-form
 ? Submit button text: Send Message
 📋 Adding form fields...
 ? Add field 1: Text Input > Your Name (required)
-? Add field 2: Email > Email Address (required) 
+? Add field 2: Email > Email Address (required)
 ? Add field 3: Textarea > Message (required)
 ? Add field 4: ✅ Done adding fields
 ? Enable spam protection (honeypot)? Yes
@@ -188,7 +188,7 @@ $ emma create contact-form
 $ emma build contact-form-001
 ✓ Form bundle built successfully
 
-$ emma deploy contact-form-001  
+$ emma deploy contact-form-001
 ✓ Form deployed successfully
 Form URL: http://localhost:3333/forms/contact-form-001
 API Endpoint: http://localhost:3333/api/submit/contact-form-001

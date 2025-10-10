@@ -92,7 +92,9 @@ describe('EmmaConfig', () => {
       expect(config.isInitialized()).toBe(true);
       expect(await fs.pathExists(config.getFormsDir())).toBe(true);
       expect(await fs.pathExists(config.getBuildsDir())).toBe(true);
-      expect(await fs.pathExists(path.join(testDir, '.emma', 'config.json'))).toBe(true);
+      expect(
+        await fs.pathExists(path.join(testDir, '.emma', 'config.json'))
+      ).toBe(true);
     });
   });
 
@@ -141,7 +143,7 @@ describe('EmmaConfig', () => {
 
     it('should delete form schema and builds', async () => {
       await config.saveFormSchema('test-form-001', mockSchema);
-      
+
       // Create mock build directory
       const buildDir = config.getBuildPath('test-form-001');
       await fs.ensureDir(buildDir);

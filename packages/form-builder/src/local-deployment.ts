@@ -4,6 +4,9 @@
 
 import fs from 'fs-extra';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
 import express from 'express';
 import type { EmmaConfig } from './config.js';
 import { FormBuilder } from './form-builder.js';
@@ -96,13 +99,35 @@ export class LocalDeployment {
     // Middleware
     this.app.use(express.json());
     this.app.use(
-      express.static(path.join(__dirname, '../../../form-renderer/themes'))
+      express.static(path.resolve(currentDir, '../../../form-renderer/themes'))
     );
 
     // Serve form builds
     const buildsDir = this.config.getBuildsDir();
 
-    // Form preview pages
+    // Serve all form assets from /forms/:formId/:asset (must come before the general form route)
+    this.app.get('/forms/:formId/*', async (req, res) => {
+      const formId = req.params.formId;
+      // Extract the asset path from the full URL
+      const fullPath = req.path;
+      const assetPath = fullPath.replace(`/forms/${formId}/`, '');
+      const formDir = path.join(buildsDir, formId);
+      const fullAssetPath = path.join(formDir, assetPath);
+
+      if (await fs.pathExists(fullAssetPath)) {
+        // Set correct MIME type for JS files
+        if (fullAssetPath.endsWith('.js')) {
+          res.type('application/javascript');
+        } else if (fullAssetPath.endsWith('.css')) {
+          res.type('text/css');
+        }
+        res.sendFile(fullAssetPath);
+      } else {
+        res.status(404).send('Asset not found');
+      }
+    });
+
+    // Form preview pages (must come after the asset route)
     this.app.get('/forms/:formId', async (req, res) => {
       const formId = req.params.formId;
       const indexPath = path.join(buildsDir, formId, 'index.html');
@@ -116,29 +141,6 @@ export class LocalDeployment {
           <p>Run: <code>emma build ${formId}</code></p>
         `);
       }
-    });
-
-    // Form JavaScript bundles
-    this.app.get('/forms/:formId/form.js', async (req, res) => {
-      const formId = req.params.formId;
-      const bundlePath = path.join(buildsDir, formId, 'form.js');
-
-      if (await fs.pathExists(bundlePath)) {
-        res.type('application/javascript').sendFile(bundlePath);
-      } else {
-        res.status(404).send('Form bundle not found');
-      }
-    });
-
-    // Theme CSS files
-    this.app.get('/themes/:theme.css', (req, res) => {
-      const theme = req.params.theme;
-      const themePath = path.join(
-        __dirname,
-        '../../../form-renderer/themes',
-        `${theme}.css`
-      );
-      res.sendFile(themePath);
     });
 
     // API submission endpoint
@@ -268,7 +270,7 @@ export class LocalDeployment {
   /**
    * Stop the server
    */
-  private async stopServer(): Promise<void> {
+  async stopServer(): Promise<void> {
     if (this.server) {
       return new Promise((resolve) => {
         this.server.close(() => {

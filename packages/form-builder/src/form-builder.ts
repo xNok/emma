@@ -7,6 +7,9 @@ import path from 'path';
 import type { FormSchema } from '@emma/shared/types';
 import type { EmmaConfig } from './config.js';
 
+import { fileURLToPath } from 'url';
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
 export interface BuildResult {
   bundlePath: string;
   outputDir: string;
@@ -26,8 +29,8 @@ export class FormBuilder {
     // Generate the form bundle JavaScript
     const bundleContent = this.generateFormBundle(schema);
 
-    // Write bundle file
-    const bundlePath = path.join(outputDir, 'form.js');
+    // Write bundle file with unique name
+    const bundlePath = path.join(outputDir, `${schema.formId}.js`);
     await fs.writeFile(bundlePath, bundleContent, 'utf8');
 
     // Copy theme CSS if it exists
@@ -389,13 +392,20 @@ export class FormBuilder {
             <strong>Fields:</strong> ${schema.fields.length}<br>
             <strong>API Endpoint:</strong> <code>${schema.apiEndpoint}</code>
         </div>
+        
+        <div class="debug-links" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+            <strong>🔧 Debug Assets:</strong><br>
+            <a href="${schema.formId}.js" target="_blank" style="color: #0066cc; text-decoration: none;">📄 JavaScript Bundle</a> |
+            <a href="themes/${schema.theme}.css" target="_blank" style="color: #0066cc; text-decoration: none;">🎨 Theme CSS</a> |
+            <a href="${schema.apiEndpoint}" target="_blank" style="color: #0066cc; text-decoration: none;">🔗 API Endpoint</a>
+        </div>
     </div>
 
     <div id="form-container" data-emma-form="${schema.formId}">
         <!-- Form will be rendered here -->
     </div>
 
-    <script src="./form.js"></script>
+    <script src="${schema.formId}.js"></script>
 </body>
 </html>`;
   }
@@ -407,7 +417,7 @@ export class FormBuilder {
     theme: string,
     outputDir: string
   ): Promise<void> {
-    const themesDir = path.join(__dirname, '../../form-renderer/themes');
+    const themesDir = path.resolve(currentDir, '../../form-renderer/themes');
     const themeFile = path.join(themesDir, `${theme}.css`);
 
     if (await fs.pathExists(themeFile)) {

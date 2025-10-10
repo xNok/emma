@@ -87,7 +87,9 @@ describe('FormBuilder', () => {
     it('should generate form bundle with correct structure', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
 
-      expect(result.bundlePath).toMatch(/contact-form-001\/form\.js$/);
+      expect(result.bundlePath).toMatch(
+        /contact-form-001\/contact-form-001\.js$/
+      );
       expect(result.outputDir).toMatch(/contact-form-001$/);
       expect(result.size).toBeGreaterThan(0);
 
@@ -104,7 +106,7 @@ describe('FormBuilder', () => {
       const htmlContent = await fs.readFile(htmlPath, 'utf8');
       expect(htmlContent).toContain('Contact Form');
       expect(htmlContent).toContain('contact-form-001');
-      expect(htmlContent).toContain('form.js');
+      expect(htmlContent).toContain('contact-form-001.js');
     });
 
     it('should embed schema in bundle', async () => {
@@ -143,19 +145,39 @@ describe('FormBuilder', () => {
           { id: 'text', type: 'text', label: 'Text' },
           { id: 'email', type: 'email', label: 'Email' },
           { id: 'number', type: 'number', label: 'Number' },
-          { id: 'select', type: 'select', label: 'Select', options: [
-            { value: 'opt1', label: 'Option 1' },
-            { value: 'opt2', label: 'Option 2' },
-          ]},
-          { id: 'radio', type: 'radio', label: 'Radio', options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
-          ]},
-          { id: 'checkbox', type: 'checkbox', label: 'Checkbox', options: [
-            { value: 'cb1', label: 'Checkbox 1' },
-            { value: 'cb2', label: 'Checkbox 2' },
-          ]},
-          { id: 'hidden', type: 'hidden', label: 'Hidden', defaultValue: 'hidden-value' },
+          {
+            id: 'select',
+            type: 'select',
+            label: 'Select',
+            options: [
+              { value: 'opt1', label: 'Option 1' },
+              { value: 'opt2', label: 'Option 2' },
+            ],
+          },
+          {
+            id: 'radio',
+            type: 'radio',
+            label: 'Radio',
+            options: [
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ],
+          },
+          {
+            id: 'checkbox',
+            type: 'checkbox',
+            label: 'Checkbox',
+            options: [
+              { value: 'cb1', label: 'Checkbox 1' },
+              { value: 'cb2', label: 'Checkbox 2' },
+            ],
+          },
+          {
+            id: 'hidden',
+            type: 'hidden',
+            label: 'Hidden',
+            defaultValue: 'hidden-value',
+          },
         ],
       };
 
@@ -164,10 +186,10 @@ describe('FormBuilder', () => {
 
       // Check that different field types are handled
       expect(bundleContent).toContain('input.type = field.type');
-      expect(bundleContent).toContain('case \'textarea\'');
-      expect(bundleContent).toContain('case \'select\'');
-      expect(bundleContent).toContain('case \'radio\'');
-      expect(bundleContent).toContain('case \'checkbox\'');
+      expect(bundleContent).toContain("case 'textarea'");
+      expect(bundleContent).toContain("case 'select'");
+      expect(bundleContent).toContain("case 'radio'");
+      expect(bundleContent).toContain("case 'checkbox'");
     });
 
     it('should include honeypot protection', async () => {
@@ -191,7 +213,10 @@ describe('FormBuilder', () => {
         },
       };
 
-      const result = await builder.build('no-honeypot-form', schemaWithoutHoneypot);
+      const result = await builder.build(
+        'no-honeypot-form',
+        schemaWithoutHoneypot
+      );
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
       expect(bundleContent).toContain('honeypot?.enabled');
@@ -219,7 +244,9 @@ describe('FormBuilder', () => {
   describe('error handling', () => {
     it('should handle missing output directory creation', async () => {
       // This should not throw as FormBuilder creates directories
-      await expect(builder.build('test-form', mockSchema)).resolves.toBeDefined();
+      await expect(
+        builder.build('test-form', mockSchema)
+      ).resolves.toBeDefined();
     });
 
     it('should handle schema serialization', async () => {
@@ -228,7 +255,10 @@ describe('FormBuilder', () => {
         undefinedProperty: undefined,
       };
 
-      const result = await builder.build('test-form', schemaWithUndefined as FormSchema);
+      const result = await builder.build(
+        'test-form',
+        schemaWithUndefined as FormSchema
+      );
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
 
       // Should handle undefined properties gracefully
