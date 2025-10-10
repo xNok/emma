@@ -313,12 +313,15 @@ async function createField(
     case 'textarea': {
       const textareaAnswers = (await inquirer.prompt([
         {
-          type: 'number',
+          type: 'input',
           name: 'rows',
           message: 'Number of rows:',
           default: 4,
-          validate: (input: number) =>
-            input > 0 || 'Rows must be greater than 0',
+          validate: (input: string) => {
+            const value = Number(input);
+            return Number.isInteger(value) && value > 0 ? true : 'Rows must be a positive integer';
+          },
+          filter: (input: string) => Number(input),
         },
       ])) as TextareaAnswer;
       field.rows = textareaAnswers.rows;
