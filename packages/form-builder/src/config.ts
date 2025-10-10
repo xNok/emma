@@ -44,7 +44,10 @@ export class EmmaConfig {
   async load(): Promise<void> {
     try {
       if (await fs.pathExists(this.configFile)) {
-        const fileData = await fs.readJson(this.configFile);
+        const fileData = (await fs.readJson(this.configFile)) as Record<
+          string,
+          any
+        >;
         this.data = { ...this.data, ...fileData };
       }
     } catch (error) {
@@ -146,7 +149,9 @@ export class EmmaConfig {
       const yamlContent = await fs.readFile(formPath, 'utf8');
       return yaml.load(yamlContent) as FormSchema;
     } catch (error) {
-      throw new Error(`Failed to load form schema for ${formId}: ${error}`);
+      throw new Error(
+        `Failed to load form schema for ${formId}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

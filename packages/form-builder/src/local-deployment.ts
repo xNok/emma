@@ -5,6 +5,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import type { Server } from 'http';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 import express from 'express';
@@ -24,7 +25,7 @@ export interface DeploymentResult {
 
 export class LocalDeployment {
   private app: express.Application | null = null;
-  private server: any = null;
+  private server: Server | null = null;
   private currentPort: number | null = null;
 
   constructor(private config: EmmaConfig) {}
@@ -273,7 +274,7 @@ export class LocalDeployment {
   async stopServer(): Promise<void> {
     if (this.server) {
       return new Promise((resolve) => {
-        this.server.close(() => {
+        this.server!.close(() => {
           this.server = null;
           this.currentPort = null;
           resolve();

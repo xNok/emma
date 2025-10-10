@@ -8,6 +8,13 @@ import path from 'path';
 import http from 'http';
 import { EmmaConfig } from '../config.js';
 import { LocalDeployment } from '../local-deployment.js';
+
+interface ApiResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  submissionId?: string;
+}
 import { FormBuilder } from '../form-builder.js';
 import type { FormSchema } from '@emma/shared/types';
 
@@ -245,7 +252,7 @@ describe('LocalDeployment Integration Tests', () => {
       });
 
       expect(response.status).toBe(200);
-      const result = JSON.parse(response.text);
+      const result = JSON.parse(response.text) as ApiResponse;
       expect(result.success).toBe(true);
       expect(result.message).toContain('submitted successfully');
     });
@@ -282,7 +289,7 @@ describe('LocalDeployment Integration Tests', () => {
       });
 
       expect(response.status).toBe(400);
-      const result = JSON.parse(response.text);
+      const result = JSON.parse(response.text) as ApiResponse;
       expect(result.success).toBe(false);
       expect(result.error).toBe('Spam detected');
     });

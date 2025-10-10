@@ -13,6 +13,35 @@ import type {
   ValidationRules,
 } from '@emma/shared/types';
 
+interface BasicFormInfo {
+  formName: string;
+  theme: string;
+}
+
+interface FormOptions {
+  submitButtonText: string;
+  successMessage: string;
+}
+
+interface FieldAnswer {
+  id: string;
+  label: string;
+  required: boolean;
+  placeholder?: string;
+}
+
+interface TextareaAnswer extends FieldAnswer {
+  rows: number;
+}
+
+interface SelectAnswer extends FieldAnswer {
+  defaultValue?: string;
+}
+
+interface InquirerAnswer {
+  [key: string]: any;
+}
+
 // Available field types
 const FIELD_TYPES: { name: string; value: FieldType; description: string }[] = [
   { name: 'Text Input', value: 'text', description: 'Single-line text field' },
@@ -75,7 +104,7 @@ export function createCommand(config: EmmaConfig): Command {
       console.log('');
 
       // Basic form information
-      const basicInfo = await inquirer.prompt([
+      const basicInfo = (await inquirer.prompt([
         {
           type: 'input',
           name: 'formName',
@@ -103,7 +132,7 @@ export function createCommand(config: EmmaConfig): Command {
           message: 'Success message:',
           default: 'Thank you for your submission!',
         },
-      ]);
+      ])) as BasicFormInfo & FormOptions;
 
       // Generate unique form ID
       const baseId =
@@ -129,7 +158,7 @@ export function createCommand(config: EmmaConfig): Command {
           { name: '✅ Done adding fields', value: '__done__', description: '' },
         ];
 
-        const { fieldType } = await inquirer.prompt([
+        const { fieldType } = (await inquirer.prompt([
           {
             type: 'list',
             name: 'fieldType',
@@ -137,7 +166,7 @@ export function createCommand(config: EmmaConfig): Command {
             choices: fieldChoices,
             pageSize: 15,
           },
-        ]);
+        ])) as { fieldType: FieldType | '__done__' };
 
         if (fieldType === '__done__') {
           addingFields = false;
@@ -161,14 +190,14 @@ export function createCommand(config: EmmaConfig): Command {
       }
 
       // Honeypot settings
-      const { enableHoneypot } = await inquirer.prompt([
+      const { enableHoneypot } = (await inquirer.prompt([
         {
           type: 'confirm',
           name: 'enableHoneypot',
           message: 'Enable spam protection (honeypot)?',
           default: true,
         },
-      ]);
+      ])) as { enableHoneypot: boolean };
 
       // Create form schema
       const schema: FormSchema = {
@@ -208,7 +237,11 @@ export function createCommand(config: EmmaConfig): Command {
         console.log(`  $ emma deploy ${formId}     # Deploy to local server`);
         console.log(`  $ emma preview ${formId}    # Open in browser`);
       } catch (error) {
-        console.log(chalk.red(`Error saving form: ${error}`));
+        console.log(
+          chalk.red(
+            `Error saving form: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
         process.exit(1);
       }
     });
@@ -218,7 +251,7 @@ async function createField(
   type: FieldType,
   fieldNumber: number
 ): Promise<FormField> {
-  const basePrompts = [
+  const basePrompts: any[] = [
     {
       type: 'input',
       name: 'label',
@@ -231,7 +264,7 @@ async function createField(
       type: 'input',
       name: 'id',
       message: 'Field ID:',
-      default: (answers: any) =>
+      default: (answers: Record<string, any>) =>
         answers.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
       validate: (input: string) =>
         /^[a-z][a-z0-9_]*$/.test(input) ||
@@ -245,17 +278,17 @@ async function createField(
         type: 'input',
         name: 'placeholder',
         message: 'Placeholder text (optional):',
-      } as any,
+      },
       {
         type: 'confirm',
         name: 'required',
         message: 'Required field?',
         default: true,
-      } as any
+      }
     );
   }
 
-  const baseAnswers = await inquirer.prompt(basePrompts);
+  const baseAnswers = (await inquirer.prompt(basePrompts)) as FieldAnswer;
 
   const field: FormField = {
     id: baseAnswers.id,
@@ -270,8 +303,8 @@ async function createField(
 
   // Type-specific prompts
   switch (type) {
-    case 'textarea':
-      const textareaAnswers = await inquirer.prompt([
+    case 'textarea': {
+      const textareaAnswers = (await inquirer.prompt([
         {
           type: 'number',
           name: 'rows',
@@ -280,9 +313,10 @@ async function createField(
           validate: (input: number) =>
             input > 0 || 'Rows must be greater than 0',
         },
-      ]);
+      ])) as TextareaAnswer;
       field.rows = textareaAnswers.rows;
       break;
+    }
 
     case 'select':
     case 'radio':
@@ -291,8 +325,8 @@ async function createField(
       field.options = options;
       break;
 
-    case 'hidden':
-      const hiddenAnswers = await inquirer.prompt([
+    case 'hidden': {
+      const hiddenAnswers = (await inquirer.prompt([
         {
           type: 'input',
           name: 'defaultValue',
@@ -300,9 +334,10 @@ async function createField(
           validate: (input: string) =>
             input.trim().length > 0 || 'Value is required for hidden fields',
         },
-      ]);
+      ])) as SelectAnswer;
       field.defaultValue = hiddenAnswers.defaultValue;
       break;
+    }
   }
 
   // Validation rules
@@ -323,10 +358,7 @@ async function createFieldOptions() {
   );
 
   while (true) {
-    const {
-      optionValue,
-      optionLabel,
-    }: { optionValue: string; optionLabel?: string } = await inquirer.prompt([
+    const optionAnswers = (await inquirer.prompt([
       {
         type: 'input',
         name: 'optionValue',
@@ -336,16 +368,16 @@ async function createFieldOptions() {
         type: 'input',
         name: 'optionLabel',
         message: 'Option label:',
-        when: (answers: any) => !!answers.optionValue,
-        default: (answers: any) => answers.optionValue,
+        when: (answers: Record<string, any>) => !!answers.optionValue,
+        default: (answers: Record<string, any>) => answers.optionValue,
       },
-    ]);
+    ])) as { optionValue: string; optionLabel?: string };
 
-    if (!optionValue) break;
+    if (!optionAnswers.optionValue) break;
 
     options.push({
-      value: optionValue,
-      label: optionLabel || optionValue,
+      value: optionAnswers.optionValue,
+      label: optionAnswers.optionLabel || optionAnswers.optionValue,
     });
   }
 
@@ -395,21 +427,24 @@ async function createValidationRules(
   }
 
   if (validationPrompts.length > 0) {
-    const { addValidation } = await inquirer.prompt([
+    const { addValidation } = (await inquirer.prompt([
       {
         type: 'confirm',
         name: 'addValidation',
         message: 'Add validation rules?',
         default: false,
       },
-    ]);
+    ])) as { addValidation: boolean };
 
     if (addValidation) {
-      const answers = await inquirer.prompt(validationPrompts);
+      const answers = (await inquirer.prompt(validationPrompts)) as Record<
+        string,
+        any
+      >;
 
       Object.keys(answers).forEach((key) => {
         if (answers[key] != null && answers[key] !== '') {
-          (rules as any)[key] = answers[key];
+          (rules as Record<string, any>)[key] = answers[key];
         }
       });
     }

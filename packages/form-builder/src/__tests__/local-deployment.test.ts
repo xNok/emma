@@ -11,6 +11,19 @@ import { LocalDeployment } from '../local-deployment.js';
 import { FormBuilder } from '../form-builder.js';
 import type { FormSchema } from '@emma/shared/types';
 
+interface ApiResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  submissionId?: string;
+}
+
+interface ServerInfo {
+  service: string;
+  version: string;
+  timestamp: string;
+}
+
 // Increase timeout for server operations
 const TIMEOUT = 10000;
 
@@ -60,14 +73,7 @@ describe('LocalDeployment', () => {
   afterEach(async () => {
     // Stop any running server
     if (deployment.isRunning()) {
-      await new Promise<void>((resolve) => {
-        const server = (deployment as any).server;
-        if (server) {
-          server.close(() => resolve());
-        } else {
-          resolve();
-        }
-      });
+      await deployment.stopServer();
     }
 
     // Clean up test directory
@@ -228,7 +234,7 @@ describe('LocalDeployment', () => {
         );
 
         expect(response.ok).toBe(true);
-        const result = await response.json();
+        const result = (await response.json()) as ApiResponse;
         expect(result.success).toBe(true);
         expect(result.submissionId).toBeDefined();
       },
@@ -257,7 +263,7 @@ describe('LocalDeployment', () => {
         );
 
         expect(response.status).toBe(400);
-        const result = await response.json();
+        const result = (await response.json()) as ApiResponse;
         expect(result.success).toBe(false);
         expect(result.error).toBe('Spam detected');
       },
@@ -270,7 +276,7 @@ describe('LocalDeployment', () => {
         const response = await fetch(`http://localhost:3339/api/info`);
         expect(response.ok).toBe(true);
 
-        const info = await response.json();
+        const info = (await response.json()) as ServerInfo;
         expect(info.service).toBe('Emma Forms Local Server');
         expect(info.version).toBe('0.1.0');
         expect(info.timestamp).toBeDefined();

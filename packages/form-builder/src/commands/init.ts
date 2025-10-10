@@ -15,14 +15,14 @@ export function initCommand(config: EmmaConfig): Command {
       console.log('');
 
       if (config.isInitialized()) {
-        const { overwrite } = await inquirer.prompt([
+        const { overwrite } = (await inquirer.prompt([
           {
             type: 'confirm',
             name: 'overwrite',
             message: 'Emma is already initialized. Overwrite configuration?',
             default: false,
           },
-        ]);
+        ])) as { overwrite: boolean };
 
         if (!overwrite) {
           console.log(chalk.yellow('Initialization cancelled.'));
@@ -31,7 +31,7 @@ export function initCommand(config: EmmaConfig): Command {
       }
 
       // Configuration prompts
-      const answers = await inquirer.prompt([
+      const answers = (await inquirer.prompt([
         {
           type: 'input',
           name: 'defaultTheme',
@@ -60,7 +60,11 @@ export function initCommand(config: EmmaConfig): Command {
           validate: (input: string) =>
             input.trim().length > 0 || 'Host is required',
         },
-      ]);
+      ])) as {
+        defaultTheme: string;
+        localServerPort: number;
+        localServerHost: string;
+      };
 
       // Update configuration
       config.set('defaultTheme', answers.defaultTheme);

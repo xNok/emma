@@ -6,11 +6,15 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import type { EmmaConfig } from '../config.js';
 
+interface ListOptions {
+  detailed?: boolean;
+}
+
 export function listCommand(config: EmmaConfig): Command {
   return new Command('list')
     .description('List all forms')
     .option('-d, --detailed', 'Show detailed information')
-    .action(async (options) => {
+    .action(async (options: ListOptions) => {
       if (!config.isInitialized()) {
         console.log(
           chalk.red('Emma is not initialized. Run "emma init" first.')

@@ -45,16 +45,12 @@ describe('FormManager', () => {
     // Stop any running deployment server
     if (manager.isDeploymentRunning()) {
       // Access private deployment instance to stop server
-      const deployment = (manager as any).deployment;
+      const deployment = (manager as any).deployment as {
+        isRunning(): boolean;
+        stopServer(): Promise<void>;
+      };
       if (deployment.isRunning()) {
-        await new Promise<void>((resolve) => {
-          const server = (deployment as any).server;
-          if (server) {
-            server.close(() => resolve());
-          } else {
-            resolve();
-          }
-        });
+        await deployment.stopServer();
       }
     }
 

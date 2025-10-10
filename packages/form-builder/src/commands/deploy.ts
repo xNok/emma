@@ -8,6 +8,11 @@ import ora from 'ora';
 import type { EmmaConfig } from '../config.js';
 import { LocalDeployment } from '../local-deployment.js';
 
+interface DeployOptions {
+  port?: string;
+  host?: string;
+}
+
 export function deployCommand(config: EmmaConfig): Command {
   return new Command('deploy')
     .description(
@@ -16,7 +21,7 @@ export function deployCommand(config: EmmaConfig): Command {
     .argument('<form-id>', 'Form ID to deploy')
     .option('-p, --port <port>', 'Override default port')
     .option('-h, --host <host>', 'Override default host')
-    .action(async (formId: string, options) => {
+    .action(async (formId: string, options: DeployOptions) => {
       if (!config.isInitialized()) {
         console.log(
           chalk.red('Emma is not initialized. Run "emma init" first.')
@@ -35,7 +40,9 @@ export function deployCommand(config: EmmaConfig): Command {
 
       try {
         const host = options.host || config.get('localServerHost');
-        const port = options.port || config.get('localServerPort');
+        const port = options.port
+          ? parseInt(options.port, 10)
+          : config.get('localServerPort');
 
         const result = await deployment.deploy(formId, { host, port });
 
@@ -65,7 +72,11 @@ export function deployCommand(config: EmmaConfig): Command {
         console.log(`  $ curl -X POST ${result.apiUrl}  # Test API endpoint`);
       } catch (error) {
         spinner.fail('Deployment failed');
-        console.log(chalk.red(`Error: ${error}`));
+        console.log(
+          chalk.red(
+            `Error: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
         process.exit(1);
       }
     });

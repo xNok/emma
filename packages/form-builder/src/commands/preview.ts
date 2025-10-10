@@ -8,6 +8,12 @@ import open from 'open';
 import type { EmmaConfig } from '../config.js';
 import { LocalDeployment } from '../local-deployment.js';
 
+interface PreviewOptions {
+  port?: string;
+  host?: string;
+  open?: boolean;
+}
+
 export function previewCommand(config: EmmaConfig): Command {
   return new Command('preview')
     .description('Open form preview in browser')
@@ -15,7 +21,7 @@ export function previewCommand(config: EmmaConfig): Command {
     .option('-p, --port <port>', 'Override default port')
     .option('-h, --host <host>', 'Override default host')
     .option('--no-open', "Don't open browser automatically")
-    .action(async (formId: string, options) => {
+    .action(async (formId: string, options: PreviewOptions) => {
       if (!config.isInitialized()) {
         console.log(
           chalk.red('Emma is not initialized. Run "emma init" first.')
@@ -33,7 +39,9 @@ export function previewCommand(config: EmmaConfig): Command {
 
       try {
         const host = options.host || config.get('localServerHost');
-        const port = options.port || config.get('localServerPort');
+        const port = options.port
+          ? parseInt(options.port, 10)
+          : config.get('localServerPort');
 
         // Ensure form is deployed/built
         const result = await deployment.ensureDeployed(formId, { host, port });
@@ -60,7 +68,11 @@ export function previewCommand(config: EmmaConfig): Command {
         console.log(chalk.cyan('Hugo Integration:'));
         console.log(`  {{< embed-form "${formId}" >}}`);
       } catch (error) {
-        console.log(chalk.red(`Error: ${error}`));
+        console.log(
+          chalk.red(
+            `Error: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
         process.exit(1);
       }
     });

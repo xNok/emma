@@ -8,12 +8,16 @@ import ora from 'ora';
 import type { EmmaConfig } from '../config.js';
 import { FormBuilder } from '../form-builder.js';
 
+interface BuildOptions {
+  watch?: boolean;
+}
+
 export function buildCommand(config: EmmaConfig): Command {
   return new Command('build')
     .description('Build a form bundle')
     .argument('<form-id>', 'Form ID to build')
     .option('-w, --watch', 'Watch for changes and rebuild')
-    .action(async (formId: string, options) => {
+    .action(async (formId: string, options: BuildOptions) => {
       if (!config.isInitialized()) {
         console.log(
           chalk.red('Emma is not initialized. Run "emma init" first.')
@@ -55,7 +59,11 @@ export function buildCommand(config: EmmaConfig): Command {
         }
       } catch (error) {
         spinner.fail('Build failed');
-        console.log(chalk.red(`Error: ${error}`));
+        console.log(
+          chalk.red(
+            `Error: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
         process.exit(1);
       }
     });
