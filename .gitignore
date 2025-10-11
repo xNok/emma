@@ -62,7 +62,5 @@ temp/
 # Emma specific
 forms/*.js
 forms/*.json
-node_modules
-.test-tmp/
 .emma-test*/
-.husky/
+/packages/form-builder/.tmp-emma-test/
