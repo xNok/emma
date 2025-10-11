@@ -1,8 +1,0 @@
-{
-  "initialized": true,
-  "defaultTheme": "default",
-  "localServerPort": 3333,
-  "localServerHost": "localhost",
-  "formsDirectory": "/workspaces/emma/packages/form-builder/.tmp-emma-test/forms",
-  "buildsDirectory": "/workspaces/emma/packages/form-builder/.tmp-emma-test/builds"
-}
