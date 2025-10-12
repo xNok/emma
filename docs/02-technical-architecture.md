@@ -442,10 +442,10 @@ sequenceDiagram
 
 The initial implementation of the core components is now complete, as outlined in this document. The system has been built according to the architecture described above. This includes:
 
--   **Form Builder TUI:** A functional command-line tool for creating and managing forms.
--   **Form Renderer:** A client-side library for rendering forms and handling submissions.
--   **Data Collection API:** A Cloudflare Worker endpoint for receiving and storing form data.
--   **Hugo Module:** A basic Hugo shortcode for easy integration.
+- **Form Builder TUI:** A functional command-line tool for creating and managing forms.
+- **Form Renderer:** A client-side library for rendering forms and handling submissions.
+- **Data Collection API:** A Cloudflare Worker endpoint for receiving and storing form data.
+- **Hugo Module:** A basic Hugo shortcode for easy integration.
 
 Future work will focus on polishing these components, adding new features, and improving the developer experience.
 
