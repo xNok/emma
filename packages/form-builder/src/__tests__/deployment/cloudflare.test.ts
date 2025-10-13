@@ -74,7 +74,11 @@ describe('cloudflareProvider', () => {
 
     const findCall = (key: string) => {
       return mockSend.mock.calls.find(
-        (call) => call[0].input.Key === key
+        (call) =>
+          call[0] &&
+          call[0].input &&
+          typeof call[0].input.Key === 'string' &&
+          call[0].input.Key === key
       )?.[0].input;
     };
 
