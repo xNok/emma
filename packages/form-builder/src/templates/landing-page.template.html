@@ -5,10 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>__FORM_NAME__</title>
     <link rel="stylesheet" href="themes/__THEME__.css">
-    <script type="module" src="__FORM_ID__.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        #form-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        footer {
+            position: sticky;
+            bottom: 0;
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            margin-top: auto;
+        }
+        
+        footer p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 0.5rem;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <div id="form-container" data-emma-form="__FORM_ID__"></div>
+    <div class="main-content">
+        <div id="form-container" data-emma-form="__FORM_ID__"></div>
+    </div>
+
+    <!-- ESM Module: Load the form bundle which imports the runtime -->
+    <script type="module" src="__FORM_ID__.js"></script>
+
+    <!-- Fallback for browsers without module support -->
+    <script nomodule>
+        document.getElementById('form-container').innerHTML = 
+            '<div style="background: #fee; border: 2px solid #c00; padding: 20px; border-radius: 8px; color: #c00;">' +
+            '<strong>⚠️ Browser Not Supported</strong><br>' +
+            'This form requires a modern browser with ES Module support.' +
+            '</div>';
+    </script>
+
     <footer>
         <p>🧑‍💻Built by Emma🚀<a href="https://github.com/xnok/emma">GitHub</a></p>
     </footer>

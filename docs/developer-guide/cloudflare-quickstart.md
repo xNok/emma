@@ -30,7 +30,7 @@ The config is stored in `~/.emma/config.json` under `cloudflare`.
 ## Deploy a form
 
 - Ensure your form schema exists (e.g., `examples/contact-form.yaml`).
-- Run: `emma deploy cloudflare --form-id contact-form` (or via interactive prompts)
+- Run: `emma deploy contact-form-001 --target cloudflare` (or use interactive target selection)
 - The CLI will build the bundle, upload it to R2, and print the public URLs
 
 ## Environment variables

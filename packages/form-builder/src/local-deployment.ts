@@ -206,7 +206,7 @@ export class LocalDeployment {
           formIds
             .map(
               (id) =>
-                `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${id}.js">Bundle</a></li>`
+                `<li><a href="/forms/${id}/preview.html">${id}</a> - <a href="/forms/${id}/${id}.js">Bundle</a></li>`
             )
             .join('') +
           '</ul>';
