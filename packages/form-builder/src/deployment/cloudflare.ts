@@ -30,6 +30,12 @@ export interface CloudflareDeploymentResult {
   bundleUrl: string;
   themeKey?: string;
   themeUrl?: string;
+  indexKey?: string;
+  indexUrl?: string;
+  rendererKey?: string;
+  rendererUrl?: string;
+  schemaKey?: string;
+  schemaUrl?: string;
 }
 
 export class CloudflareR2Deployment {
@@ -46,11 +52,6 @@ export class CloudflareR2Deployment {
     // Resolve build artifacts
     const buildDir = this.config.getBuildPath(formId);
     const bundlePath = path.join(buildDir, `${formId}.js`);
-    const themeDir = path.join(buildDir, 'themes');
-    const themeCss = path.join(
-      themeDir,
-      `${await this.getThemeName(formId)}.css`
-    );
 
     if (!(await fs.pathExists(bundlePath))) {
       throw new Error(`Bundle not found. Build first: ${bundlePath}`);
@@ -60,11 +61,34 @@ export class CloudflareR2Deployment {
     const bundleKey = `${formId}/${formId}.js`;
     await this.uploadToR2(bundlePath, options.bucket, bundleKey, options);
 
+    const schema = await this.config.loadFormSchema(formId);
+    if (!schema) {
+      throw new Error(`Schema not found for form "${formId}"`);
+    }
+
+    const themeCss = path.join(buildDir, 'themes', `${schema.theme}.css`);
+    const indexPath = path.join(buildDir, 'index.html');
+    const rendererPath = path.join(buildDir, 'emma-forms.esm.js');
+
     let themeKey: string | undefined;
     if (await fs.pathExists(themeCss)) {
       themeKey = `${formId}/themes/${path.basename(themeCss)}`;
       await this.uploadToR2(themeCss, options.bucket, themeKey, options);
     }
+
+    const indexKey = `${formId}/index.html`;
+    await this.uploadToR2(indexPath, options.bucket, indexKey, options);
+
+    const rendererKey = `${formId}/emma-forms.esm.js`;
+    await this.uploadToR2(rendererPath, options.bucket, rendererKey, options);
+
+    const schemaKey = `${formId}/${formId}.json`;
+    await this.uploadContentToR2(
+      JSON.stringify(schema, null, 2),
+      options.bucket,
+      schemaKey,
+      options
+    );
 
     return {
       bundleKey,
@@ -73,12 +97,58 @@ export class CloudflareR2Deployment {
       themeUrl: themeKey
         ? this.joinUrl(options.publicUrl, themeKey)
         : undefined,
+      indexKey,
+      indexUrl: this.joinUrl(options.publicUrl, indexKey),
+      rendererKey,
+      rendererUrl: this.joinUrl(options.publicUrl, rendererKey),
+      schemaKey,
+      schemaUrl: this.joinUrl(options.publicUrl, schemaKey),
     };
   }
 
-  private async getThemeName(formId: string): Promise<string> {
-    const schema = await this.config.loadFormSchema(formId);
-    return schema?.theme || this.config.get('defaultTheme');
+  private async uploadContentToR2(
+    content: string | Buffer,
+    bucket: string,
+    key: string,
+    options: CloudflareDeploymentOptions
+  ): Promise<void> {
+    await this.uploadContentViaS3(content, bucket, key, options);
+  }
+
+  private async uploadContentViaS3(
+    content: string | Buffer,
+    bucket: string,
+    key: string,
+    options: CloudflareDeploymentOptions
+  ): Promise<void> {
+    const s3 = this.getS3Client(options);
+    if (!options.overwrite) {
+      try {
+        await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+        throw new Error(
+          `Object already exists at ${bucket}/${key}. Use --overwrite to replace.`
+        );
+      } catch (err) {
+        const e = err as S3ServiceException;
+        const code = e.$metadata?.httpStatusCode;
+        const msg = (e.name || e.message || '').toLowerCase();
+        if (
+          code !== 404 &&
+          !msg.includes('not found') &&
+          !msg.includes('no such key') &&
+          !msg.includes('404')
+        ) {
+          throw err;
+        }
+      }
+    }
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: content,
+      })
+    );
   }
 
   private joinUrl(base: string, key: string): string {
@@ -259,13 +329,16 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
       console.log('');
       console.log(chalk.green('🚀 Cloudflare deployment complete!'));
       console.log('');
-      console.log(chalk.cyan('Form Bundle URL:'));
-      console.log(`  ${result.bundleUrl}`);
+      console.log(chalk.cyan('Form Landing Page:'));
+      console.log(`  ${result.indexUrl}`);
+      console.log('');
+      console.log(chalk.cyan('Assets:'));
+      console.log(`  - Form Bundle:    ${result.bundleUrl}`);
       if (result.themeUrl) {
-        console.log('');
-        console.log(chalk.cyan('Theme CSS URL:'));
-        console.log(`  ${result.themeUrl}`);
+        console.log(`  - Theme CSS:      ${result.themeUrl}`);
       }
+      console.log(`  - Form Renderer:  ${result.rendererUrl}`);
+      console.log(`  - Form Schema:    ${result.schemaUrl}`);
       console.log('');
       console.log(chalk.cyan('Hugo Shortcode:'));
       console.log(`  {{< embed-form "${formId}" >}}`);

@@ -51,42 +51,56 @@ describe('cloudflareProvider', () => {
 
   // S3-only: no bucket creation test needed
 
-  it('should execute deployment (S3-only, always succeeds)', async () => {
+  it('should upload all form assets to R2', async () => {
     const options = {
-      bucket: 'bucket',
-      publicUrl: 'https://bucket.r2.cloudflarestorage.com',
+      bucket: 'test-bucket',
+      publicUrl: 'https://forms.example.com',
       accessKeyId: 'fake-key',
       secretAccessKey: 'fake-secret',
       accountId: 'test-account',
+      overwrite: true,
     };
-    // Mock S3Client and its send method:
-    // - HeadObjectCommand always throws 404 (object not found)
-    // - All other commands resolve
-    // Mock getS3Client on the prototype for all instances
+
+    const mockSend = vi.fn().mockResolvedValue({});
     (
       CloudflareR2Deployment.prototype as unknown as {
-        getS3Client: () => {
-          send: (cmd: { constructor: { name: string } }) => Promise<unknown>;
-        };
+        getS3Client: () => { send: Mock };
       }
-    ).getS3Client = () => {
-      return {
-        send: vi
-          .fn()
-          .mockImplementation((cmd: { constructor: { name: string } }) => {
-            if (cmd.constructor.name === 'HeadObjectCommand') {
-              const err = new Error('NotFound') as Error & {
-                $metadata?: { httpStatusCode: number };
-              };
-              err.$metadata = { httpStatusCode: 404 };
-              throw err;
-            }
-            return Promise.resolve({});
-          }),
-      };
+    ).getS3Client = () => ({ send: mockSend });
+
+    await cloudflareProvider.execute(realConfig, 'form-id', options);
+
+    expect(mockSend).toHaveBeenCalledTimes(5);
+
+    const findCall = (key: string) => {
+      const call = (
+        mockSend.mock.calls as [
+          {
+            input: {
+              Key: string;
+              Body: string | Buffer;
+            };
+          },
+        ][]
+      ).find((c) => c[0].input.Key === key);
+      return call?.[0].input;
     };
-    await expect(
-      cloudflareProvider.execute(realConfig, 'form-id', options)
-    ).resolves.not.toThrow();
+
+    expect(findCall('form-id/form-id.js')).toBeDefined();
+    expect(findCall('form-id/themes/default.css')).toBeDefined();
+    expect(findCall('form-id/index.html')).toBeDefined();
+    expect(findCall('form-id/emma-forms.esm.js')).toBeDefined();
+    const schemaCall = findCall('form-id/form-id.json');
+    expect(schemaCall).toBeDefined();
+    if (schemaCall) {
+      expect(JSON.parse(schemaCall.Body as string)).toEqual({
+        formId: 'form-id',
+        name: 'Test Form',
+        version: '1.0',
+        apiEndpoint: '/api/test',
+        fields: [],
+        theme: 'default',
+      });
+    }
   });
 });
