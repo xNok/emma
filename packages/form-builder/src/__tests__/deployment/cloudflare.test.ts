@@ -73,13 +73,17 @@ describe('cloudflareProvider', () => {
     expect(mockSend).toHaveBeenCalledTimes(5);
 
     const findCall = (key: string) => {
-      return mockSend.mock.calls.find(
-        (call) =>
-          call[0] &&
-          call[0].input &&
-          typeof call[0].input.Key === 'string' &&
-          call[0].input.Key === key
-      )?.[0].input;
+      const call = (
+        mockSend.mock.calls as [
+          {
+            input: {
+              Key: string;
+              Body: string | Buffer;
+            };
+          },
+        ][]
+      ).find((c) => c[0].input.Key === key);
+      return call?.[0].input;
     };
 
     expect(findCall('form-id/form-id.js')).toBeDefined();
@@ -88,13 +92,15 @@ describe('cloudflareProvider', () => {
     expect(findCall('form-id/emma-forms.esm.js')).toBeDefined();
     const schemaCall = findCall('form-id/form-id.json');
     expect(schemaCall).toBeDefined();
-    expect(JSON.parse(schemaCall.Body)).toEqual({
-      formId: 'form-id',
-      name: 'Test Form',
-      version: '1.0',
-      apiEndpoint: '/api/test',
-      fields: [],
-      theme: 'default',
-    });
+    if (schemaCall) {
+      expect(JSON.parse(schemaCall.Body as string)).toEqual({
+        formId: 'form-id',
+        name: 'Test Form',
+        version: '1.0',
+        apiEndpoint: '/api/test',
+        fields: [],
+        theme: 'default',
+      });
+    }
   });
 });

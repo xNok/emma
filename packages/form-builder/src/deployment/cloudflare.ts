@@ -77,15 +77,9 @@ export class CloudflareR2Deployment {
     }
 
     const indexKey = `${formId}/index.html`;
-    if (!(await fs.pathExists(indexPath))) {
-      throw new Error(`Index file not found. Build first: ${indexPath}`);
-    }
     await this.uploadToR2(indexPath, options.bucket, indexKey, options);
 
     const rendererKey = `${formId}/emma-forms.esm.js`;
-    if (!(await fs.pathExists(rendererPath))) {
-      throw new Error(`Renderer file not found. Build first: ${rendererPath}`);
-    }
     await this.uploadToR2(rendererPath, options.bucket, rendererKey, options);
 
     const schemaKey = `${formId}/${formId}.json`;
