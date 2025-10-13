@@ -44,7 +44,9 @@ async function main() {
       console.log(chalk.cyan('Examples:'));
       console.log('  $ emma init');
       console.log('  $ emma create contact-form');
-      console.log('  $ emma deploy contact-form-001');
+      console.log('  $ emma deploy contact-form-001                    # Interactive target selection');
+      console.log('  $ emma deploy contact-form-001 --target local     # Deploy to local');
+      console.log('  $ emma deploy contact-form-001 --target cloudflare --bucket my-bucket --public-url https://forms.example.com');
       console.log('  $ emma preview contact-form-001');
       console.log('');
     });

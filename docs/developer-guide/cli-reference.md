@@ -218,34 +218,37 @@ Next steps:
 
 ### `emma deploy`
 
-Deploy a form either locally (simulation) or to Cloudflare R2 using subcommands.
+Deploy a form to a target environment. You can either select the target interactively or specify it with the `--target` flag.
 
 ```bash
-# Default behavior: emma deploy <form-id> -> local
+# Interactive target selection
 emma deploy <form-id>
 
-# Explicit subcommands
-emma deploy local <form-id> [--port <port>] [--host <host>]
-emma deploy cloudflare <form-id> --bucket <name> --public-url <url> [--overwrite]
+# Specify target explicitly
+emma deploy <form-id> --target <provider>
 ```
 
 **Arguments:**
 
 - `form-id` - The form ID to deploy
 
+**General Options:**
+
+- `--target <provider>` - Target deployment provider (`local` | `cloudflare`)
+
 **Local Options:**
 
-- `--port`, `-p` - Override default port
-- `--host`, `-h` - Override default host
+- `--port <port>` - Override default port
+- `--host <host>` - Override default host
 
 **Cloudflare Options:**
 
-- `--bucket` - R2 bucket name (e.g., `emma-forms`)
-- `--public-url` - Base public URL serving the bucket (e.g., `https://forms.example.com`)
-- `--access-key-id`, `--secret-access-key` - R2 S3 credentials (or use env `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`)
-- `--endpoint` - Custom S3 endpoint (defaults to `https://<accountId>.r2.cloudflarestorage.com`)
-- `--account-id` - Cloudflare account ID (falls back to env `CLOUDFLARE_ACCOUNT_ID`)
-- `--api-token` - Cloudflare API token (falls back to env `CLOUDFLARE_API_TOKEN`) [wrangler only]
+- `--bucket <name>` - R2 bucket name (e.g., `emma-forms`)
+- `--public-url <url>` - Base public URL serving the bucket (e.g., `https://forms.example.com`)
+- `--access-key-id <id>` - R2 S3 credentials (or use env `R2_ACCESS_KEY_ID`)
+- `--secret-access-key <key>` - R2 S3 credentials (or use env `R2_SECRET_ACCESS_KEY`)
+- `--endpoint <url>` - Custom S3 endpoint (defaults to `https://<accountId>.r2.cloudflarestorage.com`)
+- `--account-id <id>` - Cloudflare account ID (falls back to env `CLOUDFLARE_ACCOUNT_ID`)
 - `--overwrite` - Overwrite existing objects in R2
 
 **Cloudflare Auth:**
@@ -270,17 +273,26 @@ You can authenticate via either method:
 **Examples:**
 
 ```bash
-# Local simulation
-emma deploy local contact-form-001
+# Interactive target selection (user will be prompted)
+emma deploy contact-form-001
 
-# Cloudflare R2
-emma deploy cloudflare contact-form-001 \
+# Deploy to local environment
+emma deploy contact-form-001 --target local
+
+# Deploy to local with custom port
+emma deploy contact-form-001 --target local --port 4000
+
+# Deploy to Cloudflare R2
+emma deploy contact-form-001 --target cloudflare \
   --bucket emma-forms \
   --public-url https://forms.example.com
 
-If you've previously run `emma init` and configured Cloudflare, you can omit
-`--bucket` and `--public-url`. The saved values from `~/.emma/config.json` will be used.
+# Deploy to Cloudflare with existing config
+emma deploy contact-form-001 --target cloudflare
 ```
+
+**Note:** If you've previously run `emma init` and configured Cloudflare, you can omit
+`--bucket` and `--public-url`. The saved values from `~/.emma/config.json` will be used.
 
 ---
 

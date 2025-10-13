@@ -1,5 +1,5 @@
 /**
- * Deploy Command - Subcommands per target (local, cloudflare)
+ * Deploy Command - Target selection via prompt or --target flag
  */
 
 import { Command } from 'commander';
@@ -17,29 +17,71 @@ export function deployCommand(config: EmmaConfig): Command {
     'Deploy a form to a target environment'
   );
 
-  // Default: emma deploy <form-id> routes to default provider
+  // Main deploy command with target selection
   cmd
-    .argument('[form-id]', 'Form ID to deploy')
-    .action(async (formId?: string) => {
-      if (!formId) {
-        const providers = getDeploymentProviders()
-          .map((p) => p.name)
-          .join(' | ');
-        console.log(
-          chalk.yellow(
-            `Usage: emma deploy <provider> <form-id> where <provider> is one of: ${providers}`
-          )
-        );
+    .argument('<form-id>', 'Form ID to deploy')
+    .option(
+      '--target <provider>',
+      `Target deployment provider (${getDeploymentProviders()
+        .map((p) => p.name)
+        .join(' | ')})`
+    )
+    // Add common provider options that will be passed through
+    .option('--bucket <name>', 'R2 bucket name (for Cloudflare)')
+    .option('--public-url <url>', 'Public base URL (for Cloudflare)')
+    .option('--access-key-id <id>', 'R2 Access Key ID (for Cloudflare)')
+    .option('--secret-access-key <key>', 'R2 Secret Access Key (for Cloudflare)')
+    .option('--endpoint <url>', 'S3 endpoint (for Cloudflare)')
+    .option('--account-id <id>', 'Cloudflare account ID')
+    .option('--overwrite', 'Overwrite existing objects (for Cloudflare)')
+    .option('--port <port>', 'Port number (for local)')
+    .option('--host <host>', 'Host address (for local)')
+    .action(async (formId: string, options: any) => {
+      const providers = getDeploymentProviders();
+      let selectedProvider;
+
+      // If --target is specified, use it
+      if (options.target) {
+        selectedProvider = providers.find((p) => p.name === options.target);
+        if (!selectedProvider) {
+          console.log(
+            chalk.red(
+              `Unknown target "${options.target}". Available targets: ${providers
+                .map((p) => p.name)
+                .join(', ')}`
+            )
+          );
+          return;
+        }
+      } else {
+        // Prompt user to select a target
+        const inquirerModule = await import('inquirer');
+        const inquirer = inquirerModule.default || inquirerModule;
+        
+        const answer = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'provider',
+            message: 'Select deployment target:',
+            choices: providers.map((p) => ({
+              name: `${p.name} - ${p.description}`,
+              value: p.name,
+            })),
+            default: getDefaultProvider().name,
+          },
+        ]);
+
+        selectedProvider = providers.find((p) => p.name === answer.provider);
+      }
+
+      if (!selectedProvider) {
+        console.log(chalk.red('No provider selected'));
         return;
       }
-      const def = getDefaultProvider();
-      await def.execute(config, formId, {});
-    });
 
-  // Register all providers as subcommands
-  for (const provider of getDeploymentProviders()) {
-    provider.register(cmd, config);
-  }
+      // Execute the selected provider with the options
+      await selectedProvider.execute(config, formId, options);
+    });
 
   return cmd;
 }
