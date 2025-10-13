@@ -62,13 +62,8 @@ components:
     SubmissionRequest:
       type: object
       required:
-        - formId
         - data
       properties:
-        formId:
-          type: string
-          description: The unique identifier of the form.
-          example: contact-form-001
         data:
           type: object
           description: >-
