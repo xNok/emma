@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Emma Forms API
+  version: 1.0.0
+  description: API for submitting form data from Emma Forms.
+
+paths:
+  /submit/{formId}:
+    post:
+      summary: Submit a form
+      description: >-
+        Receives form submission data, validates it against the form's schema,
+        and stores it.
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          description: The unique identifier for the form being submitted.
+          schema:
+            type: string
+            example: contact-form-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionRequest'
+      responses:
+        '200':
+          description: Submission successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionSuccessResponse'
+        '400':
+          description: Bad Request - The submission data is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found - The specified formId does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too Many Requests - Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    SubmissionRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          description: >-
+            An object containing the submitted form data, where keys are the
+            field IDs.
+          additionalProperties: true
+          example:
+            name: John Doe
+            email: john.doe@example.com
+            message: Hello, this is a test submission.
+        meta:
+          type: object
+          description: Optional metadata about the submission.
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              description: ISO 8601 timestamp of the submission.
+            userAgent:
+              type: string
+              description: The user agent of the client.
+            referrer:
+              type: string
+              description: The referrer URL.
+          example:
+            timestamp: '2025-10-07T12:00:00Z'
+            userAgent: >-
+              Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+              (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36
+            referrer: 'https://example.com/contact'
+
+    SubmissionSuccessResponse:
+      type: object
+      required:
+        - success
+        - submissionId
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the submission was successful.
+          example: true
+        submissionId:
+          type: string
+          description: A unique identifier for the submission.
+          example: sub_abc123xyz
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          description: Indicates that the request failed.
+          example: false
+        error:
+          type: string
+          description: A description of the error.
+          example: Invalid email format
+        field:
+          type: string
+          description: The ID of the field that caused the validation error.
+          example: email
+
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - apiKey: []
