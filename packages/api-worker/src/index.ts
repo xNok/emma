@@ -11,6 +11,8 @@ import type {
 } from '@emma/shared/types';
 import { validateSubmissionData } from '@emma/shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@emma/shared/utils';
+import { openApiSpec } from './openapi';
+import OpenAPIBackend from 'openapi-backend';
 
 // Cloudflare Workers types
 type ExecutionContext = {
@@ -52,6 +54,7 @@ export interface Env {
   RATE_LIMIT_WINDOW: string;
   MAX_SUBMISSION_SIZE: string;
   ALLOWED_ORIGINS: string;
+  API_KEY?: string;
 }
 
 export default {
@@ -68,11 +71,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // Routes
-    if (path.startsWith('/submit/')) {
-      return handleSubmit(request, env, ctx);
-    }
-
+    // Health check not in spec but useful
     if (path === '/health') {
       return new Response(
         JSON.stringify({ status: 'ok', environment: env.ENVIRONMENT }),
@@ -82,7 +81,8 @@ export default {
       );
     }
 
-    return new Response('Not Found', { status: 404 });
+    // Route all other requests via OpenAPI router
+    return routeWithOpenAPI(request, env, ctx);
   },
 };
 
@@ -130,8 +130,8 @@ async function handleSubmit(
       );
     }
 
-    // Validate form ID matches
-    if (submissionData.formId !== formId) {
+    // Validate form ID matches (optional for flexibility, warn only if missing)
+    if (submissionData.formId && submissionData.formId !== formId) {
       return jsonResponse({ success: false, error: 'Form ID mismatch' }, 400);
     }
 
@@ -297,7 +297,7 @@ function handleCORS(request: Request, env: Env): Response {
 
   const headers: HeadersInit = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, X-API-Key',
     'Access-Control-Max-Age': '86400',
   };
 
@@ -326,4 +326,77 @@ function jsonResponse(data: unknown, status: number, env?: Env): Response {
   }
 
   return new Response(JSON.stringify(data), { status, headers });
+}
+
+// ---------------------------------------------------------------------------
+// OpenAPI helpers (minimal): determine if API key security is enabled
+// ---------------------------------------------------------------------------
+function openApiSecured(): boolean {
+  // security array at top-level indicates apiKey required
+  try {
+    return Array.isArray((openApiSpec as any).security) && (openApiSpec as any).security.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+function isApiKeyValid(request: Request, env: Env): boolean {
+  const configured = env.API_KEY;
+  if (!configured) return true; // if no key set, treat as public
+  const provided = request.headers.get('X-API-Key');
+  return Boolean(provided) && provided === configured;
+}
+
+async function routeWithOpenAPI(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  // Create a per-request router so handlers can close over env/ctx
+  const api = new OpenAPIBackend({ definition: openApiSpec as any });
+  await api.init();
+  api.register({
+    submitForm: async () => {
+      if (openApiSecured() && !isApiKeyValid(request, env)) {
+        return jsonResponse({ success: false, error: 'Unauthorized' }, 401, env);
+      }
+      return handleSubmit(request, env, ctx);
+    },
+    notFound: async () => jsonResponse({ success: false, error: 'Not Found' }, 404, env),
+    validationFail: async (c: any) => {
+      const errors = c.validation?.errors || [];
+      const first = errors[0];
+      return jsonResponse(
+        { success: false, error: first?.message || 'Validation failed' },
+        400,
+        env
+      );
+    },
+    notImplemented: async () => jsonResponse({ success: false, error: 'Not Implemented' }, 501, env),
+  });
+  const url = new URL(request.url);
+  const req = {
+    method: request.method,
+    path: url.pathname,
+    query: Object.fromEntries(url.searchParams.entries()),
+    headers: Object.fromEntries(request.headers.entries()),
+    body: await maybeParseJson(request),
+  } as any;
+
+  const res = await api.handleRequest(req);
+  // If handler returned a Response use it; otherwise serialize
+  if (res instanceof Response) return res;
+  if (typeof res === 'object') return jsonResponse(res, 200, env);
+  return new Response(String(res ?? ''), { status: 200 });
+}
+
+async function maybeParseJson(request: Request): Promise<any | undefined> {
+  const contentType = request.headers.get('Content-Type') || '';
+  if (request.method !== 'GET' && contentType.includes('application/json')) {
+    try {
+      // Parse from a cloned request so the original can still be consumed later
+      const clone = request.clone();
+      return await clone.json();
+    } catch {
+      // ignore parse errors; openapi-backend will handle validation
+      return undefined;
+    }
+  }
+  return undefined;
 }

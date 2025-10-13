@@ -1,6 +1,6 @@
 # Emma API Worker
 
-Cloudflare Worker that handles form submissions and stores data in D1.
+Cloudflare Worker that handles form submissions and stores data in D1. Routes are defined by the OpenAPI spec (`openapi.yaml`) and dispatched via `openapi-backend`.
 
 ## Overview
 
@@ -12,11 +12,14 @@ The API Worker provides:
 - Rate limiting
 - Database persistence
 
-## Deployment
+## Run & Deploy
+
+Monorepo uses Yarn workspaces.
 
 ```bash
-npm install
-npx wrangler deploy
+yarn install
+yarn workspace @emma/api-worker dev   # local dev with wrangler
+yarn workspace @emma/api-worker deploy
 ```
 
 ## Configuration
@@ -32,6 +35,12 @@ compatibility_date = "2025-10-07"
 binding = "DB"
 database_name = "emma-submissions"
 database_id = "your-database-id"
+
+[vars]
+ALLOWED_ORIGINS = "*"
+MAX_SUBMISSION_SIZE = "10000"
+# Set to require header X-API-Key; leave empty for public API
+API_KEY = ""
 ```
 
 ## API Endpoints
@@ -62,11 +71,7 @@ Submit form data.
 ```
 
 ## Development
-
-```bash
-npm run dev
-npx wrangler dev
-```
+See docs: `docs/developer-guide/cloudflare-quickstart.md` for detailed instructions.
 
 ## Documentation
 

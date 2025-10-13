@@ -14,6 +14,7 @@ ENVIRONMENT = "production"
 RATE_LIMIT_REQUESTS = "5"
 RATE_LIMIT_WINDOW = "60" # seconds
 MAX_SUBMISSION_SIZE = "10000" # bytes
+API_KEY = "" # set a non-empty value to require X-API-Key
 
 # CORS allowed origins (comma-separated)
 ALLOWED_ORIGINS = "*" # Change to specific domains in production
@@ -24,6 +25,7 @@ name = "emma-api-dev"
 [env.development.vars]
 ENVIRONMENT = "development"
 ALLOWED_ORIGINS = "*"
+API_KEY = "" # leave empty for local dev unless testing auth
 
 # Staging environment
 [env.staging]

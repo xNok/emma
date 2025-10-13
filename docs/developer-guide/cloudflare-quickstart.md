@@ -1,3 +1,57 @@
+# Cloudflare Worker Quickstart (API)
+
+This package provides a Cloudflare Worker that implements the Emma Forms API based on the OpenAPI spec at `packages/api-worker/openapi.yaml`.
+
+## Run locally
+
+- Prerequisites: Node 18+, Yarn 4, Cloudflare Wrangler
+
+- From repository root:
+
+```bash
+ yarn install
+ yarn workspace @emma/api-worker dev
+```
+
+Wrangler will start a local server (default http://localhost:8787).
+
+## Configuration
+
+`packages/api-worker/wrangler.toml` controls bindings and environment variables:
+
+- DB: D1 binding (requires a database in real deployments)
+- ENVIRONMENT: environment name
+- ALLOWED_ORIGINS: CORS origins
+- MAX_SUBMISSION_SIZE: payload size limit
+- API_KEY: when set, requests must include `X-API-Key` header.
+
+## OpenAPI-driven routing
+
+The worker routes requests using the OpenAPI definition. We inline the spec in `src/openapi.ts` (generated from `openapi.yaml`) and dispatch using `openapi-backend` based on `operationId`:
+
+- `POST /submit/{formId}` -> `submitForm` -> `handleSubmit()`
+
+Handlers perform validation with `@emma/shared` and write to D1.
+
+## DigitalOcean Functions
+
+The same handler code can be adapted to DigitalOcean Functions by exporting an HTTP handler function. The business logic in `handleSubmit` is platform-neutral; you mainly need to:
+
+- Map the incoming request object to Fetch API Request
+- Provide a DB client or storage alternative
+- Return a standard Fetch `Response`
+
+We plan to add a small adapter layer for DigitalOcean to reuse the same handlers.
+
+## Tests
+
+Run tests just for the api-worker:
+
+```bash
+ yarn workspace @emma/api-worker test
+```
+
+A basic test covers a successful submit path with a mocked D1.
 # Cloudflare Quick Start
 
 This guide helps you deploy Emma bundles to Cloudflare R2 quickly.
