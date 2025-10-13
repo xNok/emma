@@ -86,16 +86,19 @@ describe('FormBuilder', () => {
       expect(await fs.pathExists(result.bundlePath)).toBe(true);
     });
 
-    it('should create test HTML file', async () => {
+    it('should create test HTML files', async () => {
       const result = await builder.build('contact-form-001', mockSchema);
-      const htmlPath = path.join(result.outputDir, 'index.html');
+      const landingPagePath = path.join(result.outputDir, 'index.html');
+      const previewPath = path.join(result.outputDir, 'preview.html');
 
-      expect(await fs.pathExists(htmlPath)).toBe(true);
+      expect(await fs.pathExists(landingPagePath)).toBe(true);
+      expect(await fs.pathExists(previewPath)).toBe(true);
 
-      const htmlContent = await fs.readFile(htmlPath, 'utf8');
-      expect(htmlContent).toContain('Contact Form');
-      expect(htmlContent).toContain('contact-form-001');
-      expect(htmlContent).toContain('contact-form-001.js');
+      const landingPageContent = await fs.readFile(landingPagePath, 'utf8');
+      expect(landingPageContent).toContain('Built by Emma');
+
+      const previewContent = await fs.readFile(previewPath, 'utf8');
+      expect(previewContent).toContain('Form Preview');
     });
 
     it('should embed schema in bundle', async () => {

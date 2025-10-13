@@ -154,7 +154,9 @@ describe('LocalDeployment Integration Tests', () => {
       );
 
       // Test form HTML page
-      const htmlResponse = await makeRequest(deployResult.formUrl);
+      const htmlResponse = await makeRequest(
+        `${deployResult.formUrl}/preview.html`
+      );
       expect(htmlResponse.status).toBe(200);
       expect(htmlResponse.headers['content-type']).toContain('text/html');
 
@@ -311,7 +313,9 @@ describe('LocalDeployment Integration Tests', () => {
       });
 
       // Get HTML content
-      const response = await makeRequest(deployResult.formUrl);
+      const response = await makeRequest(
+        `${deployResult.formUrl}/preview.html`
+      );
       const htmlContent = response.text;
 
       // Check for debug links (ESM bundle references)

@@ -41,8 +41,13 @@ export class FormBuilder {
 
     // Create a test HTML file for local preview
     const testHtmlContent = this.generateTestHtml(schema);
-    const testHtmlPath = path.join(outputDir, 'index.html');
+    const testHtmlPath = path.join(outputDir, 'preview.html');
     await fs.writeFile(testHtmlPath, testHtmlContent, 'utf8');
+
+    // Create a landing page HTML file
+    const landingPageHtmlContent = this.generateLandingPageHtml(schema);
+    const landingPageHtmlPath = path.join(outputDir, 'index.html');
+    await fs.writeFile(landingPageHtmlPath, landingPageHtmlContent, 'utf8');
 
     // Get file size
     const stats = await fs.stat(bundlePath);
@@ -75,6 +80,17 @@ export class FormBuilder {
       .replace(/__THEME__/g, schema.theme)
       .replace('__FIELDS_COUNT__', String(schema.fields.length))
       .replace(/__API_ENDPOINT__/g, schema.apiEndpoint);
+  }
+
+  /**
+   * Generate landing page HTML file
+   */
+  private generateLandingPageHtml(schema: FormSchema): string {
+    const template = this.readTemplate('landing-page.template.html');
+    return template
+      .replace('__FORM_NAME__', schema.name)
+      .replace(/__FORM_ID__/g, schema.formId)
+      .replace(/__THEME__/g, schema.theme);
   }
 
   /**

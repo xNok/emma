@@ -141,7 +141,7 @@ describe('Form Builder & Renderer Integration', () => {
 
   it('should generate a preview HTML file', async () => {
     const result = await builder.build(TEST_FORM_ID, testSchema);
-    const previewPath = path.join(result.outputDir, 'index.html');
+    const previewPath = path.join(result.outputDir, 'preview.html');
 
     expect(await fs.pathExists(previewPath)).toBe(true);
 
@@ -153,6 +153,19 @@ describe('Form Builder & Renderer Integration', () => {
 
     // Should have data attribute for container
     expect(previewContent).toContain(`data-emma-form="${TEST_FORM_ID}"`);
+  });
+
+  it('should generate a landing page HTML file', async () => {
+    const result = await builder.build(TEST_FORM_ID, testSchema);
+    const landingPagePath = path.join(result.outputDir, 'index.html');
+
+    expect(await fs.pathExists(landingPagePath)).toBe(true);
+
+    const landingPageContent = await fs.readFile(landingPagePath, 'utf8');
+
+    // Should contain the footer
+    expect(landingPageContent).toContain('Built by Emma');
+    expect(landingPageContent).toContain('https://github.com/xnok/emma');
   });
 
   it('should follow the bundle specification', async () => {
