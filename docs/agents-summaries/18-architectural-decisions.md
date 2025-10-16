@@ -1,52 +1,262 @@
 # Agent Summary: Architectural Decisions for Foundation Questions
 
 **Date:** October 16, 2025  
-**Status:** ✅ Complete  
+**Status:** ✅ Complete (Revised based on feedback)  
 **Related Issue:** Finalize outstanding project foundation questions
 
 ## What Was Accomplished
 
-I addressed the three critical architectural questions that were blocking v1.0 development, as outlined in the project foundation discussion.
+I addressed the three critical architectural questions that were blocking v1.0 development, incorporating feedback to simplify the approach significantly.
 
-### 1. Created Comprehensive Architectural Decisions Document
+### 1. Created Revised Architectural Decisions Document
 
 **File:** `docs/05-architectural-decisions.md`
 
-This new document provides formal decisions and detailed specifications for:
+This document provides formal decisions with significantly simplified approaches based on project maintainer feedback:
 
 #### Authentication Strategy (Section 2)
 
-- **Primary Method**: R2 S3-compatible credentials for secure, least-privileged access
-- **Fallback Method**: Wrangler CLI integration for developers already using it
-- **Credential Storage**: Encrypted config.json with environment variable support
-- **Security Best Practices**: Token scoping, expiration, revocation process
-- **Implementation Checklist**: Clear tasks for CLI development
+**Decision**: Environment variables only - NO credential storage
 
-**Key Decision**: Use R2 S3 API credentials instead of full Cloudflare API tokens, providing better security and easier setup.
+- **No Local Storage**: Emma CLI will never store credentials, even encrypted
+- **Environment Variables**: All auth via `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_API_TOKEN`
+- **Infrastructure Deployment**: `emma init` handles complete setup including API worker deployment
+- **Reconfiguration**: `emma init --override` restarts setup process
+- **No config commands**: Removed `emma config` - not needed with env vars only
 
-#### Form Schema Versioning (Section 3)
+**Key Change from Original**: Original approach included encrypted credential storage in `~/.emma/config.json`. New approach: NEVER store credentials.
 
-- **Version Format**: Semantic Versioning (MAJOR.MINOR.PATCH)
-- **Version Increment Rules**: Clear guidelines for when to bump each version component
-- **Schema Structure**: Extended YAML format with version history tracking
-- **Database Storage**: New `form_versions` table for complete audit trail
-- **CLI Workflow**: Automatic version detection and manual override support
+#### Form Versioning (Section 3)
 
-**Key Decision**: Use industry-standard semantic versioning with immutable deployments and complete version history.
+**Decision**: Linear history with timestamp-based immutable snapshots
 
-#### Schema Migrations (Section 4)
+- **No Semantic Versioning**: Replaced MAJOR.MINOR.PATCH with simple timestamp-based snapshots
+- **Snapshot Approach**: Each edit creates `contact-form-<timestamp>.js`
+- **R2 Storage Only**: All version data in R2, not database
+- **Simple History**: Local YAML tracks all snapshots
+- **New Commands**: `emma history`, `emma edit`, `emma deploy --snapshot`
 
-- **Core Approach**: Schema-on-read with version tagging (no eager migrations)
-- **Submission Storage**: Each submission tagged with schema version at submission time
-- **Display Rules**: Flexible views showing current schema, submission schema, or unified view
-- **Migration Strategies**: No migration (default), backfill (optional), dual schema (transitional)
-- **Database Enhancement**: New schema_version field and field_mappings table
+**Key Change from Original**: Original used semantic versioning (1.0.0, 1.1.0, etc.) with database storage. New approach uses timestamps and R2 only.
 
-**Key Decision**: Preserve all historical data with lazy schema adaptation on read, avoiding migration downtime and data loss.
+#### Form Changes & Migrations (Section 4)
 
-### 2. Updated Foundation Document
+**Decision**: Create new forms for major changes - NO migrations
+
+- **Minor Changes**: Edit creates new snapshot of same form
+- **Major Changes**: Create new form (e.g., `contact-form-v2`)
+- **No Database Migrations**: Form changes never trigger migrations
+- **Snapshot Tagging**: Each submission stores its form_snapshot
+- **Display Logic**: Viewer shows fields that existed when submitted
+
+**Key Change from Original**: Original included migration strategies and database tables for version history. New approach: avoid migrations entirely by creating new forms.
+
+### 2. Removed Separate Issues Document
+
+**Change**: Based on feedback, removed `docs/ACTIONABLE-ISSUES.md` and incorporated actionable issues into this summary.
+
+### 3. Updated Foundation Document
 
 **File:** `docs/01-project-foundation.md`
+
+- Marked all open questions as resolved
+- Added links to specific sections in the architectural decisions document
+
+## Actionable Implementation Tasks
+
+Based on the architectural decisions, here are the implementation tasks ready for GitHub issues:
+
+### Issue 1: Implement Environment-Based Authentication & Infrastructure Deployment
+
+**Priority**: Critical  
+**Estimated Effort**: 3-4 days
+
+**Requirements**:
+
+- [ ] Implement environment variable validation for:
+  - `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID`
+  - `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- [ ] Create `emma init` command with:
+  - Provider selection (Cloudflare, custom, etc.)
+  - Environment variable verification
+  - R2 bucket creation
+  - API worker deployment via Wrangler
+  - D1 database creation and migration
+  - Infrastructure health checks
+- [ ] Add `emma init --override` for reconfiguration
+- [ ] Store only non-secret config in `~/.emma/config.json`
+- [ ] Remove any credential storage code from CLI
+
+**Testing**:
+
+- [ ] Test init with valid environment variables
+- [ ] Test init with missing environment variables
+- [ ] Test init --override replaces existing config
+- [ ] Verify no credentials stored anywhere
+- [ ] Test complete infrastructure deployment
+
+**Documentation**:
+
+- [ ] Environment variable setup guide
+- [ ] `emma init` workflow documentation
+- [ ] Troubleshooting guide for auth issues
+
+**Acceptance Criteria**:
+
+- CLI never stores credentials
+- `emma init` successfully deploys complete infrastructure
+- Clear error messages guide users to set missing env vars
+- Works in CI/CD environments
+
+### Issue 2: Implement Snapshot-Based Form Versioning
+
+**Priority**: High  
+**Estimated Effort**: 2-3 days
+
+**Requirements**:
+
+- [ ] Add snapshot tracking to form YAML schema:
+  - `currentSnapshot` field
+  - `snapshots` array with timestamp, r2Key, changes
+  - `addedAt` field for form fields
+- [ ] Implement timestamp-based bundle naming:
+  - Format: `<form-id>-<timestamp>.js`
+- [ ] Create `emma edit` command:
+  - Interactive field editing
+  - Generates new snapshot on save
+  - Updates currentSnapshot pointer
+- [ ] Build `emma history <form-id>` command:
+  - Shows all snapshots with timestamps
+  - Displays changes for each snapshot
+- [ ] Implement registry.json management:
+  - Stored in R2 at `registry.json`
+  - Lists all forms with current snapshots
+  - Updated on each deployment
+- [ ] Add `emma deploy --snapshot <timestamp>` for rollback
+
+**Testing**:
+
+- [ ] Test snapshot creation on form edit
+- [ ] Test history command shows all snapshots
+- [ ] Test deploying specific snapshot
+- [ ] Test registry.json updates correctly
+- [ ] Test multiple forms in same bucket
+
+**Documentation**:
+
+- [ ] Snapshot workflow guide
+- [ ] When to create new forms vs. edit existing
+- [ ] `emma history` and `emma edit` documentation
+
+**Acceptance Criteria**:
+
+- Each edit creates new immutable snapshot
+- Complete history maintained in local YAML
+- Any snapshot can be deployed independently
+- No database storage for versions
+
+### Issue 3: Implement Snapshot-Aware Submission Storage
+
+**Priority**: Medium  
+**Estimated Effort**: 2-3 days
+
+**Requirements**:
+
+- [ ] Add `form_snapshot` field to submission storage
+- [ ] Add `form_bundle` field for full traceability
+- [ ] Update API worker to store snapshot with submission
+- [ ] Create submission viewer with:
+  - Grouping by form ID
+  - Snapshot indicator for each submission
+  - Field display based on snapshot
+  - "N/A" for fields not in snapshot
+- [ ] Add submission export with snapshot metadata
+- [ ] Build form comparison tool:
+  - Compare fields between snapshots
+  - Show added/removed fields
+  - Highlight changes
+
+**Testing**:
+
+- [ ] Test submissions store correct snapshot
+- [ ] Test viewer groups by form ID
+- [ ] Test display of submissions from different snapshots
+- [ ] Test export includes snapshot metadata
+- [ ] Test comparison between snapshots
+
+**Documentation**:
+
+- [ ] Submission viewing guide
+- [ ] How snapshot affects submission display
+- [ ] Export format documentation
+
+**Acceptance Criteria**:
+
+- All submissions tagged with snapshot timestamp
+- Viewer correctly handles submissions from different snapshots
+- No migration needed when form changes
+- Export includes complete snapshot information
+
+### Issue 4: Update Documentation
+
+**Priority**: High  
+**Estimated Effort**: 1-2 days
+
+**Requirements**:
+
+- [ ] Update `docs/infrastructure/cloudflare.md`:
+  - Environment variable setup instructions
+  - `emma init` infrastructure deployment flow
+  - Remove credential storage sections
+- [ ] Update `docs/developer-guide/cli-reference.md`:
+  - Document `emma init` and `emma init --override`
+  - Remove `emma config` commands
+  - Add `emma history` and `emma edit` commands
+  - Document `emma deploy --snapshot`
+- [ ] Update `docs/02-technical-architecture.md`:
+  - Snapshot-based versioning approach
+  - Remove semantic version tables
+  - Update form schema examples
+- [ ] Create new guides:
+  - Environment setup guide
+  - Form history and snapshot guide
+  - Complete deployment workflow
+
+**Acceptance Criteria**:
+
+- All documentation reflects new architecture
+- Clear examples for common workflows
+- No references to credential storage
+- Snapshot approach fully documented
+
+## Implementation Priority Order
+
+1. **Issue 1**: Authentication & Infrastructure (Critical) - Blocks everything
+2. **Issue 2**: Snapshot Versioning (High) - Needed for form management
+3. **Issue 4**: Documentation (High) - Supports implementation
+4. **Issue 3**: Submission Storage (Medium) - Long-term feature
+
+**Total Estimated Effort**: 8-12 days
+
+## Key Benefits of Revised Approach
+
+1. **Simpler**: No credential management, no semantic versioning
+2. **More Secure**: Zero credential storage anywhere
+3. **More Maintainable**: R2-only storage, no database complexity
+4. **Better UX**: Timestamps easier than version numbers
+5. **Cleaner**: Creating new forms for major changes avoids migration complexity
+
+## Status
+
+✅ **Discussion Resolved**: All architectural questions answered with simplified approach  
+✅ **Documentation Complete**: Comprehensive but simpler specifications  
+✅ **Ready for Implementation**: Clear tasks with realistic estimates
+
+---
+
+**Document Created:** `docs/05-architectural-decisions.md`  
+**Document Updated:** `docs/01-project-foundation.md`  
+**Document Removed:** `docs/ACTIONABLE-ISSUES.md` (content moved here)  
+**Agent Summary:** `docs/agents-summaries/18-architectural-decisions.md`
 
 - Marked all open questions as resolved
 - Added links to specific sections in the new architectural decisions document

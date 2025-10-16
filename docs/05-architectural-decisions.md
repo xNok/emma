@@ -7,498 +7,453 @@
 
 ## 1. Purpose
 
-This document formally addresses the open architectural questions from [01-project-foundation.md](./01-project-foundation.md) that are required for v1.0 release. These decisions establish clear technical approaches for CLI authentication, schema versioning, and database migrations.
+This document formally addresses the open architectural questions from [01-project-foundation.md](./01-project-foundation.md) that are required for v1.0 release. These decisions establish clear technical approaches for CLI authentication, form versioning, and change management.
 
 ## 2. Authentication Strategy for CLI Deployment
 
 ### 2.1 Problem Statement
 
-The Form Builder CLI needs to securely authenticate with Cloudflare services to deploy forms to R2 storage and register forms in the D1 database. This is a blocker for implementing the deployment feature.
+The Form Builder CLI needs to securely authenticate with Cloudflare services to:
+
+- Deploy forms to R2 storage
+- Deploy and configure the API worker
+- Set up and manage the D1 database
+
+This is a blocker for implementing the deployment feature.
 
 ### 2.2 Requirements
 
-- **Security**: Credentials must be stored securely and not exposed in repositories
+- **Security**: No credential storage - rely on environment variables only
 - **Simplicity**: Easy setup for developers with minimal configuration
 - **Flexibility**: Support different environments (development, staging, production)
-- **Least Privilege**: Use minimal required permissions for API access
-- **Revocability**: Ability to revoke access without affecting other services
+- **Infrastructure Setup**: `emma init` handles complete provider setup including API worker deployment
 
-### 2.3 Decision: Scoped API Token with S3-Compatible R2 Access
+### 2.3 Decision: Environment Variables Only - No Credential Storage
 
-**Primary Method: R2 S3-Compatible Credentials (Recommended)**
+**Core Principle**: Emma CLI will NEVER store credentials. All authentication relies on environment variables.
 
-For production deployments, use Cloudflare R2's S3-compatible API with access keys:
+#### Configuration Approach
 
-1. **R2 Access Keys**
-   - Generate R2-specific API tokens from Cloudflare Dashboard
-   - Provides S3-compatible access to R2 buckets
-   - Does not require full Cloudflare API access
-
-2. **Configuration Storage**
+1. **R2 Access (S3-Compatible API)**
 
    ```bash
-   # Environment variables (recommended for CI/CD)
+   # Required environment variables for form deployment
    export R2_ACCESS_KEY_ID="your-access-key-id"
    export R2_SECRET_ACCESS_KEY="your-secret-access-key"
    export R2_ACCOUNT_ID="your-cloudflare-account-id"
+   export R2_BUCKET_NAME="emma-forms"
+   export R2_PUBLIC_URL="https://forms.example.com"
+   ```
 
-   # Or stored in ~/.emma/config.json (encrypted)
+2. **API Worker Deployment (via Wrangler)**
+
+   ```bash
+   # Required for deploying/managing the API worker
+   export CLOUDFLARE_API_TOKEN="your-api-token"
+   export CLOUDFLARE_ACCOUNT_ID="your-cloudflare-account-id"
+   ```
+
+3. **Non-Secret Configuration Only**
+
+   The `~/.emma/config.json` stores ONLY non-sensitive settings:
+
+   ```json
    {
-     "cloudflare": {
-       "accountId": "your-account-id",
-       "r2": {
-         "accessKeyId": "encrypted-value",
-         "secretAccessKey": "encrypted-value",
-         "bucketName": "emma-forms",
-         "publicUrl": "https://forms.example.com"
-       }
-     }
+     "provider": "cloudflare",
+     "defaultTheme": "default",
+     "localServerPort": 3333,
+     "localServerHost": "localhost"
    }
    ```
 
-3. **Token Permissions Required**
-   - R2 Bucket: Read & Write access
-   - No other Cloudflare API permissions needed
+   **Credentials are NEVER stored in this file.**
 
-4. **CLI Flow**
+#### Token Permissions Required
 
-   ```bash
-   # Initial setup
-   emma init
-   # Prompts for:
-   # - Cloudflare Account ID
-   # - R2 Access Key ID
-   # - R2 Secret Access Key
-   # - R2 Bucket Name
-   # - Public CDN URL
+Create a Cloudflare API token with these permissions:
 
-   # Deploy using stored credentials
-   emma deploy cloudflare my-form-001
+- **Account - Workers R2 Storage**: Edit
+- **Account - Workers Scripts**: Edit
+- **Account - D1**: Edit
+- **Zone - Workers Routes**: Edit (if using custom domain)
 
-   # Or override with flags
-   emma deploy cloudflare my-form-001 \
-     --access-key-id $R2_ACCESS_KEY_ID \
-     --secret-access-key $R2_SECRET_ACCESS_KEY \
-     --bucket emma-forms
-   ```
+#### CLI Workflow
 
-**Alternative Method: Wrangler CLI Integration (Fallback)**
+**Initial Setup with Infrastructure Deployment**
 
-For developers already using Wrangler:
+```bash
+# Run init to set up provider and deploy infrastructure
+emma init
 
-1. **Use Wrangler Authentication**
-   - Leverage existing `wrangler login` or `CLOUDFLARE_API_TOKEN`
-   - Automatically uses Wrangler's stored credentials
-   - Falls back to this method if R2 credentials not configured
+# Interactive prompts:
+# 1. Select deployment provider:
+#    > Cloudflare (Workers + R2 + D1)
+#    > DigitalOcean Functions (coming soon)
+#    > Custom (bring your own infrastructure)
+#
+# 2. Verify environment variables are set:
+#    ✓ CLOUDFLARE_API_TOKEN found
+#    ✓ R2_ACCESS_KEY_ID found
+#    ✓ R2_SECRET_ACCESS_KEY found
+#    (or prompt to set them now)
+#
+# 3. Deploy infrastructure:
+#    → Creating R2 bucket "emma-forms"
+#    → Deploying API worker to Cloudflare
+#    → Creating D1 database "emma-submissions"
+#    → Running database migrations
+#    → Testing API worker endpoint
+#    ✓ Infrastructure deployed successfully!
+#
+# 4. Save non-secret config to ~/.emma/config.json
+#
+# Result: Complete setup ready to create and deploy forms
 
-2. **Configuration**
+# To reconfigure or switch providers
+emma init --override
+# This restarts the entire setup process
+```
 
-   ```bash
-   # Authenticate with Wrangler
-   npx wrangler login
+**Form Deployment**
 
-   # Or use API token
-   export CLOUDFLARE_API_TOKEN="your-api-token"
-   export CLOUDFLARE_ACCOUNT_ID="your-account-id"
+```bash
+# Deploy a form (reads credentials from environment)
+emma deploy my-form-001
 
-   # Emma CLI will detect and use Wrangler credentials
-   emma deploy cloudflare my-form-001
-   ```
+# CLI checks for required environment variables
+# Uploads form bundle to R2
+# Updates form registry if needed
+```
 
-3. **Token Permissions Required**
-   - Account - Workers R2 Storage: Edit
-   - Account - D1: Edit (if registering forms)
+#### Benefits
 
-### 2.4 Security Best Practices
+1. **Security**: No credentials ever stored on disk
+2. **CI/CD Friendly**: Environment variables work seamlessly in pipelines
+3. **Simple**: One-time infrastructure setup via `emma init`
+4. **Multi-Environment**: Easy to switch by changing environment variables
+5. **No Secret Management**: Users manage secrets via their preferred tool (shell, .env files, secret managers)
 
-1. **Credential Storage**
-   - Store in `~/.emma/config.json` with file permissions 600
-   - Encrypt sensitive values using system keychain when available
-   - Never commit credentials to git repositories
+### 2.4 Implementation Checklist
 
-2. **Environment Variables**
-   - Recommended for CI/CD pipelines
-   - Prefix with `R2_` or `CLOUDFLARE_` for clarity
-   - Document required variables in deployment guides
+- [ ] Implement environment variable validation in CLI
+- [ ] Create `emma init` with provider selection and infrastructure deployment
+- [ ] Add R2 S3-compatible client for form uploads
+- [ ] Integrate Wrangler for API worker deployment
+- [ ] Add database migration runner during init
+- [ ] Implement infrastructure health checks
+- [ ] Document environment variable setup
+- [ ] Add `emma init --override` for reconfiguration
 
-3. **Token Scoping**
-   - Create separate tokens for development and production
-   - Use bucket-specific policies when possible
-   - Set token expiration dates (e.g., 90 days)
-
-4. **Revocation Process**
-   - Document how to revoke and regenerate tokens
-   - Provide CLI command to clear stored credentials: `emma config clear`
-
-### 2.5 Implementation Checklist
-
-- [ ] Implement R2 S3-compatible client in CLI
-- [ ] Add credential encryption for config.json storage
-- [ ] Create `emma config` commands for managing authentication
-- [ ] Add Wrangler fallback authentication method
-- [ ] Document setup process in deployment guide
-- [ ] Add error messages for authentication failures
-- [ ] Create troubleshooting guide for common auth issues
-
-## 3. Form Schema Versioning Strategy
+## 3. Form Versioning Strategy
 
 ### 3.1 Problem Statement
 
-As forms evolve, the schema structure may change. We need a clear versioning strategy to:
-
-- Track changes to individual forms
-- Ensure backwards compatibility
-- Handle schema validation over time
-- Support form rollback if needed
+As forms evolve, we need to track changes and maintain history. However, the approach must be simple and avoid complexity in the CLI and database.
 
 ### 3.2 Requirements
 
-- **Change Tracking**: Record what changed and when
-- **Backwards Compatibility**: Existing submissions remain valid
-- **Deployment Safety**: Prevent breaking changes
-- **Developer Experience**: Simple versioning workflow
-- **Audit Trail**: History of form modifications
+- **Simplicity**: Avoid complex version numbering that users must manage
+- **History**: Maintain complete history of form changes
+- **Deployment**: Each form state should be independently deployable
+- **Storage**: Rely on R2 bucket storage, not database
+- **No Migrations**: Form changes should not require data migrations
 
-### 3.3 Decision: Semantic Versioning with Immutable Deployments
+### 3.3 Decision: Linear History with Immutable Form Snapshots
 
-**Version Format**: Follow Semantic Versioning (SemVer)
+**Core Principle**: Every edit to a form creates a new immutable snapshot that is independently deployable.
 
-```
-MAJOR.MINOR.PATCH
+#### Versioning Approach
 
-Examples:
-- 1.0.0 - Initial deployment
-- 1.1.0 - Added optional email field
-- 1.0.1 - Fixed validation message typo
-- 2.0.0 - Removed required name field (breaking change)
-```
+Instead of semantic versioning (MAJOR.MINOR.PATCH), use a **linear history** approach:
 
-**Version Increment Rules**:
+1. **Form Identifier**: Each form has a base ID (e.g., `contact-form`)
 
-1. **MAJOR** (Breaking Changes)
-   - Removing a required field
-   - Changing field type (e.g., text → number)
-   - Changing field ID
-   - Modifying validation that makes existing data invalid
+2. **Snapshot Timestamps**: Each edit creates a new snapshot with timestamp
 
-2. **MINOR** (Additive Changes)
-   - Adding new optional fields
-   - Adding new validation to optional fields
-   - Changing labels or help text
-   - Modifying non-breaking UI settings
+   ```yaml
+   # ~/.emma/forms/contact-form.yaml
+   formId: contact-form
+   name: Contact Form
+   createdAt: 2025-10-01T10:00:00Z
+   lastModified: 2025-10-16T14:30:00Z
+   currentSnapshot: 1729089000
 
-3. **PATCH** (Non-Functional Changes)
-   - Fixing typos in labels
-   - Adjusting CSS/themes
-   - Updating success messages
-   - Performance improvements
+   snapshots:
+     - timestamp: 1727780400 # 2025-10-01 10:00:00
+       deployed: true
+       r2Key: contact-form-1727780400.js
+       changes: Initial version
 
-**Schema Structure**:
+     - timestamp: 1729089000 # 2025-10-16 14:30:00
+       deployed: true
+       r2Key: contact-form-1729089000.js
+       changes: Added phone number field
 
-```yaml
-formId: contact-form-001
-name: Contact Form
-# Current version
-version: 1.2.0
-# Track all versions
-versionHistory:
-  - version: 1.0.0
-    deployedAt: 2025-10-01T10:00:00Z
-    changes: Initial release
-  - version: 1.1.0
-    deployedAt: 2025-10-08T15:30:00Z
-    changes: Added optional company field
-  - version: 1.2.0
-    deployedAt: 2025-10-16T12:00:00Z
-    changes: Added phone number field with validation
+   fields:
+     # Current field configuration
+     - id: name
+       type: text
+       label: Your Name
+       required: true
 
-fields:
-  - id: name
-    type: text
-    label: Your Name
-    required: true
-    # Track when field was added
-    addedIn: 1.0.0
-```
+     - id: email
+       type: email
+       label: Email Address
+       required: true
 
-**CLI Workflow**:
+     - id: phone
+       type: tel
+       label: Phone Number
+       required: false
+       addedAt: 1729089000
+   ```
+
+3. **R2 Storage Structure**
+
+   Each snapshot is stored independently in R2:
+
+   ```
+   emma-forms/
+   ├── contact-form-1727780400.js  # Initial version
+   ├── contact-form-1729089000.js  # Latest version with phone field
+   └── newsletter-1728000000.js
+   ```
+
+4. **Form Registry (Lightweight)**
+
+   A simple JSON file in R2 for form discovery:
+
+   ```json
+   {
+     "forms": [
+       {
+         "formId": "contact-form",
+         "name": "Contact Form",
+         "currentSnapshot": 1729089000,
+         "allSnapshots": [1727780400, 1729089000],
+         "publicUrl": "https://forms.example.com/contact-form-1729089000.js"
+       }
+     ],
+     "lastUpdated": 1729089100
+   }
+   ```
+
+   Stored at: `emma-forms/registry.json`
+
+#### CLI Workflow
 
 ```bash
-# Editing a form prompts for version bump
-emma edit contact-form-001
-# CLI detects changes and suggests version bump:
-# "You removed a required field. Suggested version: 2.0.0 (major)"
+# Create new form
+emma create contact-form
+# Creates initial snapshot: contact-form-<timestamp>.yaml
 
-# Manual version specification
-emma deploy cloudflare contact-form-001 --version 1.2.0
+# Edit form (creates new snapshot)
+emma edit contact-form
+# Interactive prompts to modify fields
+# Saves new snapshot in snapshots array
+# Updates currentSnapshot
 
-# View version history
-emma versions contact-form-001
+# Build specific snapshot
+emma build contact-form
+# Builds current snapshot by default
+
+emma build contact-form --snapshot 1727780400
+# Builds specific historical snapshot
+
+# Deploy current snapshot
+emma deploy contact-form
+# Uploads contact-form-<currentSnapshot>.js to R2
+# Updates registry.json
+
+# View history
+emma history contact-form
+# Shows all snapshots with timestamps and changes
+
+# Rollback to previous snapshot
+emma deploy contact-form --snapshot 1727780400
+# Deploys older version
+# Updates currentSnapshot pointer
 ```
 
-### 3.4 Version Storage in Database
+#### Benefits
 
-**Forms Table Enhancement**:
+1. **Simple**: No version number management required
+2. **Immutable**: Each snapshot is independently deployable
+3. **History**: Complete history maintained in form YAML
+4. **Rollback**: Easy to deploy any previous snapshot
+5. **No Database**: All version data stored in R2 and local YAML
+6. **Parallel Versions**: Can deploy multiple snapshots simultaneously
 
-```sql
-CREATE TABLE forms (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  schema TEXT NOT NULL,           -- Current schema JSON
-  version TEXT NOT NULL,           -- Current version (e.g., "1.2.0")
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
-  active INTEGER DEFAULT 1
-);
+### 3.4 Implementation Checklist
 
--- New table for version history
-CREATE TABLE form_versions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  form_id TEXT NOT NULL,
-  version TEXT NOT NULL,           -- Version number
-  schema TEXT NOT NULL,            -- Full schema snapshot at this version
-  changes TEXT,                    -- Description of changes
-  deployed_at INTEGER NOT NULL,    -- Deployment timestamp
-  deployed_by TEXT,                -- User/system that deployed
-  FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE,
-  UNIQUE (form_id, version)
-);
+- [ ] Add snapshot tracking to form YAML schema
+- [ ] Implement timestamp-based form bundle naming
+- [ ] Create `emma edit` command that generates new snapshots
+- [ ] Build `emma history` command to show snapshot timeline
+- [ ] Implement `emma deploy --snapshot` for deploying specific versions
+- [ ] Create registry.json management in R2
+- [ ] Add snapshot comparison tool
+- [ ] Document snapshot workflow
 
-CREATE INDEX idx_form_versions_form_id ON form_versions(form_id);
-CREATE INDEX idx_form_versions_deployed_at ON form_versions(deployed_at DESC);
-```
-
-### 3.5 Benefits
-
-1. **Clear Change Communication**: Developers know impact of changes
-2. **Rollback Capability**: Can revert to previous versions
-3. **Audit Trail**: Complete history of form modifications
-4. **Safety**: Major version bump signals breaking changes
-5. **Compatibility**: Semantic versioning is industry standard
-
-## 4. Schema Migrations and Field Updates
+## 4. Form Changes and Submissions
 
 ### 4.1 Problem Statement
 
-When a form schema changes:
-
-- What happens to existing submissions with old schema?
-- How do we display old data with new form structure?
-- How do we handle removed or renamed fields?
-- Should we validate old submissions against new schema?
+When a form changes (fields added, removed, or modified), what happens to existing submissions? How do we avoid complex migrations?
 
 ### 4.2 Requirements
 
 - **Data Preservation**: Never lose existing submission data
-- **Schema Evolution**: Support adding/removing fields safely
-- **Query Compatibility**: Allow querying across schema versions
-- **Display Consistency**: Show old submissions meaningfully
-- **Performance**: Migrations should not block deployments
+- **No Eager Migrations**: Avoid database migrations on form changes
+- **Simple Storage**: Use straightforward submission storage
+- **Flexible Display**: Show submissions appropriately for their form version
 
-### 4.3 Decision: Schema-on-Read with Version Tagging
+### 4.3 Decision: Create New Forms for Major Changes - No Migrations
 
-**Core Principle**: Store submissions with their schema version and adapt on read.
+**Core Principle**: Instead of migrating data, create new forms for significant changes.
 
-**Submission Storage**:
+#### Change Management Strategy
+
+1. **Minor Changes (Same Form)**: Non-breaking changes to existing form
+   - Label text updates
+   - Help text modifications
+   - Validation message changes
+   - Theme/styling updates
+   - **Result**: Edit creates new snapshot of same form
+
+2. **Major Changes (New Form)**: Breaking changes create a new form
+   - Removing required fields
+   - Changing field types
+   - Renaming field IDs
+   - Major structural changes
+   - **Result**: Use `emma create` to make a new form (e.g., `contact-form-v2`)
+
+#### Submission Storage
+
+Store submissions with reference to the form snapshot used:
 
 ```json
 {
   "id": "sub_abc123",
-  "form_id": "contact-form-001",
-  "schema_version": "1.0.0",
+  "form_id": "contact-form",
+  "form_snapshot": 1729089000,
+  "form_bundle": "contact-form-1729089000.js",
   "data": {
     "name": "John Doe",
     "email": "john@example.com",
-    "message": "Hello!"
+    "phone": "+1-555-0123"
   },
   "meta": {
-    "timestamp": "2025-10-16T10:00:00Z",
+    "timestamp": "2025-10-16T15:00:00Z",
     "userAgent": "Mozilla/5.0...",
     "referrer": "https://example.com/contact"
   },
-  "created_at": 1697454000
+  "created_at": 1729090800
 }
 ```
 
-Note: `schema_version` stores the schema version at submission time.
+#### Display Logic
 
-**Reading Submissions with Schema Mapping**:
+When viewing submissions:
 
-When displaying submissions:
+1. **Group by Form**: All submissions for `contact-form` shown together
+2. **Indicate Snapshot**: Show which snapshot each submission used
+3. **Field Availability**: Display fields that existed in that snapshot
+4. **New Fields**: Show as "N/A" if field didn't exist when submitted
 
-1. **Fetch submission with schema_version**
-2. **Load current form schema**
-3. **Apply field mapping rules**:
-   - **New fields**: Show as "N/A" or "Not collected"
-   - **Removed fields**: Still display with "(deprecated)" label
-   - **Renamed fields**: Use mapping table to show both names
-   - **Type changes**: Convert or show warning
-
-**Example Schema Evolution**:
-
-```yaml
-# Version 1.0.0 → 1.1.0: Added optional phone field
-# Old submissions: phone field shows "N/A"
-# New submissions: phone field has data
-
-# Version 1.1.0 → 2.0.0: Renamed "message" to "comments"
-# Mapping in schema:
-fieldMappings:
-  - oldId: message
-    newId: comments
-    deprecatedIn: 2.0.0
-# Display logic:
-# - Show old submissions with "comments (was: message)"
-# - New submissions use "comments" field
-```
-
-### 4.4 Migration Strategies
-
-**Strategy 1: No Migration (Default)**
-
-- Submissions remain unchanged
-- Schema version stored with each submission
-- Display layer handles differences
-- **Best for**: Most forms, especially those with additive changes
-
-**Strategy 2: Backfill Migration (Optional)**
-
-For breaking changes, optionally backfill data:
-
-```bash
-# CLI command to backfill missing fields
-emma migrate contact-form-001 \
-  --from 1.0.0 \
-  --to 2.0.0 \
-  --map "message=comments" \
-  --default-value "phone=N/A"
-
-# This updates old submissions to match new schema
-```
-
-**Strategy 3: Dual Schema Support**
-
-For critical forms, maintain dual schemas temporarily:
-
-```yaml
-# During transition period, support both schemas
-schemaCompat:
-  - version: 1.0.0
-    validUntil: 2026-01-01
-  - version: 2.0.0
-    validFrom: 2025-10-16
-# Submissions validated against appropriate schema
-```
-
-### 4.5 Database Schema Enhancement
-
-```sql
--- Add schema_version to submissions table
-ALTER TABLE submissions ADD COLUMN schema_version TEXT DEFAULT '1.0.0';
-
--- Add index for querying by schema version
-CREATE INDEX idx_submissions_schema_version ON submissions(schema_version);
-
--- Field mappings table for complex migrations
-CREATE TABLE field_mappings (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  form_id TEXT NOT NULL,
-  from_version TEXT NOT NULL,
-  to_version TEXT NOT NULL,
-  old_field_id TEXT NOT NULL,
-  new_field_id TEXT NOT NULL,
-  mapping_type TEXT NOT NULL,     -- 'rename', 'merge', 'split', 'remove'
-  created_at INTEGER NOT NULL,
-  FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
-);
-```
-
-### 4.6 Display Rules
-
-**Admin Dashboard / Submission Viewer**:
-
-1. **Current Schema View** (Default)
-   - Show all fields from current schema
-   - Mark missing fields as "Not collected"
-   - Group submissions by schema version
-
-2. **Submission Schema View**
-   - Show fields as they were when submitted
-   - Include deprecated fields
-   - Add timestamp of schema version
-
-3. **Unified View** (Advanced)
-   - Merge all fields across versions
-   - Show data availability per submission
-   - Export functionality includes all fields
-
-**Example Display**:
+Example display:
 
 ```
-Submission #123 (Schema v1.0.0)
+Submission #123 (Form: contact-form-1727780400)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Name:     John Doe
 Email:    john@example.com
-Message:  Hello!
-Phone:    N/A (added in v1.1.0)
-Company:  N/A (added in v2.0.0)
+Phone:    N/A (added in later version)
 
-Submission #456 (Schema v2.0.0)
+Submission #456 (Form: contact-form-1729089000)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Name:     Jane Smith
 Email:    jane@example.com
-Comments: Great service! (was: Message)
 Phone:    +1-555-0123
-Company:  Acme Corp
 ```
 
-### 4.7 Implementation Checklist
+#### Benefits
 
-- [ ] Add schema_version field to submissions table
-- [ ] Store version with each submission in API worker
-- [ ] Create form_versions table for version history
-- [ ] Implement schema-on-read adapter in submission viewer
-- [ ] Add field mapping support for renamed fields
-- [ ] Create migration CLI commands
-- [ ] Document migration strategies for users
-- [ ] Add version comparison tool to CLI
-- [ ] Build submission export with schema evolution support
+1. **No Migrations**: Never need to migrate submission data
+2. **Data Integrity**: All submissions remain exactly as submitted
+3. **Clear Separation**: Major changes use new forms, keeping data clean
+4. **Simple Logic**: Display layer handles field differences
+5. **User Choice**: Users decide whether to create new form or edit existing
+
+### 4.4 Implementation Checklist
+
+- [ ] Store form_snapshot with each submission in API worker
+- [ ] Add form_bundle reference for traceability
+- [ ] Create submission viewer with snapshot awareness
+- [ ] Add grouping by form ID with snapshot indicators
+- [ ] Document when to create new forms vs. edit existing
+- [ ] Add export functionality that includes snapshot metadata
+- [ ] Build form comparison tool to show changes between snapshots
 
 ## 5. Summary of Decisions
 
 ### 5.1 Authentication Strategy
 
-**Decision**: Use R2 S3-compatible credentials as primary method, with Wrangler integration as fallback.
+**Decision**: Environment variables only - no credential storage
 
 **Rationale**:
 
-- Most secure and least privileged approach
-- Standard S3 interface is well-documented
-- Does not require full Cloudflare API access
-- Works in CI/CD environments easily
+- Most secure - no credentials on disk
+- CI/CD friendly
+- Simple - users manage secrets their way
+- `emma init` handles complete infrastructure deployment
 
-### 5.2 Schema Versioning
+**Key Implementation**:
 
-**Decision**: Semantic versioning with immutable deployments and version history tracking.
+- Required env vars: `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_API_TOKEN`
+- `emma init` deploys API worker, creates database, sets up R2
+- `emma init --override` for reconfiguration
+- No `emma config` commands needed
 
-**Rationale**:
+### 5.2 Form Versioning
 
-- Industry-standard versioning approach
-- Clear communication of change impact
-- Enables rollback and audit trails
-- Supports backwards compatibility analysis
-
-### 5.3 Schema Migrations
-
-**Decision**: Schema-on-read with version tagging, avoiding eager migrations.
+**Decision**: Linear history with timestamp-based immutable snapshots
 
 **Rationale**:
 
-- Preserves all historical data
-- No migration downtime on deployments
-- Flexible display options for different needs
-- Optional migration for special cases
-- Aligns with event sourcing principles
+- Simpler than semantic versioning
+- No manual version number management
+- Each snapshot independently deployable
+- Complete history maintained
+- All data stored in R2, not database
+
+**Key Implementation**:
+
+- Form snapshots: `contact-form-<timestamp>.js`
+- Local form YAML tracks all snapshots
+- R2 registry.json for form discovery
+- `emma history` shows snapshot timeline
+- `emma deploy --snapshot` for rollback
+
+### 5.3 Form Changes
+
+**Decision**: Create new forms for breaking changes - no migrations
+
+**Rationale**:
+
+- Avoids complex migration logic
+- Preserves all submission data intact
+- Clear separation of concerns
+- Users control when to create new forms
+- Display layer handles version differences
+
+**Key Implementation**:
+
+- Store form_snapshot with each submission
+- Minor changes create new snapshots
+- Major changes create new forms (e.g., `contact-form-v2`)
+- Submission viewer groups by form, shows snapshot
+- No database migrations ever needed
 
 ## 6. Impact on Existing Documentation
 
@@ -509,70 +464,73 @@ Company:  Acme Corp
    - Link to this document for decisions
 
 2. **[02-technical-architecture.md](./02-technical-architecture.md)**
-   - Update database schema with new tables
-   - Add version fields to form schema
+   - Update to reflect snapshot-based versioning
+   - Remove complex version tables
 
 3. **[docs/infrastructure/cloudflare.md](./infrastructure/cloudflare.md)**
-   - Add detailed authentication setup guide
-   - Include R2 access key generation steps
+   - Add environment variable setup guide
+   - Document `emma init` infrastructure deployment
 
 4. **[docs/developer-guide/cli-reference.md](./developer-guide/cli-reference.md)**
-   - Document version commands
-   - Add migration command reference
+   - Document `emma init` and `emma init --override`
+   - Remove `emma config` commands
+   - Add `emma history` and snapshot commands
 
 ### 6.2 New Documentation Needed
 
-1. **Deployment Guide**: Step-by-step authentication setup
-2. **Migration Guide**: How to handle schema changes
-3. **Version Management Guide**: Best practices for versioning
+1. **Environment Setup Guide**: How to configure required environment variables
+2. **Form History Guide**: Understanding snapshots and when to create new forms
+3. **Deployment Guide**: Complete `emma init` to `emma deploy` workflow
 
 ## 7. Implementation Roadmap
 
-### Phase 1: Authentication (Priority: Critical)
+### Phase 1: Authentication & Infrastructure (Priority: Critical)
 
-- [ ] Implement R2 S3 client with credential management
-- [ ] Add `emma config` commands for authentication
-- [ ] Create setup wizard in `emma init`
-- [ ] Document authentication process
-- [ ] Add error handling and troubleshooting
-
-**Estimated Effort**: 2-3 days  
-**Blocker for**: Cloudflare deployment feature
-
-### Phase 2: Schema Versioning (Priority: High)
-
-- [ ] Add version field to form schema
-- [ ] Create form_versions database table
-- [ ] Update CLI to track version history
-- [ ] Add version increment prompts to `emma edit`
-- [ ] Implement version comparison tool
+- [ ] Implement environment variable validation
+- [ ] Create `emma init` with provider selection
+- [ ] Add R2 bucket creation
+- [ ] Integrate Wrangler for API worker deployment
+- [ ] Add D1 database creation and migrations
+- [ ] Implement infrastructure health checks
+- [ ] Document environment variable setup
 
 **Estimated Effort**: 3-4 days  
-**Blocker for**: Form editing workflow
+**Blocker for**: All deployment features
 
-### Phase 3: Schema Migrations (Priority: Medium)
+### Phase 2: Snapshot-Based Versioning (Priority: High)
 
-- [ ] Add schema_version to submissions
-- [ ] Implement schema-on-read adapter
-- [ ] Create submission viewer with version awareness
-- [ ] Add optional migration commands
-- [ ] Document migration strategies
+- [ ] Add snapshot tracking to form schema
+- [ ] Implement timestamp-based bundle naming
+- [ ] Create `emma edit` with snapshot generation
+- [ ] Build `emma history` command
+- [ ] Implement registry.json management
+- [ ] Add `emma deploy --snapshot`
 
-**Estimated Effort**: 4-5 days  
+**Estimated Effort**: 2-3 days  
+**Blocker for**: Form management workflow
+
+### Phase 3: Submission Handling (Priority: Medium)
+
+- [ ] Add form_snapshot to submission storage
+- [ ] Update API worker to store snapshot reference
+- [ ] Create submission viewer with snapshot awareness
+- [ ] Add form comparison tool
+- [ ] Document form change strategies
+
+**Estimated Effort**: 2-3 days  
 **Blocker for**: Long-term form maintenance
 
 ## 8. Open Questions (Future Consideration)
 
-- **Multi-tenant Isolation**: How to separate forms across organizations?
-- **Form Templates**: Should we support form templates with versioning?
-- **Schema Validation**: Should we validate old submissions against new schema?
-- **Data Retention**: What's the policy for old submission data?
-- **Form Archival**: How to handle deprecated forms?
+- **Multi-provider Support**: How to abstract provider differences?
+- **Form Templates**: Should we support form templates with snapshots?
+- **Snapshot Cleanup**: Should old snapshots be archived after X months?
+- **Submission Migration**: Optional tool to migrate submissions between forms?
 
 These questions are not blockers for v1.0 and can be addressed in future versions.
 
 ---
 
 **Status**: ✅ Ready for Implementation  
-**Next Steps**: Create actionable GitHub issues for each phase  
+**Next Steps**: Create GitHub issues for each implementation phase  
 **Next Document**: TBD based on implementation needs
