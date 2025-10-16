@@ -8,7 +8,7 @@ import type {
   DeploymentProviderDefinition,
   GenericProviderOptions,
 } from './index.js';
-import { FormSchema } from '@xnok/emma-shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 export const localProvider: DeploymentProviderDefinition = {
   name: 'local',
