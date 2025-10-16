@@ -44,7 +44,7 @@ export class LocalDeployment {
     // Deployment assumes form is already built
     // Use FormManager.ensureBuilt() before calling this if needed
     const buildPath = this.config.getBuildPath(formId);
-    const bundlePath = path.join(buildPath, `${formId}.js`);
+    const bundlePath = path.join(buildPath, `${schema.formId}.js`);
 
     if (!(await fs.pathExists(bundlePath))) {
       throw new Error(

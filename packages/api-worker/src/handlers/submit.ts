@@ -1,9 +1,5 @@
 import { Context } from 'hono';
-import {
-  FormSchema,
-  SubmissionData,
-  SubmissionResponse,
-} from '@emma/shared/types';
+import { SubmissionData, SubmissionResponse } from '@emma/shared/types';
 import { validateSubmissionData } from '@emma/shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@emma/shared/utils';
 import { Env } from '../env';

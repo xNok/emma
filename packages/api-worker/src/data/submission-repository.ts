@@ -1,4 +1,3 @@
-import { FormRecord } from '@emma/shared/types';
 import { D1Database } from '@cloudflare/workers-types';
 
 export interface SubmissionRepository {
@@ -41,7 +40,9 @@ export class D1SubmissionRepository implements SubmissionRepository {
           timestamp
         ),
       this.db
-        .prepare(`UPDATE forms SET submission_count = submission_count + 1 WHERE id = ?`)
+        .prepare(
+          `UPDATE forms SET submission_count = submission_count + 1 WHERE id = ?`
+        )
         .bind(formId),
     ]);
   }

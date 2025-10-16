@@ -6,6 +6,8 @@ import {
 } from './data/schema-repository';
 import { Env } from './env';
 
+import { ExecutionContext } from '@cloudflare/workers-types';
+
 export default {
   fetch: (request: Request, env: Env, ctx: ExecutionContext) => {
     const cdnSchemaRepository = new CdnSchemaRepository(env.CDN_URL);

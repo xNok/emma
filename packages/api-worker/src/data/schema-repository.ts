@@ -17,7 +17,7 @@ export class CdnSchemaRepository implements SchemaRepository {
     if (!response.ok) {
       return null;
     }
-    return response.json<FormSchema>();
+    return (await response.json()) as FormSchema;
   }
 }
 
