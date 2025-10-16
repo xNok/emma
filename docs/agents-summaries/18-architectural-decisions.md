@@ -15,6 +15,7 @@ I addressed the three critical architectural questions that were blocking v1.0 d
 This new document provides formal decisions and detailed specifications for:
 
 #### Authentication Strategy (Section 2)
+
 - **Primary Method**: R2 S3-compatible credentials for secure, least-privileged access
 - **Fallback Method**: Wrangler CLI integration for developers already using it
 - **Credential Storage**: Encrypted config.json with environment variable support
@@ -24,6 +25,7 @@ This new document provides formal decisions and detailed specifications for:
 **Key Decision**: Use R2 S3 API credentials instead of full Cloudflare API tokens, providing better security and easier setup.
 
 #### Form Schema Versioning (Section 3)
+
 - **Version Format**: Semantic Versioning (MAJOR.MINOR.PATCH)
 - **Version Increment Rules**: Clear guidelines for when to bump each version component
 - **Schema Structure**: Extended YAML format with version history tracking
@@ -33,6 +35,7 @@ This new document provides formal decisions and detailed specifications for:
 **Key Decision**: Use industry-standard semantic versioning with immutable deployments and complete version history.
 
 #### Schema Migrations (Section 4)
+
 - **Core Approach**: Schema-on-read with version tagging (no eager migrations)
 - **Submission Storage**: Each submission tagged with schema version at submission time
 - **Display Rules**: Flexible views showing current schema, submission schema, or unified view
@@ -52,6 +55,7 @@ This new document provides formal decisions and detailed specifications for:
 ### 3. Documentation Quality
 
 The new document includes:
+
 - Clear problem statements for each architectural question
 - Requirements analysis for each decision
 - Detailed technical specifications
@@ -68,16 +72,19 @@ The new document includes:
 The document outlines a phased approach:
 
 ### Phase 1: Authentication (Critical Priority)
+
 - Estimated effort: 2-3 days
 - Blocker for Cloudflare deployment feature
 - Tasks: R2 S3 client, credential management, setup wizard
 
 ### Phase 2: Schema Versioning (High Priority)
+
 - Estimated effort: 3-4 days
 - Blocker for form editing workflow
 - Tasks: Version tracking, database tables, CLI commands
 
 ### Phase 3: Schema Migrations (Medium Priority)
+
 - Estimated effort: 4-5 days
 - Blocker for long-term form maintenance
 - Tasks: Version tagging, schema adapter, viewer updates

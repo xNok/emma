@@ -35,12 +35,13 @@ For production deployments, use Cloudflare R2's S3-compatible API with access ke
    - Does not require full Cloudflare API access
 
 2. **Configuration Storage**
+
    ```bash
    # Environment variables (recommended for CI/CD)
    export R2_ACCESS_KEY_ID="your-access-key-id"
    export R2_SECRET_ACCESS_KEY="your-secret-access-key"
    export R2_ACCOUNT_ID="your-cloudflare-account-id"
-   
+
    # Or stored in ~/.emma/config.json (encrypted)
    {
      "cloudflare": {
@@ -60,6 +61,7 @@ For production deployments, use Cloudflare R2's S3-compatible API with access ke
    - No other Cloudflare API permissions needed
 
 4. **CLI Flow**
+
    ```bash
    # Initial setup
    emma init
@@ -69,10 +71,10 @@ For production deployments, use Cloudflare R2's S3-compatible API with access ke
    # - R2 Secret Access Key
    # - R2 Bucket Name
    # - Public CDN URL
-   
+
    # Deploy using stored credentials
    emma deploy cloudflare my-form-001
-   
+
    # Or override with flags
    emma deploy cloudflare my-form-001 \
      --access-key-id $R2_ACCESS_KEY_ID \
@@ -90,14 +92,15 @@ For developers already using Wrangler:
    - Falls back to this method if R2 credentials not configured
 
 2. **Configuration**
+
    ```bash
    # Authenticate with Wrangler
    npx wrangler login
-   
+
    # Or use API token
    export CLOUDFLARE_API_TOKEN="your-api-token"
    export CLOUDFLARE_ACCOUNT_ID="your-account-id"
-   
+
    # Emma CLI will detect and use Wrangler credentials
    emma deploy cloudflare my-form-001
    ```
@@ -142,6 +145,7 @@ For developers already using Wrangler:
 ### 3.1 Problem Statement
 
 As forms evolve, the schema structure may change. We need a clear versioning strategy to:
+
 - Track changes to individual forms
 - Ensure backwards compatibility
 - Handle schema validation over time
@@ -194,8 +198,8 @@ Examples:
 ```yaml
 formId: contact-form-001
 name: Contact Form
-version: 1.2.0              # Current version
-versionHistory:             # Track all versions
+version: 1.2.0 # Current version
+versionHistory: # Track all versions
   - version: 1.0.0
     deployedAt: 2025-10-01T10:00:00Z
     changes: Initial release
@@ -211,7 +215,7 @@ fields:
     type: text
     label: Your Name
     required: true
-    addedIn: 1.0.0          # Track when field was added
+    addedIn: 1.0.0 # Track when field was added
 ```
 
 **CLI Workflow**:
@@ -274,6 +278,7 @@ CREATE INDEX idx_form_versions_deployed_at ON form_versions(deployed_at DESC);
 ### 4.1 Problem Statement
 
 When a form schema changes:
+
 - What happens to existing submissions with old schema?
 - How do we display old data with new form structure?
 - How do we handle removed or renamed fields?
@@ -297,7 +302,7 @@ When a form schema changes:
 {
   "id": "sub_abc123",
   "form_id": "contact-form-001",
-  "schema_version": "1.0.0",        // Schema version at submission time
+  "schema_version": "1.0.0", // Schema version at submission time
   "data": {
     "name": "John Doe",
     "email": "john@example.com",
@@ -337,7 +342,6 @@ fieldMappings:
   - oldId: message
     newId: comments
     deprecatedIn: 2.0.0
-    
 # Display logic:
 # - Show old submissions with "comments (was: message)"
 # - New submissions use "comments" field
@@ -378,7 +382,6 @@ schemaCompat:
     validUntil: 2026-01-01
   - version: 2.0.0
     validFrom: 2025-10-16
-    
 # Submissions validated against appropriate schema
 ```
 
@@ -463,6 +466,7 @@ Company:  Acme Corp
 **Decision**: Use R2 S3-compatible credentials as primary method, with Wrangler integration as fallback.
 
 **Rationale**:
+
 - Most secure and least privileged approach
 - Standard S3 interface is well-documented
 - Does not require full Cloudflare API access
@@ -473,6 +477,7 @@ Company:  Acme Corp
 **Decision**: Semantic versioning with immutable deployments and version history tracking.
 
 **Rationale**:
+
 - Industry-standard versioning approach
 - Clear communication of change impact
 - Enables rollback and audit trails
@@ -483,6 +488,7 @@ Company:  Acme Corp
 **Decision**: Schema-on-read with version tagging, avoiding eager migrations.
 
 **Rationale**:
+
 - Preserves all historical data
 - No migration downtime on deployments
 - Flexible display options for different needs

@@ -93,12 +93,13 @@ Implement semantic versioning for form schemas to track changes and support back
 **CLI Behavior:**
 
 When deploying a modified form:
+
 ```bash
 $ emma deploy cloudflare contact-form-001
 
 ⚠️  Schema changes detected:
   - Removed required field "company"
-  
+
 This is a BREAKING change.
 Current version: 1.2.0
 Suggested version: 2.0.0 (major)
@@ -181,7 +182,6 @@ fieldMappings:
   - oldId: message
     newId: comments
     deprecatedIn: 2.0.0
-    
 # Display shows both names for clarity
 ```
 
@@ -231,13 +231,11 @@ Create comprehensive documentation for the new authentication, versioning, and m
   - R2 access key generation
   - Environment variable configuration
   - CI/CD integration examples
-  
 - [ ] **Version Management Guide** (`docs/guides/version-management.md`)
   - Semantic versioning explanation
   - When to bump major/minor/patch
   - Version history tracking
   - Rollback procedures
-  
 - [ ] **Migration Guide** (`docs/guides/migrations.md`)
   - Schema evolution strategies
   - Handling field additions/removals
@@ -250,13 +248,11 @@ Create comprehensive documentation for the new authentication, versioning, and m
   - Add R2 access key setup section
   - Update wrangler.toml examples
   - Add troubleshooting section
-  
 - [ ] Update `docs/developer-guide/cli-reference.md`
   - Document `emma config` commands
   - Document `emma versions` command
   - Document `emma migrate` commands
   - Update `emma deploy` with version flag
-  
 - [ ] Update `docs/developer-guide/form-schemas.md`
   - Add version fields to schema examples
   - Add field mappings examples
