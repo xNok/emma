@@ -7,8 +7,6 @@ import {
 import { validateSubmissionData } from '@emma/shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@emma/shared/utils';
 import { Env } from '../env';
-import { getFormSchema, saveSubmission } from '../database';
-
 /**
  * Handles form submission
  */
@@ -23,9 +21,10 @@ export default async function handleSubmit(
 
     const submissionData = await c.req.json<SubmissionData>();
     const clientIP = c.req.header('CF-Connecting-IP') || 'unknown';
+    const submissionRepository = c.env.submissionRepository;
 
     // Get form schema from database
-    const formRecord = await getFormSchema(formId, c.env);
+    const formRecord = await submissionRepository.getFormSchema(formId);
     if (!formRecord) {
       return c.json({ success: false, error: 'Form not found' }, 404);
     }
@@ -67,7 +66,12 @@ export default async function handleSubmit(
     };
 
     // Save submission to database
-    await saveSubmission(submissionId, formId, sanitizedData, meta, c.env);
+    await submissionRepository.saveSubmission(
+      submissionId,
+      formId,
+      sanitizedData,
+      meta
+    );
 
     // Return success
     const response: SubmissionResponse = {

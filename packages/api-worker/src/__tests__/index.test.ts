@@ -52,12 +52,11 @@ describe('API Worker', () => {
       deploy_count: 0,
     };
 
-    // Mock the database response
-    const prepareMock = vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnThis(),
-      first: vi.fn().mockResolvedValue(mockFormRecord),
-    });
-    vi.mocked(mockEnv.DB).prepare = prepareMock;
+    // Mock the submission repository
+    mockEnv.submissionRepository = {
+      getFormSchema: vi.fn().mockResolvedValue(mockFormRecord),
+      saveSubmission: vi.fn().mockResolvedValue(undefined),
+    };
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
@@ -81,12 +80,11 @@ describe('API Worker', () => {
       data: { name: 'Test User' },
     };
 
-    // Mock the database response
-    const prepareMock = vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnThis(),
-      first: vi.fn().mockResolvedValue(null),
-    });
-    vi.mocked(mockEnv.DB).prepare = prepareMock;
+    // Mock the submission repository
+    mockEnv.submissionRepository = {
+      getFormSchema: vi.fn().mockResolvedValue(null),
+      saveSubmission: vi.fn().mockResolvedValue(undefined),
+    };
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
@@ -125,12 +123,11 @@ describe('API Worker', () => {
       deploy_count: 0,
     };
 
-    // Mock the database response
-    const prepareMock = vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnThis(),
-      first: vi.fn().mockResolvedValue(mockFormRecord),
-    });
-    vi.mocked(mockEnv.DB).prepare = prepareMock;
+    // Mock the submission repository
+    mockEnv.submissionRepository = {
+      getFormSchema: vi.fn().mockResolvedValue(mockFormRecord),
+      saveSubmission: vi.fn().mockResolvedValue(undefined),
+    };
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
