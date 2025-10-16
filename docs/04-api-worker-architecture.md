@@ -13,7 +13,8 @@ This document outlines the modular architecture for the `api-worker` package, de
 The `api-worker` is structured into the following key components:
 
 - **`src/server.ts`**: This is the main entry point for the Hono application. It sets up middleware (CORS, logging) and defines the API routes. It is environment-agnostic and contains the core application logic.
-- **`src/index.ts`**: This is the entry point for the Cloudflare Worker. It imports the Hono app from `server.ts` and exports it, allowing it to run on the Cloudflare edge.
+- **`src/cloudflare-index.ts`**: This is the entry point for the Cloudflare Worker. It imports the Hono app from `server.ts` and exports it, allowing it to run on the Cloudflare edge.
+- **`src/index.ts`**: This is the entry point for running the server in a standard Node.js environment, useful for local development and testing.
 - **`src/handlers/`**: This directory contains the route handlers. Each handler is responsible for a specific API endpoint (e.g., `handleSubmit`).
 - **`src/database.ts`**: This module abstracts all database interactions. The initial implementation uses Cloudflare D1, but it can be easily swapped out for other databases.
 - **`src/types.ts`**: This file is auto-generated from `openapi.yaml` and contains all the TypeScript types for our API.

@@ -1,5 +1,5 @@
 name = "emma-api"
-main = "src/index.ts"
+main = "src/cloudflare-index.ts"
 compatibility_date = "2025-10-07"
 
 # D1 Database binding

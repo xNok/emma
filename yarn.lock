@@ -849,6 +849,7 @@ __metadata:
   dependencies:
     "@cloudflare/workers-types": "npm:^4.20231218.0"
     "@emma/shared": "workspace:*"
+    "@hono/node-server": "npm:^1.19.5"
     "@types/node": "npm:^20.10.0"
     hono: "npm:^4.9.12"
     openapi-typescript: "npm:^7.10.1"
@@ -1318,6 +1319,15 @@ __metadata:
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
   checksum: 10c0/0b3c9958d3cd17f4add3574975e3115ae05dc7f1298a60810414b16f6f558c137b5fb3cd3905df380bacfd955ec13f67c1e6710cbb5c246a7e8d65a8289b2bff
+  languageName: node
+  linkType: hard
+
+"@hono/node-server@npm:^1.19.5":
+  version: 1.19.5
+  resolution: "@hono/node-server@npm:1.19.5"
+  peerDependencies:
+    hono: ^4
+  checksum: 10c0/ee935ba923bb8bc3e0453d08a59e356b595c1ddffef3c96f8b9a4199f6b587c311743fb576d8236aa57d638012d7251c1f1b1ebbbd488358a951ee1a6b6991e8
   languageName: node
   linkType: hard
 
