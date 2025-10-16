@@ -3,7 +3,6 @@ import app from '../server';
 import { FormSchema } from '@emma/shared/types';
 import { Env } from '../env';
 import { D1Database } from '@cloudflare/workers-types';
-
 import { KVNamespace } from '@cloudflare/workers-types';
 
 const mockEnv: Env = {
@@ -12,7 +11,6 @@ const mockEnv: Env = {
     batch: vi.fn(),
   } as unknown as D1Database,
   submissionRepository: {
-    getFormSchema: vi.fn(),
     saveSubmission: vi.fn(),
   },
   schemaRepository: {
@@ -61,9 +59,7 @@ describe('API Worker', () => {
     };
 
     // Mock the submission repository
-    mockEnv.schemaRepository.getSchema = vi
-      .fn()
-      .mockResolvedValue(mockFormSchema);
+    mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(mockFormSchema);
     mockEnv.submissionRepository.saveSubmission = vi
       .fn()
       .mockResolvedValue(undefined);
@@ -125,9 +121,7 @@ describe('API Worker', () => {
     };
 
     // Mock the submission repository
-    mockEnv.schemaRepository.getSchema = vi
-      .fn()
-      .mockResolvedValue(mockFormSchema);
+    mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(mockFormSchema);
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
