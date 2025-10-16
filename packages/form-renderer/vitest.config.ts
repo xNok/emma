@@ -13,19 +13,19 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@emma/shared/types': path.resolve(
+      '@xnok/shared/types': path.resolve(
         __dirname,
         '../../shared/dist/types/index.js'
       ),
-      '@emma/shared/schema': path.resolve(
+      '@xnok/shared/schema': path.resolve(
         __dirname,
         '../../shared/dist/schema/validators.js'
       ),
-      '@emma/shared/utils': path.resolve(
+      '@xnok/shared/utils': path.resolve(
         __dirname,
         '../../shared/dist/utils/helpers.js'
       ),
-      '@emma/shared': path.resolve(__dirname, '../../shared/dist/index.js'),
+      '@xnok/shared': path.resolve(__dirname, '../../shared/dist/index.js'),
     },
   },
 });

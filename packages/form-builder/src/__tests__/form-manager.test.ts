@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 import { EmmaConfig } from '../config.js';
 import { FormManager } from '../form-manager.js';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/shared/types';
 
 interface DeploymentService {
   isRunning(): boolean;

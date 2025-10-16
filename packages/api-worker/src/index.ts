@@ -8,9 +8,9 @@ import type {
   SubmissionData,
   SubmissionResponse,
   FormRecord,
-} from '@emma/shared/types';
-import { validateSubmissionData } from '@emma/shared/schema';
-import { generateSubmissionId, sanitizeInput } from '@emma/shared/utils';
+} from '@xnok/shared/types';
+import { validateSubmissionData } from '@xnok/shared/schema';
+import { generateSubmissionId, sanitizeInput } from '@xnok/shared/utils';
 
 // Cloudflare Workers types
 type ExecutionContext = {
