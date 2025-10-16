@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import open from 'open';
 import type { EmmaConfig } from '../config.js';
 import { FormManager } from '../form-manager.js';
-import { FormSchema } from '@xnok/emma-shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 interface PreviewOptions {
   port?: string;
