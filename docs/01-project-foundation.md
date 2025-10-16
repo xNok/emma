@@ -132,11 +132,11 @@ Before laying down code, we need to complete these documentation files:
 
 ## 8. Open Questions
 
-- [ ] Should we use a monorepo tool (Turborepo, Nx) or simple npm workspaces?
-- [ ] What's our versioning strategy for the form schema?
-- [ ] Do we need a migration path for form updates?
-- [ ] Should the TUI support local testing/preview of forms?
-- [ ] What authentication method for the form builder API access?
+- [x] ~~Should we use a monorepo tool (Turborepo, Nx) or simple npm workspaces?~~ **Resolved**: Using Yarn workspaces (simple, no additional tooling)
+- [x] ~~What's our versioning strategy for the form schema?~~ **Resolved**: See [05-architectural-decisions.md](./05-architectural-decisions.md#3-form-schema-versioning-strategy)
+- [x] ~~Do we need a migration path for form updates?~~ **Resolved**: See [05-architectural-decisions.md](./05-architectural-decisions.md#4-schema-migrations-and-field-updates)
+- [x] ~~Should the TUI support local testing/preview of forms?~~ **Resolved**: Yes, implemented with local Express server
+- [x] ~~What authentication method for the form builder API access?~~ **Resolved**: See [05-architectural-decisions.md](./05-architectural-decisions.md#2-authentication-strategy-for-cli-deployment)
 
 ## 9. Success Criteria
 
@@ -150,4 +150,5 @@ This foundation phase is complete when:
 
 ---
 
-**Next Document:** [02-technical-architecture.md](./02-technical-architecture.md) (to be created)
+**Next Document:** [02-technical-architecture.md](./02-technical-architecture.md)  
+**See Also:** [05-architectural-decisions.md](./05-architectural-decisions.md) for resolved foundation questions
