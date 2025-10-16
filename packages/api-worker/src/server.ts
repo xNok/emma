@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import handleSubmit from './handlers/submit';
-import { Env } from './types';
+import { Env } from './env';
 
 const app = new Hono<{ Bindings: Env }>();
 

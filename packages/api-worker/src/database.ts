@@ -1,5 +1,5 @@
 import { FormRecord } from '@emma/shared/types';
-import { Env } from './types';
+import { Env } from './env';
 
 export async function getFormSchema(
   formId: string,

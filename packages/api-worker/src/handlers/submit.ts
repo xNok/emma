@@ -3,11 +3,10 @@ import {
   FormSchema,
   SubmissionData,
   SubmissionResponse,
-  FormRecord,
 } from '@emma/shared/types';
 import { validateSubmissionData } from '@emma/shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@emma/shared/utils';
-import { Env } from '../types';
+import { Env } from '../env';
 import { getFormSchema, saveSubmission } from '../database';
 
 /**
@@ -53,7 +52,7 @@ export default async function handleSubmit(
       if (Array.isArray(value)) {
         sanitizedData[key] = value.map((v: string) => sanitizeInput(v));
       } else {
-        sanitizedData[key] = sanitizeInput(value as string);
+        sanitizedData[key] = sanitizeInput(String(value));
       }
     });
 
@@ -62,8 +61,7 @@ export default async function handleSubmit(
 
     const meta = {
       timestamp: submissionData.meta?.timestamp || new Date().toISOString(),
-      userAgent:
-        submissionData.meta?.userAgent || c.req.header('User-Agent'),
+      userAgent: submissionData.meta?.userAgent || c.req.header('User-Agent'),
       referrer: submissionData.meta?.referrer || c.req.header('Referer'),
       ip: clientIP,
     };

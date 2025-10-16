@@ -1,19 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import app from '../server';
 import { FormRecord } from '@emma/shared/types';
-import { Env } from '../types';
+import { Env } from '../env';
+import { D1Database } from '@cloudflare/workers-types';
 
 const mockEnv: Env = {
   DB: {
-    prepare: vi.fn(() => ({
-      bind: vi.fn(() => ({
-        first: vi.fn(),
-        run: vi.fn(),
-      })),
-      batch: vi.fn(() => Promise.resolve([])),
-    })),
-    batch: vi.fn(() => Promise.resolve([])),
-  } as any,
+    prepare: vi.fn(),
+    batch: vi.fn(),
+  } as unknown as D1Database,
   ENVIRONMENT: 'test',
   RATE_LIMIT_REQUESTS: '100',
   RATE_LIMIT_WINDOW: '60',
@@ -25,7 +20,10 @@ describe('API Worker', () => {
   it('should return health check status', async () => {
     const res = await app.request('/health', {}, mockEnv);
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as {
+      status: string;
+      environment: string;
+    };
     expect(body.status).toBe('ok');
     expect(body.environment).toBe('test');
   });
@@ -52,11 +50,11 @@ describe('API Worker', () => {
     };
 
     // Mock the database response
-    (mockEnv.DB.prepare as any).mockReturnValue({
+    const prepareMock = vi.fn().mockReturnValue({
       bind: vi.fn().mockReturnThis(),
       first: vi.fn().mockResolvedValue(mockFormRecord),
-      batch: vi.fn().mockResolvedValue([]),
     });
+    vi.mocked(mockEnv.DB).prepare = prepareMock;
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
@@ -66,7 +64,10 @@ describe('API Worker', () => {
 
     const res = await app.fetch(req, mockEnv);
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as {
+      success: boolean;
+      submissionId: string;
+    };
     expect(body.success).toBe(true);
     expect(body.submissionId).toBeDefined();
   });
@@ -78,10 +79,11 @@ describe('API Worker', () => {
     };
 
     // Mock the database response
-    (mockEnv.DB.prepare as any).mockReturnValue({
+    const prepareMock = vi.fn().mockReturnValue({
       bind: vi.fn().mockReturnThis(),
       first: vi.fn().mockResolvedValue(null),
     });
+    vi.mocked(mockEnv.DB).prepare = prepareMock;
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
@@ -91,7 +93,7 @@ describe('API Worker', () => {
 
     const res = await app.fetch(req, mockEnv);
     expect(res.status).toBe(404);
-    const body = await res.json();
+    const body = (await res.json()) as { success: boolean; error: string };
     expect(body.success).toBe(false);
     expect(body.error).toBe('Form not found');
   });
@@ -118,10 +120,11 @@ describe('API Worker', () => {
     };
 
     // Mock the database response
-    (mockEnv.DB.prepare as any).mockReturnValue({
+    const prepareMock = vi.fn().mockReturnValue({
       bind: vi.fn().mockReturnThis(),
       first: vi.fn().mockResolvedValue(mockFormRecord),
     });
+    vi.mocked(mockEnv.DB).prepare = prepareMock;
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
@@ -131,7 +134,7 @@ describe('API Worker', () => {
 
     const res = await app.fetch(req, mockEnv);
     expect(res.status).toBe(400);
-    const body = await res.json();
+    const body = (await res.json()) as { success: boolean; error: string };
     expect(body.success).toBe(false);
     expect(body.error).toBe('Email is required');
   });

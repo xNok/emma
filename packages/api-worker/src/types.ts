@@ -4,159 +4,159 @@
  */
 
 export interface paths {
-    "/submit/{formId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Submit a form
-         * @description Receives form submission data, validates it against the form's schema, and stores it.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for the form being submitted. */
-                    formId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SubmissionRequest"];
-                };
-            };
-            responses: {
-                /** @description Submission successful. */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SubmissionSuccessResponse"];
-                    };
-                };
-                /** @description Bad Request - The submission data is invalid. */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Not Found - The specified formId does not exist. */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Too Many Requests - Rate limit exceeded. */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Internal Server Error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/submit/{formId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /**
+     * Submit a form
+     * @description Receives form submission data, validates it against the form's schema, and stores it.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The unique identifier for the form being submitted. */
+          formId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['SubmissionRequest'];
+        };
+      };
+      responses: {
+        /** @description Submission successful. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SubmissionSuccessResponse'];
+          };
+        };
+        /** @description Bad Request - The submission data is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+        /** @description Not Found - The specified formId does not exist. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+        /** @description Too Many Requests - Rate limit exceeded. */
+        429: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+        /** @description Internal Server Error. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ErrorResponse'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        SubmissionRequest: {
-            /**
-             * @description An object containing the submitted form data, where keys are the field IDs.
-             * @example {
-             *       "name": "John Doe",
-             *       "email": "john.doe@example.com",
-             *       "message": "Hello, this is a test submission."
-             *     }
-             */
-            data: {
-                [key: string]: unknown;
-            };
-            /**
-             * @description Optional metadata about the submission.
-             * @example {
-             *       "timestamp": "2025-10-07T12:00:00Z",
-             *       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36",
-             *       "referrer": "https://example.com/contact"
-             *     }
-             */
-            meta?: {
-                /**
-                 * Format: date-time
-                 * @description ISO 8601 timestamp of the submission.
-                 */
-                timestamp?: string;
-                /** @description The user agent of the client. */
-                userAgent?: string;
-                /** @description The referrer URL. */
-                referrer?: string;
-            };
-        };
-        SubmissionSuccessResponse: {
-            /**
-             * @description Indicates if the submission was successful.
-             * @example true
-             */
-            success: boolean;
-            /**
-             * @description A unique identifier for the submission.
-             * @example sub_abc123xyz
-             */
-            submissionId: string;
-        };
-        ErrorResponse: {
-            /**
-             * @description Indicates that the request failed.
-             * @example false
-             */
-            success: boolean;
-            /**
-             * @description A description of the error.
-             * @example Invalid email format
-             */
-            error: string;
-            /**
-             * @description The ID of the field that caused the validation error.
-             * @example email
-             */
-            field?: string;
-        };
+  schemas: {
+    SubmissionRequest: {
+      /**
+       * @description An object containing the submitted form data, where keys are the field IDs.
+       * @example {
+       *       "name": "John Doe",
+       *       "email": "john.doe@example.com",
+       *       "message": "Hello, this is a test submission."
+       *     }
+       */
+      data: {
+        [key: string]: unknown;
+      };
+      /**
+       * @description Optional metadata about the submission.
+       * @example {
+       *       "timestamp": "2025-10-07T12:00:00Z",
+       *       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36",
+       *       "referrer": "https://example.com/contact"
+       *     }
+       */
+      meta?: {
+        /**
+         * Format: date-time
+         * @description ISO 8601 timestamp of the submission.
+         */
+        timestamp?: string;
+        /** @description The user agent of the client. */
+        userAgent?: string;
+        /** @description The referrer URL. */
+        referrer?: string;
+      };
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    SubmissionSuccessResponse: {
+      /**
+       * @description Indicates if the submission was successful.
+       * @example true
+       */
+      success: boolean;
+      /**
+       * @description A unique identifier for the submission.
+       * @example sub_abc123xyz
+       */
+      submissionId: string;
+    };
+    ErrorResponse: {
+      /**
+       * @description Indicates that the request failed.
+       * @example false
+       */
+      success: boolean;
+      /**
+       * @description A description of the error.
+       * @example Invalid email format
+       */
+      error: string;
+      /**
+       * @description The ID of the field that caused the validation error.
+       * @example email
+       */
+      field?: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;
