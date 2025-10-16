@@ -4,7 +4,6 @@ import { Env } from '../env';
 import { D1Database, KVNamespace } from '@cloudflare/workers-types';
 import { D1SubmissionRepository } from '../data/submission-repository';
 import { KvCacheSchemaRepository } from '../data/schema-repository';
-
 import { ExecutionContext } from '@cloudflare/workers-types';
 
 describe('Cloudflare Index', () => {
@@ -14,6 +13,9 @@ describe('Cloudflare Index', () => {
       CDN_URL: 'https://example.com',
       SCHEMA_CACHE: {} as KVNamespace,
       submissionRepository: new D1SubmissionRepository({} as D1Database),
+      schemaRepository: new KvCacheSchemaRepository({} as KVNamespace, {
+        getSchema: vi.fn(),
+      }),
       ENVIRONMENT: 'test',
       RATE_LIMIT_REQUESTS: '100',
       RATE_LIMIT_WINDOW: '60',
@@ -24,6 +26,9 @@ describe('Cloudflare Index', () => {
     const mockCtx: ExecutionContext = {
       waitUntil: vi.fn(),
       passThroughOnException: vi.fn(),
+      get props() {
+        return {};
+      },
     };
     const mockRequest = new Request('http://localhost');
 
