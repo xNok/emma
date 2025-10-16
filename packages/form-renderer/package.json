@@ -1,5 +1,5 @@
 {
-  "name": "@emma/form-renderer",
+  "name": "@xnok/form-renderer",
   "version": "0.1.0",
   "description": "Client-side form rendering library for Emma",
   "type": "module",
@@ -13,7 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@emma/shared": "workspace:*"
+    "@xnok/shared": "workspace:*"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -36,5 +36,8 @@
     "renderer",
     "client-side",
     "validation"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }

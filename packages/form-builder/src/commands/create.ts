@@ -11,7 +11,7 @@ import type {
   FormField,
   FieldType,
   ValidationRules,
-} from '@emma/shared/types';
+} from '@xnok/shared/types';
 
 interface InquirerPrompt {
   type: string;

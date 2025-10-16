@@ -9,7 +9,7 @@ import os from 'os';
 import { EmmaConfig } from '../config.js';
 import { LocalDeployment } from '../local-deployment.js';
 import { FormBuilder } from '../form-builder.js';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/shared/types';
 
 interface ApiResponse {
   success: boolean;

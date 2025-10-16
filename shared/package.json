@@ -1,5 +1,5 @@
 {
-  "name": "@emma/shared",
+  "name": "@xnok/shared",
   "version": "0.1.0",
   "description": "Shared types and utilities for Emma forms",
   "type": "module",
@@ -29,5 +29,8 @@
     "forms",
     "types",
     "utilities"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }

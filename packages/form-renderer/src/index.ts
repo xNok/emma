@@ -7,8 +7,8 @@ import type {
   FormSchema,
   FormField,
   SubmissionResponse,
-} from '@emma/shared/types';
-import { validateSubmissionData } from '@emma/shared/schema';
+} from '@xnok/shared/types';
+import { validateSubmissionData } from '@xnok/shared/schema';
 
 export interface RenderOptions {
   formId: string;
