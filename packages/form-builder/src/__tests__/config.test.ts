@@ -7,7 +7,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { EmmaConfig } from '../config.js';
-import type { FormSchema } from '@xnok/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 describe('EmmaConfig', () => {
   let testDir: string;

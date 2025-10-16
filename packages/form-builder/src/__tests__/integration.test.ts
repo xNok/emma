@@ -10,7 +10,7 @@ import { FormBuilder } from '../form-builder.js';
 import { EmmaConfig } from '../config.js';
 import fs from 'fs-extra';
 import path from 'path';
-import type { FormSchema } from '@xnok/shared/types';
+import type { FormSchema } from '@emma/shared/types';
 
 const TEST_WORKSPACE = path.join(process.cwd(), '.test-workspace');
 const TEST_FORM_ID = 'integration-test-form';

@@ -8,7 +8,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@xnok/shared': path.resolve(__dirname, '../../shared'),
+      '@emma/shared': path.resolve(__dirname, '../../shared'),
     },
   },
 });

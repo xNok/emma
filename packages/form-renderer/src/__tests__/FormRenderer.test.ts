@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { FormRenderer } from '../index';
-import type { FormSchema } from '@xnok/shared/types';
+import type { FormSchema } from '@emma/shared/types';
 
 describe('FormRenderer - Core Rendering', () => {
   let container: HTMLElement;

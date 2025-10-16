@@ -1,5 +1,5 @@
 {
-  "name": "@xnok/form-renderer",
+  "name": "@xnok/emma-form-renderer",
   "version": "0.1.0",
   "description": "Client-side form rendering library for Emma",
   "type": "module",
@@ -13,7 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@xnok/shared": "workspace:*"
+    "@xnok/emma-shared": "workspace:*"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

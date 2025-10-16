@@ -4,7 +4,7 @@
 
 import fs from 'fs-extra';
 import path from 'path';
-import type { FormSchema } from '@xnok/shared/types';
+import type { FormSchema } from '@emma/shared/types';
 import type { EmmaConfig } from './config.js';
 
 import { fileURLToPath } from 'url';
@@ -143,7 +143,7 @@ export class FormBuilder {
     } else {
       console.warn(
         '⚠️  Emma Forms runtime (emma-forms.esm.js) not found. ' +
-          'Run "yarn workspace @xnok/form-renderer build" first.'
+          'Run "yarn workspace @emma/form-renderer build" first.'
       );
     }
   }
