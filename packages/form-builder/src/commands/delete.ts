@@ -6,6 +6,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import type { EmmaConfig } from '../config.js';
+import { FormSchema } from '@xnok/emma-shared/types';
 
 interface DeleteOptions {
   force?: boolean;
@@ -25,7 +26,7 @@ export function deleteCommand(config: EmmaConfig): Command {
       }
 
       // Check if form exists
-      const schema = await config.loadFormSchema(formId);
+      const schema: FormSchema | null = await config.loadFormSchema(formId);
       if (!schema) {
         console.log(chalk.red(`Form "${formId}" not found.`));
         return;

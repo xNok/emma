@@ -1,5 +1,5 @@
 {
-  "name": "@emma/api-worker",
+  "name": "@xnok/emma-api-worker",
   "version": "0.1.0",
   "description": "Cloudflare Worker for handling form submissions",
   "type": "module",
@@ -15,8 +15,8 @@
     "generate:types": "openapi-typescript openapi.yaml --output src/types.ts"
   },
   "dependencies": {
-    "@emma/shared": "workspace:*",
     "@hono/node-server": "^1.19.5",
+    "@xnok/emma-shared": "workspace:*",
     "hono": "^4.9.12"
   },
   "devDependencies": {

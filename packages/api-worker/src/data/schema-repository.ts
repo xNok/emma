@@ -1,4 +1,4 @@
-import { FormSchema } from '@emma/shared/types';
+import { FormSchema } from '@xnok/emma-shared/types';
 import { KVNamespace } from '@cloudflare/workers-types';
 
 export interface SchemaRepository {

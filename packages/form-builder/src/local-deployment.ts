@@ -10,6 +10,7 @@ import type { Server } from 'http';
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 import express from 'express';
 import type { EmmaConfig } from './config.js';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 export interface DeploymentOptions {
   host: string;
@@ -36,7 +37,7 @@ export class LocalDeployment {
     formId: string,
     options: DeploymentOptions
   ): Promise<DeploymentResult> {
-    const schema = await this.config.loadFormSchema(formId);
+    const schema: FormSchema | null = await this.config.loadFormSchema(formId);
     if (!schema) {
       throw new Error(`Form schema not found: ${formId}`);
     }

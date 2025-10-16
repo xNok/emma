@@ -5,6 +5,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import type { EmmaConfig } from '../config.js';
+import { FormSchema } from '@xnok/emma-shared/types';
 
 interface ListOptions {
   detailed?: boolean;
@@ -38,7 +39,8 @@ export function listCommand(config: EmmaConfig): Command {
       for (const formId of formIds) {
         if (options.detailed) {
           try {
-            const schema = await config.loadFormSchema(formId);
+            const schema: FormSchema | null =
+              await config.loadFormSchema(formId);
             if (schema) {
               console.log(chalk.green(`📝 ${formId}`));
               console.log(`   Name: ${schema.name}`);

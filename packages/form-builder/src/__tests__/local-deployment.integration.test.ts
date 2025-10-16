@@ -16,7 +16,7 @@ interface ApiResponse {
   submissionId?: string;
 }
 import { FormBuilder } from '../form-builder.js';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 // Helper function to make HTTP requests
 async function makeRequest(

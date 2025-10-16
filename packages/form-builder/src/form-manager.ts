@@ -4,7 +4,7 @@
 
 import fs from 'fs-extra';
 import path from 'path';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 import type { EmmaConfig } from './config.js';
 import { FormBuilder } from './form-builder.js';
 import { LocalDeployment } from './local-deployment.js';

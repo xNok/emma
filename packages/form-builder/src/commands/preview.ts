@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import open from 'open';
 import type { EmmaConfig } from '../config.js';
 import { FormManager } from '../form-manager.js';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 interface PreviewOptions {
   port?: string;
@@ -33,7 +34,7 @@ export function previewCommand(config: EmmaConfig): Command {
 
       try {
         // Check if form exists
-        const schema = await manager.getForm(formId);
+        const schema: FormSchema | null = await manager.getForm(formId);
         if (!schema) {
           console.log(chalk.red(`Form "${formId}" not found.`));
           return;

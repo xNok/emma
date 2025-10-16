@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import app from '../server';
-import { FormSchema } from '@emma/shared/types';
+import { FormSchema } from '@xnok/emma-shared/types';
 import { Env } from '../env';
 import { D1Database } from '@cloudflare/workers-types';
 import { KVNamespace } from '@cloudflare/workers-types';

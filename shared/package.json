@@ -1,5 +1,5 @@
 {
-  "name": "@emma/shared",
+  "name": "@xnok/emma-shared",
   "version": "0.1.0",
   "description": "Shared types and utilities for Emma forms",
   "type": "module",

@@ -150,5 +150,5 @@ This foundation phase is complete when:
 
 ---
 
-**Next Document:** [02-technical-architecture.md](./02-technical-architecture.md)  
+**Next Document:** [02-technical-architecture.md](./02-technical-architecture.md)
 **See Also:** [05-architectural-decisions.md](./05-architectural-decisions.md) for resolved foundation questions

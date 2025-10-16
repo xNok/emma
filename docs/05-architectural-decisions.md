@@ -1,8 +1,8 @@
 # Architectural Decisions
 
-**Document Number:** 05  
-**Date:** October 16, 2025  
-**Status:** Final  
+**Document Number:** 05
+**Date:** October 16, 2025
+**Status:** Final
 **Previous:** [04-api-worker-architecture.md](./04-api-worker-architecture.md)
 
 ## 1. Purpose
@@ -494,7 +494,7 @@ Phone:    +1-555-0123
 - [ ] Implement infrastructure health checks
 - [ ] Document environment variable setup
 
-**Estimated Effort**: 3-4 days  
+**Estimated Effort**: 3-4 days
 **Blocker for**: All deployment features
 
 ### Phase 2: Snapshot-Based Versioning (Priority: High)
@@ -506,7 +506,7 @@ Phone:    +1-555-0123
 - [ ] Implement registry.json management
 - [ ] Add `emma deploy --snapshot`
 
-**Estimated Effort**: 2-3 days  
+**Estimated Effort**: 2-3 days
 **Blocker for**: Form management workflow
 
 ### Phase 3: Submission Handling (Priority: Medium)
@@ -517,7 +517,7 @@ Phone:    +1-555-0123
 - [ ] Add form comparison tool
 - [ ] Document form change strategies
 
-**Estimated Effort**: 2-3 days  
+**Estimated Effort**: 2-3 days
 **Blocker for**: Long-term form maintenance
 
 ## 8. Open Questions (Future Consideration)
@@ -531,6 +531,6 @@ These questions are not blockers for v1.0 and can be addressed in future version
 
 ---
 
-**Status**: ✅ Ready for Implementation  
-**Next Steps**: Create GitHub issues for each implementation phase  
+**Status**: ✅ Ready for Implementation
+**Next Steps**: Create GitHub issues for each implementation phase
 **Next Document**: TBD based on implementation needs
