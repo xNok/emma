@@ -15,7 +15,7 @@ describe('FormBuilder', () => {
   let config: EmmaConfig;
   let builder: FormBuilder;
 
-  const mockSchema: FormSchema = {
+  const mockSchema = {
     formId: 'contact-form-001',
     name: 'Contact Form',
     version: '1.0.0',
@@ -55,11 +55,14 @@ describe('FormBuilder', () => {
         fieldName: 'website',
       },
     },
-  };
+  } as FormSchema;
 
   beforeEach(async () => {
     // Create temporary directory for tests
-    testDir = path.join(os.tmpdir(), `emma-test-${Date.now()}`);
+    testDir = path.join(
+      os.tmpdir(),
+      `emma-test-${Math.random().toString(36).substring(2)}`
+    );
     await fs.ensureDir(testDir);
 
     config = new EmmaConfig(testDir);
@@ -140,7 +143,7 @@ describe('FormBuilder', () => {
     });
 
     it('should embed schema with different field types', async () => {
-      const complexSchema: FormSchema = {
+      const complexSchema = {
         ...mockSchema,
         fields: [
           { id: 'text', type: 'text', label: 'Text' },
@@ -181,7 +184,7 @@ describe('FormBuilder', () => {
             defaultValue: 'hidden-value',
           },
         ],
-      };
+      } as FormSchema;
 
       const result = await builder.build('complex-form', complexSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
@@ -204,7 +207,7 @@ describe('FormBuilder', () => {
     });
 
     it('should handle form without honeypot settings', async () => {
-      const schemaWithoutHoneypot: FormSchema = {
+      const schemaWithoutHoneypot = {
         ...mockSchema,
         settings: {
           ...mockSchema.settings,
@@ -213,7 +216,7 @@ describe('FormBuilder', () => {
             fieldName: 'website',
           },
         },
-      };
+      } as FormSchema;
 
       const result = await builder.build(
         'no-honeypot-form',

@@ -19,7 +19,7 @@ describe('Form Builder & Renderer Integration', () => {
   let config: EmmaConfig;
   let builder: FormBuilder;
 
-  const testSchema: FormSchema = {
+  const testSchema = {
     formId: TEST_FORM_ID,
     name: 'Integration Test Form',
     version: '0.1.0',
@@ -53,7 +53,7 @@ describe('Form Builder & Renderer Integration', () => {
         fieldName: 'website',
       },
     },
-  };
+  } as FormSchema;
 
   beforeAll(async () => {
     // Create test workspace

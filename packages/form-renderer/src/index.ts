@@ -7,7 +7,7 @@ import type {
   FormSchema,
   FormField,
   SubmissionResponse,
-} from '@emma/shared/types';
+} from '@xnok/emma-shared/types';
 import { validateSubmissionData } from '@emma/shared/schema';
 
 export interface RenderOptions {
@@ -62,7 +62,10 @@ export class FormRenderer {
     });
 
     // Add honeypot if enabled
-    if (this.schema.settings?.honeypot?.enabled) {
+    if (
+      this.schema.settings?.honeypot?.enabled &&
+      this.schema.settings.honeypot.fieldName
+    ) {
       const honeypot = this.renderHoneypot(
         this.schema.settings.honeypot.fieldName
       );
@@ -165,16 +168,19 @@ export class FormRenderer {
 
     // Validation attributes
     if (field.validation) {
-      if (field.validation.minLength)
+      if (typeof field.validation.minLength === 'number') {
         input.minLength = field.validation.minLength;
-      if (field.validation.maxLength)
+      }
+      if (typeof field.validation.maxLength === 'number') {
         input.maxLength = field.validation.maxLength;
-      if (field.validation.min) input.min = String(field.validation.min);
-      if (field.validation.max) input.max = String(field.validation.max);
-      if (
-        field.validation.pattern &&
-        typeof field.validation.pattern === 'string'
-      ) {
+      }
+      if (typeof field.validation.min === 'number') {
+        input.min = String(field.validation.min);
+      }
+      if (typeof field.validation.max === 'number') {
+        input.max = String(field.validation.max);
+      }
+      if (typeof field.validation.pattern === 'string') {
         input.pattern = field.validation.pattern;
       }
     }
@@ -207,10 +213,12 @@ export class FormRenderer {
 
     // Validation
     if (field.validation) {
-      if (field.validation.minLength)
+      if (typeof field.validation.minLength === 'number') {
         textarea.minLength = field.validation.minLength;
-      if (field.validation.maxLength)
+      }
+      if (typeof field.validation.maxLength === 'number') {
         textarea.maxLength = field.validation.maxLength;
+      }
     }
 
     // ARIA
@@ -411,13 +419,18 @@ export class FormRenderer {
     });
 
     // Check honeypot
-    const honeypotValue = formData.get(
-      this.schema.settings?.honeypot?.fieldName || ''
-    );
-    if (honeypotValue) {
-      // Silent fail for bots
-      this.showMessage('success', this.schema.settings?.successMessage);
-      return;
+    if (
+      this.schema.settings?.honeypot?.enabled &&
+      this.schema.settings.honeypot.fieldName
+    ) {
+      const honeypotValue = formData.get(
+        this.schema.settings.honeypot.fieldName
+      );
+      if (honeypotValue) {
+        // Silent fail for bots
+        this.showMessage('success', this.schema.settings?.successMessage);
+        return;
+      }
     }
 
     // Validate
@@ -488,10 +501,9 @@ export class FormRenderer {
         }
 
         // Redirect if configured
-        const redirectUrl = this.schema.settings?.redirectUrl;
-        if (redirectUrl) {
+        if (this.schema.settings?.redirectUrl) {
           setTimeout(() => {
-            window.location.href = redirectUrl;
+            window.location.href = this.schema.settings?.redirectUrl as string;
           }, 2000);
         }
       } else {

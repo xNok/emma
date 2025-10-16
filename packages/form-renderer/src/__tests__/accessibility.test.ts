@@ -16,7 +16,7 @@ describe('FormRenderer - Accessibility', () => {
   });
 
   it('should add aria-describedby for help text', () => {
-    const schema: FormSchema = {
+    const schema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -30,7 +30,7 @@ describe('FormRenderer - Accessibility', () => {
           helpText: 'Must be at least 8 characters',
         },
       ],
-    };
+    } as FormSchema;
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -45,7 +45,7 @@ describe('FormRenderer - Accessibility', () => {
   });
 
   it('should add aria-invalid on error', async () => {
-    const schema: FormSchema = {
+    const schema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -59,7 +59,7 @@ describe('FormRenderer - Accessibility', () => {
           required: true,
         },
       ],
-    };
+    } as FormSchema;
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -84,14 +84,14 @@ describe('FormRenderer - Accessibility', () => {
   });
 
   it('should add role="alert" to message container', () => {
-    const schema: FormSchema = {
+    const schema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
       theme: 'default',
       apiEndpoint: 'https://api.test.com/submit',
       fields: [],
-    };
+    } as FormSchema;
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -107,7 +107,7 @@ describe('FormRenderer - Accessibility', () => {
   });
 
   it('should add role="radiogroup" to radio buttons', () => {
-    const schema: FormSchema = {
+    const schema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -124,7 +124,7 @@ describe('FormRenderer - Accessibility', () => {
           ],
         },
       ],
-    };
+    } as FormSchema;
 
     const renderer = new FormRenderer({
       formId: 'test-form',

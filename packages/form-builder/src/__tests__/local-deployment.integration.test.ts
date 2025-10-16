@@ -66,7 +66,7 @@ describe('LocalDeployment Integration Tests', () => {
   let builder: FormBuilder;
   let testPort: number;
 
-  const mockFormSchema: FormSchema = {
+  const mockFormSchema = {
     formId: 'test-form-001',
     name: 'Test Form',
     version: '1.0.0',
@@ -95,7 +95,7 @@ describe('LocalDeployment Integration Tests', () => {
         fieldName: 'website',
       },
     },
-  };
+  } as FormSchema;
 
   beforeEach(async () => {
     // Create temporary directory for tests
