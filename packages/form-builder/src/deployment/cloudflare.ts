@@ -12,6 +12,7 @@ import {
   type S3ServiceException,
 } from '@aws-sdk/client-s3';
 import type { EmmaConfig as EmmaConfigType } from '../config.js';
+import { FormSchema } from '@xnok/emma-shared/types';
 
 export interface CloudflareDeploymentOptions {
   bucket: string; // R2 bucket name
@@ -61,7 +62,7 @@ export class CloudflareR2Deployment {
     const bundleKey = `${formId}/${formId}.js`;
     await this.uploadToR2(bundlePath, options.bucket, bundleKey, options);
 
-    const schema = await this.config.loadFormSchema(formId);
+    const schema: FormSchema | null = await this.config.loadFormSchema(formId);
     if (!schema) {
       throw new Error(`Schema not found for form "${formId}"`);
     }

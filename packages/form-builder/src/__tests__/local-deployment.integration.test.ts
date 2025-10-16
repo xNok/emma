@@ -16,7 +16,7 @@ interface ApiResponse {
   submissionId?: string;
 }
 import { FormBuilder } from '../form-builder.js';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 // Helper function to make HTTP requests
 async function makeRequest(
@@ -66,7 +66,7 @@ describe('LocalDeployment Integration Tests', () => {
   let builder: FormBuilder;
   let testPort: number;
 
-  const mockFormSchema = {
+  const mockFormSchema: FormSchema = {
     formId: 'test-form-001',
     name: 'Test Form',
     version: '1.0.0',
@@ -95,7 +95,7 @@ describe('LocalDeployment Integration Tests', () => {
         fieldName: 'website',
       },
     },
-  } as FormSchema;
+  };
 
   beforeEach(async () => {
     // Create temporary directory for tests

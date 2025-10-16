@@ -14,4 +14,4 @@ export type {
   FieldType,
   ValidationRules,
   FormSettings,
-} from '@xnok/emma-shared/types';
+} from '@emma/shared/types';

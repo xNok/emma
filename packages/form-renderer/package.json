@@ -36,8 +36,5 @@
     "renderer",
     "client-side",
     "validation"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  ]
 }

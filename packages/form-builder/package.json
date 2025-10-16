@@ -1,5 +1,5 @@
 {
-  "name": "@xnok/form-builder",
+  "name": "@xnok/emma-form-builder",
   "version": "0.1.0",
   "description": "Terminal User Interface for creating and managing embeddable forms",
   "type": "module",
@@ -51,8 +51,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   }
 }

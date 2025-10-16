@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FormRenderer } from '../index';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 describe('FormRenderer - Validation', () => {
   let container: HTMLElement;
@@ -16,7 +16,7 @@ describe('FormRenderer - Validation', () => {
   });
 
   it('should show error for empty required field on submit', async () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -30,7 +30,7 @@ describe('FormRenderer - Validation', () => {
           required: true,
         },
       ],
-    } as FormSchema;
+    };
 
     const onSubmit = vi.fn();
 
@@ -56,7 +56,7 @@ describe('FormRenderer - Validation', () => {
   });
 
   it('should validate minLength', async () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -73,7 +73,7 @@ describe('FormRenderer - Validation', () => {
           },
         },
       ],
-    } as FormSchema;
+    };
 
     const onSubmit = vi.fn();
 
@@ -104,7 +104,7 @@ describe('FormRenderer - Validation', () => {
   });
 
   it('should clear error on input', async () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -118,7 +118,7 @@ describe('FormRenderer - Validation', () => {
           required: true,
         },
       ],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',

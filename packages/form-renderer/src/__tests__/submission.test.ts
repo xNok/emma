@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FormRenderer } from '../index';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 describe('FormRenderer - Submission', () => {
   let container: HTMLElement;
@@ -17,7 +17,7 @@ describe('FormRenderer - Submission', () => {
   });
 
   it('should call onSubmit with form data', async () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -37,7 +37,7 @@ describe('FormRenderer - Submission', () => {
           required: true,
         },
       ],
-    } as FormSchema;
+    };
 
     const onSubmit = vi.fn();
 
@@ -73,7 +73,7 @@ describe('FormRenderer - Submission', () => {
   });
 
   it('should block bot submissions with honeypot', async () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -94,7 +94,7 @@ describe('FormRenderer - Submission', () => {
         },
         successMessage: 'Success!',
       },
-    } as FormSchema;
+    };
 
     const onSubmit = vi.fn();
 

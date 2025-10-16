@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { SubmissionResponse } from '@xnok/emma-shared/types';
+import { SubmissionData, SubmissionResponse } from '@xnok/emma-shared/types';
 import { validateSubmissionData } from '@xnok/emma-shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@xnok/emma-shared/utils';
 import { Env } from '../env';
@@ -15,7 +15,7 @@ export default async function handleSubmit(
       return c.json({ success: false, error: 'Form ID required' }, 400);
     }
 
-    const submissionData = await c.req.json();
+    const submissionData = await c.req.json<SubmissionData>();
     const clientIP = c.req.header('CF-Connecting-IP') || 'unknown';
     const submissionRepository = c.env.submissionRepository;
     const schemaRepository = c.env.schemaRepository;
@@ -54,13 +54,9 @@ export default async function handleSubmit(
     const submissionId = generateSubmissionId();
 
     const meta = {
-      timestamp:
-        (submissionData.meta?.timestamp as string) || new Date().toISOString(),
-      userAgent:
-        (submissionData.meta?.userAgent as string) ||
-        c.req.header('User-Agent'),
-      referrer:
-        (submissionData.meta?.referrer as string) || c.req.header('Referer'),
+      timestamp: submissionData.meta?.timestamp || new Date().toISOString(),
+      userAgent: submissionData.meta?.userAgent || c.req.header('User-Agent'),
+      referrer: submissionData.meta?.referrer || c.req.header('Referer'),
       ip: clientIP,
     };
 

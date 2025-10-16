@@ -29,8 +29,5 @@
     "forms",
     "types",
     "utilities"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  ]
 }

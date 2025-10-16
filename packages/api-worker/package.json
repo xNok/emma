@@ -32,8 +32,5 @@
     "worker",
     "api",
     "forms"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  ]
 }

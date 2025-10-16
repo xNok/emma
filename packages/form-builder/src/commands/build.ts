@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import type { EmmaConfig } from '../config.js';
 import { FormBuilder } from '../form-builder.js';
+import { FormSchema } from '@xnok/emma-shared/types';
 
 interface BuildOptions {
   watch?: boolean;
@@ -25,7 +26,7 @@ export function buildCommand(config: EmmaConfig): Command {
         return;
       }
 
-      const schema = await config.loadFormSchema(formId);
+      const schema: FormSchema | null = await config.loadFormSchema(formId);
       if (!schema) {
         console.log(chalk.red(`Form "${formId}" not found.`));
         return;

@@ -8,14 +8,14 @@ import path from 'path';
 import os from 'os';
 import { EmmaConfig } from '../config.js';
 import { FormBuilder } from '../form-builder.js';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 describe('FormBuilder', () => {
   let testDir: string;
   let config: EmmaConfig;
   let builder: FormBuilder;
 
-  const mockSchema = {
+  const mockSchema: FormSchema = {
     formId: 'contact-form-001',
     name: 'Contact Form',
     version: '1.0.0',
@@ -55,14 +55,11 @@ describe('FormBuilder', () => {
         fieldName: 'website',
       },
     },
-  } as FormSchema;
+  };
 
   beforeEach(async () => {
     // Create temporary directory for tests
-    testDir = path.join(
-      os.tmpdir(),
-      `emma-test-${Math.random().toString(36).substring(2)}`
-    );
+    testDir = path.join(os.tmpdir(), `emma-test-${Date.now()}`);
     await fs.ensureDir(testDir);
 
     config = new EmmaConfig(testDir);
@@ -143,7 +140,7 @@ describe('FormBuilder', () => {
     });
 
     it('should embed schema with different field types', async () => {
-      const complexSchema = {
+      const complexSchema: FormSchema = {
         ...mockSchema,
         fields: [
           { id: 'text', type: 'text', label: 'Text' },
@@ -184,7 +181,7 @@ describe('FormBuilder', () => {
             defaultValue: 'hidden-value',
           },
         ],
-      } as FormSchema;
+      };
 
       const result = await builder.build('complex-form', complexSchema);
       const bundleContent = await fs.readFile(result.bundlePath, 'utf8');
@@ -207,7 +204,7 @@ describe('FormBuilder', () => {
     });
 
     it('should handle form without honeypot settings', async () => {
-      const schemaWithoutHoneypot = {
+      const schemaWithoutHoneypot: FormSchema = {
         ...mockSchema,
         settings: {
           ...mockSchema.settings,
@@ -216,7 +213,7 @@ describe('FormBuilder', () => {
             fieldName: 'website',
           },
         },
-      } as FormSchema;
+      };
 
       const result = await builder.build(
         'no-honeypot-form',

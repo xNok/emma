@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { FormRenderer } from '../index';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 describe('FormRenderer - Core Rendering', () => {
   let container: HTMLElement;
@@ -16,14 +16,14 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should create a form renderer instance', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
       theme: 'default',
       apiEndpoint: 'https://api.test.com/submit',
       fields: [],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -35,14 +35,14 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should throw error if container not found', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
       theme: 'default',
       apiEndpoint: 'https://api.test.com/submit',
       fields: [],
-    } as FormSchema;
+    };
 
     expect(() => {
       new FormRenderer({
@@ -54,7 +54,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render a text input field', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -68,7 +68,7 @@ describe('FormRenderer - Core Rendering', () => {
           required: true,
         },
       ],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -85,7 +85,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render a textarea field', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -99,7 +99,7 @@ describe('FormRenderer - Core Rendering', () => {
           rows: 5,
         },
       ],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -115,7 +115,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render a select dropdown', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -132,7 +132,7 @@ describe('FormRenderer - Core Rendering', () => {
           ],
         },
       ],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -150,7 +150,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render radio buttons', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -168,7 +168,7 @@ describe('FormRenderer - Core Rendering', () => {
           ],
         },
       ],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -185,7 +185,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render checkboxes', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -202,7 +202,7 @@ describe('FormRenderer - Core Rendering', () => {
           ],
         },
       ],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -219,7 +219,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render hidden field', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -233,7 +233,7 @@ describe('FormRenderer - Core Rendering', () => {
           defaultValue: '12345',
         },
       ],
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -251,7 +251,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render honeypot when enabled', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -264,7 +264,7 @@ describe('FormRenderer - Core Rendering', () => {
           fieldName: 'website',
         },
       },
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',
@@ -280,7 +280,7 @@ describe('FormRenderer - Core Rendering', () => {
   });
 
   it('should render submit button with custom text', () => {
-    const schema = {
+    const schema: FormSchema = {
       formId: 'test-form',
       name: 'Test Form',
       version: '1.0.0',
@@ -290,7 +290,7 @@ describe('FormRenderer - Core Rendering', () => {
       settings: {
         submitButtonText: 'Send Now',
       },
-    } as FormSchema;
+    };
 
     const renderer = new FormRenderer({
       formId: 'test-form',

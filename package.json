@@ -17,11 +17,11 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
     "typecheck": "tsc --noEmit",
     "clean": "yarn workspaces foreach -Apt run clean && rm -rf node_modules",
-    "version": "yarn changeset version",
-    "release": "yarn build && yarn changeset publish"
+    "version": "changeset version",
+    "release": "yarn build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.7",
+    "@changesets/cli": "^2.27.1",
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",

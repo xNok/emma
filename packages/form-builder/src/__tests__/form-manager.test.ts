@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 import { EmmaConfig } from '../config.js';
 import { FormManager } from '../form-manager.js';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 interface DeploymentService {
   isRunning(): boolean;
@@ -20,7 +20,7 @@ describe('FormManager', () => {
   let config: EmmaConfig;
   let manager: FormManager;
 
-  const mockSchema = {
+  const mockSchema: FormSchema = {
     formId: 'manager-test-001',
     name: 'Manager Test Form',
     version: '1.0.0',
@@ -34,14 +34,11 @@ describe('FormManager', () => {
         required: true,
       },
     ],
-  } as FormSchema;
+  };
 
   beforeEach(async () => {
     // Create temporary directory for tests
-    testDir = path.join(
-      os.tmpdir(),
-      `emma-test-${Math.random().toString(36).substring(2)}`
-    );
+    testDir = path.join(os.tmpdir(), `emma-test-${Date.now()}`);
     await fs.ensureDir(testDir);
 
     config = new EmmaConfig(testDir);
@@ -85,14 +82,8 @@ describe('FormManager', () => {
     });
 
     it('should list forms', async () => {
-      await manager.createForm('form1', {
-        ...mockSchema,
-        formId: 'form1',
-      } as FormSchema);
-      await manager.createForm('form2', {
-        ...mockSchema,
-        formId: 'form2',
-      } as FormSchema);
+      await manager.createForm('form1', { ...mockSchema, formId: 'form1' });
+      await manager.createForm('form2', { ...mockSchema, formId: 'form2' });
 
       const forms = await manager.listForms();
       expect(forms).toHaveLength(2);
@@ -166,7 +157,7 @@ describe('FormManager', () => {
   describe('integration workflow', () => {
     it('should support complete form lifecycle', async () => {
       const formId = 'lifecycle-test-001';
-      const schema = { ...mockSchema, formId } as FormSchema;
+      const schema = { ...mockSchema, formId };
 
       // Create
       await manager.createForm(formId, schema);

@@ -10,7 +10,7 @@ import { FormBuilder } from '../form-builder.js';
 import { EmmaConfig } from '../config.js';
 import fs from 'fs-extra';
 import path from 'path';
-import type { FormSchema } from '@emma/shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 const TEST_WORKSPACE = path.join(process.cwd(), '.test-workspace');
 const TEST_FORM_ID = 'integration-test-form';
@@ -19,7 +19,7 @@ describe('Form Builder & Renderer Integration', () => {
   let config: EmmaConfig;
   let builder: FormBuilder;
 
-  const testSchema = {
+  const testSchema: FormSchema = {
     formId: TEST_FORM_ID,
     name: 'Integration Test Form',
     version: '0.1.0',
@@ -53,7 +53,7 @@ describe('Form Builder & Renderer Integration', () => {
         fieldName: 'website',
       },
     },
-  } as FormSchema;
+  };
 
   beforeAll(async () => {
     // Create test workspace
