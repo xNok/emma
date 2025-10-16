@@ -198,8 +198,10 @@ Examples:
 ```yaml
 formId: contact-form-001
 name: Contact Form
-version: 1.2.0 # Current version
-versionHistory: # Track all versions
+# Current version
+version: 1.2.0
+# Track all versions
+versionHistory:
   - version: 1.0.0
     deployedAt: 2025-10-01T10:00:00Z
     changes: Initial release
@@ -215,7 +217,8 @@ fields:
     type: text
     label: Your Name
     required: true
-    addedIn: 1.0.0 # Track when field was added
+    # Track when field was added
+    addedIn: 1.0.0
 ```
 
 **CLI Workflow**:
@@ -302,7 +305,7 @@ When a form schema changes:
 {
   "id": "sub_abc123",
   "form_id": "contact-form-001",
-  "schema_version": "1.0.0", // Schema version at submission time
+  "schema_version": "1.0.0",
   "data": {
     "name": "John Doe",
     "email": "john@example.com",
@@ -316,6 +319,8 @@ When a form schema changes:
   "created_at": 1697454000
 }
 ```
+
+Note: `schema_version` stores the schema version at submission time.
 
 **Reading Submissions with Schema Mapping**:
 
