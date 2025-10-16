@@ -2,7 +2,6 @@ import { FormRecord } from '@emma/shared/types';
 import { D1Database } from '@cloudflare/workers-types';
 
 export interface SubmissionRepository {
-  getFormSchema(formId: string): Promise<FormRecord | null>;
   saveSubmission(
     submissionId: string,
     formId: string,
@@ -16,15 +15,6 @@ export class D1SubmissionRepository implements SubmissionRepository {
 
   constructor(db: D1Database) {
     this.db = db;
-  }
-
-  async getFormSchema(formId: string): Promise<FormRecord | null> {
-    const result = await this.db
-      .prepare(`SELECT * FROM forms WHERE id = ? AND active = 1`)
-      .bind(formId)
-      .first<FormRecord>();
-
-    return result || null;
   }
 
   async saveSubmission(

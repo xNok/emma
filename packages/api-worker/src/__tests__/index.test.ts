@@ -1,14 +1,28 @@
 import { describe, it, expect, vi } from 'vitest';
 import app from '../server';
-import { FormRecord } from '@emma/shared/types';
+import { FormSchema } from '@emma/shared/types';
 import { Env } from '../env';
 import { D1Database } from '@cloudflare/workers-types';
+
+import { KVNamespace } from '@cloudflare/workers-types';
 
 const mockEnv: Env = {
   DB: {
     prepare: vi.fn(),
     batch: vi.fn(),
   } as unknown as D1Database,
+  submissionRepository: {
+    getFormSchema: vi.fn(),
+    saveSubmission: vi.fn(),
+  },
+  schemaRepository: {
+    getSchema: vi.fn(),
+  },
+  CDN_URL: 'https://example.com',
+  SCHEMA_CACHE: {
+    get: vi.fn(),
+    put: vi.fn(),
+  } as unknown as KVNamespace,
   ENVIRONMENT: 'test',
   RATE_LIMIT_REQUESTS: '100',
   RATE_LIMIT_WINDOW: '60',
@@ -34,29 +48,23 @@ describe('API Worker', () => {
       data: { name: 'Test User', email: 'test@example.com' },
     };
 
-    const mockFormRecord: FormRecord = {
-      id: formId,
+    const mockFormSchema: FormSchema = {
+      formId: formId,
       name: 'Test Form',
-      schema: JSON.stringify({
-        fields: [
-          { id: 'name', type: 'text', label: 'Name', required: true },
-          { id: 'email', type: 'email', label: 'Email', required: true },
-        ],
-      }),
-      active: 1,
-      submission_count: 0,
-      created_at: 0,
-      updated_at: 0,
+      fields: [
+        { id: 'name', type: 'text', label: 'Name', required: true },
+        { id: 'email', type: 'email', label: 'Email', required: true },
+      ],
+      theme: 'default',
       version: '1',
-      api_endpoint: '',
-      deploy_count: 0,
+      apiEndpoint: '',
     };
 
     // Mock the submission repository
-    mockEnv.submissionRepository = {
-      getFormSchema: vi.fn().mockResolvedValue(mockFormRecord),
-      saveSubmission: vi.fn().mockResolvedValue(undefined),
-    };
+    mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(mockFormSchema);
+    mockEnv.submissionRepository.saveSubmission = vi
+      .fn()
+      .mockResolvedValue(undefined);
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
@@ -81,10 +89,7 @@ describe('API Worker', () => {
     };
 
     // Mock the submission repository
-    mockEnv.submissionRepository = {
-      getFormSchema: vi.fn().mockResolvedValue(null),
-      saveSubmission: vi.fn().mockResolvedValue(undefined),
-    };
+    mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(null);
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
@@ -105,29 +110,20 @@ describe('API Worker', () => {
       data: { name: 'Test User' }, // Missing email
     };
 
-    const mockFormRecord: FormRecord = {
-      id: formId,
+    const mockFormSchema: FormSchema = {
+      formId: formId,
       name: 'Test Form',
-      schema: JSON.stringify({
-        fields: [
-          { id: 'name', type: 'text', label: 'Name', required: true },
-          { id: 'email', type: 'email', label: 'Email', required: true },
-        ],
-      }),
-      active: 1,
-      submission_count: 0,
-      created_at: 0,
-      updated_at: 0,
+      fields: [
+        { id: 'name', type: 'text', label: 'Name', required: true },
+        { id: 'email', type: 'email', label: 'Email', required: true },
+      ],
+      theme: 'default',
       version: '1',
-      api_endpoint: '',
-      deploy_count: 0,
+      apiEndpoint: '',
     };
 
     // Mock the submission repository
-    mockEnv.submissionRepository = {
-      getFormSchema: vi.fn().mockResolvedValue(mockFormRecord),
-      saveSubmission: vi.fn().mockResolvedValue(undefined),
-    };
+    mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(mockFormSchema);
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',

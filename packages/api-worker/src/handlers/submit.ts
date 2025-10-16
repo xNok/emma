@@ -22,14 +22,13 @@ export default async function handleSubmit(
     const submissionData = await c.req.json<SubmissionData>();
     const clientIP = c.req.header('CF-Connecting-IP') || 'unknown';
     const submissionRepository = c.env.submissionRepository;
+    const schemaRepository = c.env.schemaRepository;
 
-    // Get form schema from database
-    const formRecord = await submissionRepository.getFormSchema(formId);
-    if (!formRecord) {
+    // Get form schema
+    const formSchema = await schemaRepository.getSchema(formId);
+    if (!formSchema) {
       return c.json({ success: false, error: 'Form not found' }, 404);
     }
-
-    const formSchema = JSON.parse(formRecord.schema) as FormSchema;
 
     // Validate submission data
     const validation = validateSubmissionData(submissionData.data, formSchema);
