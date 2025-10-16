@@ -87,5 +87,3 @@ export default async function handleSubmit(
     );
   }
 }
-
-import { getFormSchema, saveSubmission } from '../database';

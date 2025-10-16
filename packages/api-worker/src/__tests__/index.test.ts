@@ -45,8 +45,11 @@ describe('API Worker', () => {
       }),
       active: 1,
       submission_count: 0,
-      created_at: '',
-      updated_at: '',
+      created_at: 0,
+      updated_at: 0,
+      version: '1',
+      api_endpoint: '',
+      deploy_count: 0,
     };
 
     // Mock the database response
@@ -115,8 +118,11 @@ describe('API Worker', () => {
       }),
       active: 1,
       submission_count: 0,
-      created_at: '',
-      updated_at: '',
+      created_at: 0,
+      updated_at: 0,
+      version: '1',
+      api_endpoint: '',
+      deploy_count: 0,
     };
 
     // Mock the database response
