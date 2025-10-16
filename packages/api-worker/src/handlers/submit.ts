@@ -2,7 +2,6 @@ import { Context } from 'hono';
 import { SubmissionData, SubmissionResponse } from '@xnok/emma-shared/types';
 import { validateSubmissionData } from '@xnok/emma-shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@xnok/emma-shared/utils';
-
 import { Env } from '../env';
 /**
  * Handles form submission
