@@ -3,10 +3,9 @@ import cloudflareIndex from '../cloudflare-index';
 import { Env } from '../env';
 import { D1Database, KVNamespace } from '@cloudflare/workers-types';
 import { D1SubmissionRepository } from '../data/submission-repository';
-import {
-  CdnSchemaRepository,
-  KvCacheSchemaRepository,
-} from '../data/schema-repository';
+import { KvCacheSchemaRepository } from '../data/schema-repository';
+
+import { ExecutionContext } from '@cloudflare/workers-types';
 
 describe('Cloudflare Index', () => {
   it('should create and inject repositories', async () => {
@@ -14,8 +13,7 @@ describe('Cloudflare Index', () => {
       DB: {} as D1Database,
       CDN_URL: 'https://example.com',
       SCHEMA_CACHE: {} as KVNamespace,
-      submissionRepository: {} as any,
-      schemaRepository: {} as any,
+      submissionRepository: new D1SubmissionRepository({} as D1Database),
       ENVIRONMENT: 'test',
       RATE_LIMIT_REQUESTS: '100',
       RATE_LIMIT_WINDOW: '60',
@@ -23,7 +21,10 @@ describe('Cloudflare Index', () => {
       ALLOWED_ORIGINS: '*',
     };
 
-    const mockCtx = {} as ExecutionContext;
+    const mockCtx: ExecutionContext = {
+      waitUntil: vi.fn(),
+      passThroughOnException: vi.fn(),
+    };
     const mockRequest = new Request('http://localhost');
 
     // Spy on the app.fetch method

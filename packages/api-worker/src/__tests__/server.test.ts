@@ -59,7 +59,9 @@ describe('API Worker', () => {
     };
 
     // Mock the submission repository
-    mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(mockFormSchema);
+    mockEnv.schemaRepository.getSchema = vi
+      .fn()
+      .mockResolvedValue(mockFormSchema);
     mockEnv.submissionRepository.saveSubmission = vi
       .fn()
       .mockResolvedValue(undefined);
@@ -121,7 +123,9 @@ describe('API Worker', () => {
     };
 
     // Mock the submission repository
-    mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(mockFormSchema);
+    mockEnv.schemaRepository.getSchema = vi
+      .fn()
+      .mockResolvedValue(mockFormSchema);
 
     const req = new Request(`http://localhost/submit/${formId}`, {
       method: 'POST',
