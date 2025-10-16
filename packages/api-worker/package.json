@@ -10,14 +10,17 @@
     "deploy:staging": "wrangler deploy --env staging",
     "tail": "wrangler tail",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate:types": "openapi-typescript openapi.yaml --output src/types.ts"
   },
   "dependencies": {
-    "@emma/shared": "workspace:*"
+    "@emma/shared": "workspace:*",
+    "hono": "^4.9.12"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",
     "@types/node": "^20.10.0",
+    "openapi-typescript": "^7.10.1",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0",
     "wrangler": "^3.22.1"
