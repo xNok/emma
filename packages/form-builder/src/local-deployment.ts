@@ -10,7 +10,7 @@ import type { Server } from 'http';
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 import express from 'express';
 import type { EmmaConfig } from './config.js';
-import { FormSchema } from '@xnok/emma-shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 export interface DeploymentOptions {
   host: string;
