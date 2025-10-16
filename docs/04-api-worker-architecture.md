@@ -16,7 +16,9 @@ The `api-worker` is structured into the following key components:
 - **`src/cloudflare-index.ts`**: This is the entry point for the Cloudflare Worker. It imports the Hono app from `server.ts` and exports it, allowing it to run on the Cloudflare edge.
 - **`src/index.ts`**: This is the entry point for running the server in a standard Node.js environment, useful for local development and testing.
 - **`src/handlers/`**: This directory contains the route handlers. Each handler is responsible for a specific API endpoint (e.g., `handleSubmit`).
-- **`src/database.ts`**: This module abstracts all database interactions. The initial implementation uses Cloudflare D1, but it can be easily swapped out for other databases.
+- **`src/data/`**: This directory contains the data access layer, which is abstracted through repository interfaces.
+  - **`submission-repository.ts`**: Defines the interface for saving form submissions and includes a D1-specific implementation.
+  - **`schema-repository.ts`**: Defines the interface for fetching form schemas and includes implementations for fetching from a CDN with a KV cache.
 - **`src/types.ts`**: This file is auto-generated from `openapi.yaml` and contains all the TypeScript types for our API.
 - **`openapi.yaml`**: The single source of truth for our API's design.
 
@@ -25,7 +27,8 @@ The `api-worker` is structured into the following key components:
 To add a new deployment provider (e.g., DigitalOcean Functions), you would follow these steps:
 
 1.  **Create a new entry point**: Create a file like `src/do-index.ts` that imports the Hono app from `server.ts` and adapts it to the DigitalOcean Functions runtime.
-2.  **Abstract environment-specific logic**: If the new provider requires a different database or other services, you would abstract the existing logic in `database.ts` into a generic interface and create a new implementation for the new provider.
-3.  **Update build scripts**: Add a new build script to `package.json` to build the new entry point.
+2.  **Implement provider-specific repositories**: Create new implementations of the `SubmissionRepository` and `SchemaRepository` interfaces that are specific to the new provider's services (e.g., using a different database or caching mechanism).
+3.  **Inject the new repositories**: In the new entry point, instantiate the new repository implementations and inject them into the application context.
+4.  **Update build scripts**: Add a new build script to `package.json` to build the new entry point.
 
 This modular design ensures that Emma can be deployed to a variety of environments without requiring a major rewrite of the application logic.
