@@ -12,7 +12,7 @@ import {
   type S3ServiceException,
 } from '@aws-sdk/client-s3';
 import type { EmmaConfig as EmmaConfigType } from '../config.js';
-import { FormSchema } from '@xnok/emma-shared/types';
+import type { FormSchema } from '@xnok/emma-shared/types';
 
 export interface CloudflareDeploymentOptions {
   bucket: string; // R2 bucket name
