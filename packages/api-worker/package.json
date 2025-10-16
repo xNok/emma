@@ -1,6 +1,6 @@
 {
   "name": "@xnok/emma-api-worker",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Cloudflare Worker for handling form submissions",
   "type": "module",
   "main": "./src/cloudflare-index.ts",
