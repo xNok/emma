@@ -21,16 +21,25 @@ export class FormBuilder {
 
   /**
    * Build a form bundle from schema
+   * @param snapshotTimestamp Optional timestamp to build a specific snapshot
    */
-  async build(formId: string, schema: FormSchema): Promise<BuildResult> {
+  async build(
+    formId: string,
+    schema: FormSchema,
+    snapshotTimestamp?: number
+  ): Promise<BuildResult> {
     const outputDir = this.config.getBuildPath(formId);
     await fs.ensureDir(outputDir);
 
     // Generate the form bundle JavaScript
     const bundleContent = this.generateFormBundle(schema);
 
-    // Write bundle file with unique name
-    const bundlePath = path.join(outputDir, `${schema.formId}.js`);
+    // Determine bundle name based on snapshot
+    const timestamp = snapshotTimestamp || schema.currentSnapshot;
+    const bundleName = timestamp ? `${formId}-${timestamp}.js` : `${formId}.js`;
+
+    // Write bundle file with timestamp-based name
+    const bundlePath = path.join(outputDir, bundleName);
     await fs.writeFile(bundlePath, bundleContent, 'utf8');
 
     // Copy theme CSS if it exists

@@ -15,6 +15,8 @@ import { buildCommand } from './commands/build.js';
 import { deployCommand } from './commands/deploy.js';
 import { previewCommand } from './commands/preview.js';
 import { deleteCommand } from './commands/delete.js';
+import { editCommand } from './commands/edit.js';
+import { historyCommand } from './commands/history.js';
 
 const program = new Command();
 
@@ -32,10 +34,12 @@ async function main() {
     // Register commands
     program.addCommand(initCommand(config));
     program.addCommand(createCommand(config));
+    program.addCommand(editCommand(config));
     program.addCommand(listCommand(config));
     program.addCommand(buildCommand(config));
     program.addCommand(deployCommand(config));
     program.addCommand(previewCommand(config));
+    program.addCommand(historyCommand(config));
     program.addCommand(deleteCommand(config));
 
     // Enhanced help

@@ -11,6 +11,7 @@ import { FormSchema } from '@xnok/emma-shared/types';
 
 interface BuildOptions {
   watch?: boolean;
+  snapshot?: string; // Snapshot timestamp to build
 }
 
 export function buildCommand(config: EmmaConfig): Command {
@@ -18,6 +19,10 @@ export function buildCommand(config: EmmaConfig): Command {
     .description('Build a form bundle')
     .argument('<form-id>', 'Form ID to build')
     .option('-w, --watch', 'Watch for changes and rebuild')
+    .option(
+      '-s, --snapshot <timestamp>',
+      'Build a specific snapshot by timestamp'
+    )
     .action(async (formId: string, options: BuildOptions) => {
       if (!config.isInitialized()) {
         console.log(
@@ -32,11 +37,34 @@ export function buildCommand(config: EmmaConfig): Command {
         return;
       }
 
+      // Validate snapshot if specified
+      let snapshotTimestamp: number | undefined;
+      if (options.snapshot) {
+        snapshotTimestamp = parseInt(options.snapshot, 10);
+        if (isNaN(snapshotTimestamp)) {
+          console.log(chalk.red('Invalid snapshot timestamp.'));
+          return;
+        }
+
+        // Check if snapshot exists
+        const snapshotExists = schema.snapshots?.some(
+          (s) => s.timestamp === snapshotTimestamp
+        );
+        if (!snapshotExists) {
+          console.log(
+            chalk.red(
+              `Snapshot ${snapshotTimestamp} not found. Use "emma history ${formId}" to see available snapshots.`
+            )
+          );
+          return;
+        }
+      }
+
       const builder = new FormBuilder(config);
       const spinner = ora('Building form bundle...').start();
 
       try {
-        const result = await builder.build(formId, schema);
+        const result = await builder.build(formId, schema, snapshotTimestamp);
         spinner.succeed('Form bundle built successfully');
 
         console.log('');
@@ -44,6 +72,11 @@ export function buildCommand(config: EmmaConfig): Command {
         console.log(`  Bundle: ${result.bundlePath}`);
         console.log(`  Size: ${result.size} bytes`);
         console.log(`  Output: ${result.outputDir}`);
+        if (snapshotTimestamp) {
+          console.log(
+            chalk.dim(`  Snapshot: ${new Date(snapshotTimestamp * 1000).toISOString()}`)
+          );
+        }
         console.log('');
         console.log(chalk.cyan('Next steps:'));
         console.log(`  $ emma deploy ${formId}`);

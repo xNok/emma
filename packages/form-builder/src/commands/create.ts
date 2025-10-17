@@ -205,6 +205,7 @@ export function createCommand(config: EmmaConfig): Command {
       ])) as { enableHoneypot: boolean };
 
       // Create form schema
+      const now = Math.floor(Date.now() / 1000); // Unix timestamp
       const schema: FormSchema = {
         formId,
         name: basicInfo.formName,
@@ -222,7 +223,24 @@ export function createCommand(config: EmmaConfig): Command {
             fieldName: 'website', // Common honeypot field name
           },
         },
+        // Initialize snapshot tracking
+        createdAt: now,
+        lastModified: now,
+        currentSnapshot: now,
+        snapshots: [
+          {
+            timestamp: now,
+            r2Key: `${formId}-${now}.js`,
+            changes: 'Initial version',
+            deployed: false,
+          },
+        ],
       };
+
+      // Mark fields with creation timestamp
+      fields.forEach((field) => {
+        field.addedAt = now;
+      });
 
       // Save form schema
       try {

@@ -50,6 +50,7 @@ export interface FormField {
   defaultValue?: string | string[];
   helpText?: string;
   autocomplete?: string;
+  addedAt?: number; // Unix timestamp when field was added (for snapshot tracking)
 }
 
 export interface HoneypotSettings {
@@ -70,14 +71,43 @@ export interface FormSettings {
   redirectUrl?: string; // Redirect after successful submission
 }
 
+export interface FormSnapshot {
+  timestamp: number; // Unix timestamp
+  r2Key: string; // Storage key in R2 (e.g., "contact-form-1729089000.js")
+  changes: string; // Description of changes made in this snapshot
+  deployed?: boolean; // Whether this snapshot has been deployed
+}
+
 export interface FormSchema {
   formId: string;
   name: string;
-  version: string;
+  version: string; // Legacy field, kept for backward compatibility
   theme: string;
   apiEndpoint: string;
   fields: FormField[];
   settings?: FormSettings;
+  // Snapshot tracking
+  createdAt?: number; // Unix timestamp when form was created
+  lastModified?: number; // Unix timestamp when form was last modified
+  currentSnapshot?: number; // Current snapshot timestamp
+  snapshots?: FormSnapshot[]; // History of all snapshots
+}
+
+// ============================================================================
+// Form Registry Types (for R2 storage)
+// ============================================================================
+
+export interface FormRegistryEntry {
+  formId: string;
+  name: string;
+  currentSnapshot: number;
+  allSnapshots: number[];
+  publicUrl: string; // URL to current snapshot bundle
+}
+
+export interface FormRegistry {
+  forms: FormRegistryEntry[];
+  lastUpdated: number; // Unix timestamp
 }
 
 // ============================================================================
@@ -134,6 +164,8 @@ export interface SubmissionRecord {
   spam_score: number;
   status: 'new' | 'read' | 'archived' | 'spam';
   created_at: number;
+  form_snapshot?: number; // Unix timestamp of form snapshot used
+  form_bundle?: string; // Bundle file name (e.g., "contact-form-1729089000.js")
 }
 
 export interface MetadataRecord {
