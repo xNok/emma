@@ -27,9 +27,104 @@ Emma uses Cloudflare's edge computing platform for hosting, data storage, and AP
 3. Enable Workers and Pages in your account
 4. Note your Account ID (found in Workers & Pages → Overview)
 
-### 2.2 API Token Creation
+### 2.2 Environment Variables Setup
 
-Create an API token with the following permissions:
+Emma CLI uses environment variables for authentication and never stores credentials on disk. Set up the following environment variables before using `emma init`:
+
+#### Required Environment Variables
+
+```bash
+# R2 Storage Access (S3-Compatible API)
+export R2_ACCESS_KEY_ID="your-access-key-id"
+export R2_SECRET_ACCESS_KEY="your-secret-access-key"
+export R2_ACCOUNT_ID="your-cloudflare-account-id"
+export R2_BUCKET_NAME="emma-forms"
+export R2_PUBLIC_URL="https://forms.example.com"
+
+# Cloudflare API Access (for Worker deployment)
+export CLOUDFLARE_API_TOKEN="your-api-token"
+export CLOUDFLARE_ACCOUNT_ID="your-cloudflare-account-id"
+```
+
+#### How to Get Credentials
+
+**R2 Access Keys:**
+
+1. Go to Cloudflare Dashboard → R2
+2. Click "Manage R2 API Tokens"
+3. Create API Token with "Admin Read & Write" permissions
+4. Save the Access Key ID and Secret Access Key
+
+**Cloudflare API Token:**
+
+1. Go to Cloudflare Dashboard → My Profile → API Tokens
+2. Create Token → Use template "Edit Cloudflare Workers"
+3. Or create custom token with these permissions:
+   - Account - Workers R2 Storage: Edit
+   - Account - Workers Scripts: Edit
+   - Account - D1: Edit
+   - Zone - Workers Routes: Edit (if using custom domain)
+4. Save the token securely
+
+**Account ID:**
+
+- Found in Workers & Pages → Overview
+- Or in any Cloudflare service dashboard URL
+
+#### Setting Environment Variables
+
+**Option 1: Shell Profile (Persistent)**
+
+Add to `~/.bashrc`, `~/.zshrc`, or equivalent:
+
+```bash
+# Emma Cloudflare Configuration
+export R2_ACCESS_KEY_ID="..."
+export R2_SECRET_ACCESS_KEY="..."
+export R2_ACCOUNT_ID="..."
+export R2_BUCKET_NAME="emma-forms"
+export R2_PUBLIC_URL="https://forms.yourdomain.com"
+export CLOUDFLARE_API_TOKEN="..."
+export CLOUDFLARE_ACCOUNT_ID="..."
+```
+
+**Option 2: .env File (Project-Specific)**
+
+Create `.env` in your project directory:
+
+```bash
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_ACCOUNT_ID=...
+R2_BUCKET_NAME=emma-forms
+R2_PUBLIC_URL=https://forms.yourdomain.com
+CLOUDFLARE_API_TOKEN=...
+CLOUDFLARE_ACCOUNT_ID=...
+```
+
+Then source it: `source .env`
+
+**Option 3: Secret Manager (Production)**
+
+For production/CI environments, use your preferred secret manager:
+
+- GitHub Actions Secrets
+- AWS Secrets Manager
+- HashiCorp Vault
+- 1Password CLI
+- etc.
+
+**Important Security Notes:**
+
+- Never commit credentials to version control
+- Add `.env` to `.gitignore`
+- Use separate tokens for development and production
+- Rotate tokens regularly
+- Use minimal required permissions
+
+### 2.3 API Token Permissions
+
+For the Cloudflare API token, ensure these specific permissions:
 
 ```
 Token Name: Emma Form Builder
@@ -46,9 +141,181 @@ TTL: No expiry (or set your preferred expiry)
 
 Save this token securely - you'll need it for the TUI configuration.
 
-## 3. R2 Storage Setup
+## 3. Infrastructure Deployment with `emma init`
 
-### 3.1 Create R2 Bucket
+### 3.1 Overview
+
+The `emma init` command handles complete infrastructure setup, including:
+
+- Provider selection (Cloudflare, custom, etc.)
+- Environment variable verification
+- R2 bucket creation
+- API Worker deployment via Wrangler
+- D1 database creation and migrations
+- Infrastructure health checks
+
+### 3.2 Running `emma init`
+
+```bash
+# First-time setup
+emma init
+
+# Reconfigure or switch providers
+emma init --override
+```
+
+### 3.3 Interactive Setup Flow
+
+When you run `emma init`, you'll go through these steps:
+
+**Step 1: Provider Selection**
+
+```
+? Select deployment provider:
+  > Cloudflare (Workers + R2 + D1)
+    DigitalOcean Functions (coming soon)
+    Custom (bring your own infrastructure)
+```
+
+**Step 2: Environment Variable Verification**
+
+```
+Checking environment variables...
+✓ CLOUDFLARE_API_TOKEN found
+✓ R2_ACCESS_KEY_ID found
+✓ R2_SECRET_ACCESS_KEY found
+✓ R2_ACCOUNT_ID found
+✓ CLOUDFLARE_ACCOUNT_ID found
+
+Configuration:
+  Provider: Cloudflare
+  R2 Bucket: emma-forms
+  Public URL: https://forms.yourdomain.com
+```
+
+If any required variables are missing, you'll be prompted to set them or cancel.
+
+**Step 3: Infrastructure Deployment**
+
+```
+Deploying infrastructure...
+→ Creating R2 bucket "emma-forms"... ✓
+→ Deploying API worker to Cloudflare... ✓
+→ Creating D1 database "emma-submissions"... ✓
+→ Running database migrations... ✓
+→ Testing API worker endpoint... ✓
+
+Infrastructure deployed successfully!
+```
+
+**Step 4: Configuration Save**
+
+```
+Saving configuration to ~/.emma/config.json
+
+Configuration saved:
+  Provider: cloudflare
+  Default theme: default
+  Local server port: 3333
+  Local server host: localhost
+
+Ready to create forms!
+Try: emma create my-first-form
+```
+
+### 3.4 What Gets Deployed
+
+**R2 Bucket:**
+
+- Bucket name: `emma-forms` (or custom)
+- Purpose: Store form JavaScript bundles
+- Access: Public read via Worker or custom domain
+
+**API Worker:**
+
+- Worker name: `emma-api`
+- Purpose: Handle form submissions
+- Bindings: D1 database, R2 bucket
+- Routes: Configured based on your domain
+
+**D1 Database:**
+
+- Database name: `emma-submissions`
+- Purpose: Store form schemas and submissions
+- Schema: Automatically migrated with snapshot support
+
+### 3.5 Configuration Storage
+
+Emma stores **only non-sensitive** configuration in `~/.emma/config.json`:
+
+```json
+{
+  "provider": "cloudflare",
+  "defaultTheme": "default",
+  "localServerPort": 3333,
+  "localServerHost": "localhost"
+}
+```
+
+**Credentials are NEVER stored in this file.** All authentication uses environment variables.
+
+### 3.6 Reconfiguration
+
+To reconfigure or switch providers:
+
+```bash
+emma init --override
+```
+
+This will:
+
+- Restart the entire setup process
+- Allow changing provider or configuration
+- Preserve existing forms (they remain in `~/.emma/forms/`)
+- Update `~/.emma/config.json` with new settings
+
+### 3.7 Troubleshooting
+
+**Missing Environment Variables:**
+
+```
+✗ Error: Required environment variable R2_ACCESS_KEY_ID not set
+
+Please set the following environment variables:
+  export R2_ACCESS_KEY_ID="your-access-key"
+  export R2_SECRET_ACCESS_KEY="your-secret-key"
+  export CLOUDFLARE_API_TOKEN="your-token"
+
+Then run: emma init
+```
+
+**Infrastructure Deployment Failed:**
+
+```
+✗ Error: Failed to create R2 bucket
+
+Common causes:
+  - Invalid API token permissions
+  - Bucket name already exists
+  - Account quota exceeded
+
+Check your Cloudflare dashboard for details.
+```
+
+**Worker Deployment Failed:**
+
+```
+✗ Error: Failed to deploy API worker
+
+Possible solutions:
+  - Verify CLOUDFLARE_API_TOKEN has Workers Scripts:Edit permission
+  - Check that your account has Workers enabled
+  - Ensure CLOUDFLARE_ACCOUNT_ID is correct
+```
+
+## 4. R2 Storage Setup
+
+### 4.1 Create R2 Bucket
 
 ```bash
 # Using Wrangler CLI
@@ -61,7 +328,7 @@ npx wrangler r2 bucket create emma-forms
 # 4. Click Create bucket
 ```
 
-### 3.2 Configure Public Access
+### 4.2 Configure Public Access
 
 R2 buckets are private by default. To serve form JS bundles publicly:
 
@@ -121,7 +388,7 @@ pattern = "forms.yourdomain.com/*"
 zone_name = "yourdomain.com"
 ```
 
-### 3.3 File Structure in R2
+### 4.3 File Structure in R2
 
 ```
 emma-forms/
@@ -133,9 +400,9 @@ emma-forms/
     └── minimal.css
 ```
 
-## 4. D1 Database Setup
+## 5. D1 Database Setup
 
-### 4.1 Create Database
+### 5.1 Create Database
 
 ```bash
 # Create D1 database
@@ -150,7 +417,7 @@ npx wrangler d1 create emma-submissions
 # database_id = "xxxx-xxxx-xxxx"
 ```
 
-### 4.2 Initialize Schema
+### 5.2 Initialize Schema
 
 Create the database schema:
 
@@ -159,10 +426,10 @@ Create the database schema:
 
 -- Forms table: metadata about each form
 CREATE TABLE forms (
-  id TEXT PRIMARY KEY,                    -- e.g., "contact-form-001"
+  id TEXT PRIMARY KEY,                    -- e.g., "contact-form"
   name TEXT NOT NULL,                     -- Human-readable name
   schema TEXT NOT NULL,                   -- JSON schema definition
-  version TEXT NOT NULL,                  -- Schema version "1.0.0"
+  current_snapshot INTEGER NOT NULL,      -- Current snapshot timestamp
   api_endpoint TEXT,                      -- Custom API endpoint if any
   created_at INTEGER NOT NULL,            -- Unix timestamp
   updated_at INTEGER NOT NULL,            -- Unix timestamp
@@ -175,6 +442,8 @@ CREATE TABLE forms (
 CREATE TABLE submissions (
   id TEXT PRIMARY KEY,                    -- e.g., "sub_abc123xyz"
   form_id TEXT NOT NULL,                  -- Foreign key to forms.id
+  form_snapshot INTEGER NOT NULL,         -- Snapshot timestamp when submitted
+  form_bundle TEXT NOT NULL,              -- e.g., "contact-form-1729089000.js"
   data TEXT NOT NULL,                     -- JSON of submitted data
   meta TEXT,                              -- JSON metadata (IP, UA, referrer)
   spam_score INTEGER DEFAULT 0,           -- Spam detection score
@@ -187,6 +456,7 @@ CREATE TABLE submissions (
 CREATE INDEX idx_submissions_form_id ON submissions(form_id);
 CREATE INDEX idx_submissions_created_at ON submissions(created_at DESC);
 CREATE INDEX idx_submissions_status ON submissions(status);
+CREATE INDEX idx_submissions_form_snapshot ON submissions(form_snapshot);
 CREATE INDEX idx_forms_active ON forms(active);
 
 -- Metadata table: for system configuration
@@ -212,7 +482,7 @@ npx wrangler d1 execute emma-submissions --file=./migrations/0001_initial_schema
 npx wrangler d1 execute emma-submissions --command="SELECT name FROM sqlite_master WHERE type='table';"
 ```
 
-### 4.3 Database Access Patterns
+### 5.3 Database Access Patterns
 
 **Common Queries:**
 
@@ -242,9 +512,9 @@ SELECT COUNT(*) as total FROM submissions WHERE form_id = ?;
 UPDATE forms SET submission_count = submission_count + 1 WHERE id = ?;
 ```
 
-## 5. Workers Configuration
+## 6. Workers Configuration
 
-### 5.1 Submission API Worker
+### 6.1 Submission API Worker
 
 **wrangler.toml:**
 
@@ -278,7 +548,9 @@ vars = { ENVIRONMENT = "development" }
 vars = { ENVIRONMENT = "production" }
 ```
 
-### 5.2 Environment Variables & Secrets
+### 6.2 Environment Variables & Secrets
+
+**Note:** Emma CLI does not use these secrets directly. These are for the deployed Worker itself. CLI authentication uses environment variables only (see Section 2.2).
 
 ```bash
 # Set secrets (not in wrangler.toml for security)
@@ -295,7 +567,7 @@ npx wrangler secret put API_SECRET_KEY
 - `API_SECRET_KEY`: For authenticating TUI deployments
 - `WEBHOOK_SECRET`: (Optional) For notification webhooks
 
-### 5.3 Rate Limiting
+### 6.3 Rate Limiting
 
 Implement rate limiting using Durable Objects or KV:
 
@@ -320,9 +592,9 @@ export async function checkRateLimit(env: Env, ip: string): Promise<boolean> {
 }
 ```
 
-## 6. Custom Domain Setup
+## 7. Custom Domain Setup
 
-### 6.1 Forms CDN Domain
+### 7.1 Forms CDN Domain
 
 ```
 Domain: forms.yourdomain.com
@@ -335,7 +607,7 @@ Setup:
 3. SSL/TLS: Automatic via Cloudflare
 ```
 
-### 6.2 API Domain
+### 7.2 API Domain
 
 ```
 Domain: api.yourdomain.com
@@ -348,16 +620,16 @@ Setup:
 3. SSL/TLS: Automatic via Cloudflare
 ```
 
-## 7. Monitoring & Logs
+## 8. Monitoring & Logs
 
-### 7.1 Workers Analytics
+### 8.1 Workers Analytics
 
 Access via Dashboard:
 
 - Workers & Pages → Analytics & Logs
 - Metrics: Requests, errors, CPU time, duration
 
-### 7.2 Real-time Logs
+### 8.2 Real-time Logs
 
 ```bash
 # Tail logs in real-time
@@ -370,7 +642,7 @@ npx wrangler tail emma-api --status error
 npx wrangler tail emma-api > logs.txt
 ```
 
-### 7.3 D1 Metrics
+### 8.3 D1 Metrics
 
 ```bash
 # Check database size
@@ -386,7 +658,7 @@ FROM submissions
 GROUP BY form_id;
 ```
 
-## 8. Cost Estimation
+## 9. Cost Estimation
 
 **Free Tier Limits:**
 
@@ -402,7 +674,7 @@ GROUP BY form_id;
 
 **Cost: $0/month** for typical small-to-medium usage.
 
-## 9. Deployment Checklist
+## 10. Deployment Checklist
 
 - [ ] Cloudflare account created
 - [ ] API token generated with correct permissions
@@ -416,9 +688,9 @@ GROUP BY form_id;
 - [ ] Rate limiting configured
 - [ ] Monitoring dashboard reviewed
 
-## 10. Backup & Recovery
+## 11. Backup & Recovery
 
-### 10.1 Database Backups
+### 11.1 Database Backups
 
 ```bash
 # Export D1 database
@@ -428,7 +700,7 @@ npx wrangler d1 export emma-submissions --output=backup.sql
 npx wrangler d1 execute emma-submissions --file=backup.sql
 ```
 
-### 10.2 R2 Backups
+### 11.2 R2 Backups
 
 ```bash
 # Sync R2 bucket to local

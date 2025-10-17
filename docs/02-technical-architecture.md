@@ -60,33 +60,41 @@ graph TB
 **Commands:**
 
 ```bash
-emma init                    # Initialize a new form project
-emma create <form-name>      # Create a new form interactively
-emma build <form-id>         # Build form JS bundle
-emma deploy <form-id>        # Deploy to Cloudflare R2
-emma list                    # List all forms
-emma preview <form-id>       # Local preview
-emma delete <form-id>        # Delete a form
+emma init                           # Initialize and deploy infrastructure
+emma init --override                # Reconfigure provider setup
+emma create <form-name>             # Create a new form interactively
+emma edit <form-id>                 # Edit form and create new snapshot
+emma build <form-id>                # Build form JS bundle
+emma deploy <form-id>               # Deploy current snapshot
+emma deploy <form-id> --snapshot    # Deploy specific snapshot
+emma history <form-id>              # Show form snapshot timeline
+emma list [--detailed]              # List all forms
+emma preview <form-id>              # Open form preview in browser
+emma delete <form-id>               # Delete a form and build artifacts
 ```
 
-```bash
-emma init                    # Initialize Emma configuration
-emma create <form-name>      # Create a new form interactively
-emma build <form-id>         # Build form JavaScript bundle
-emma deploy <form-id>        # Deploy to local development server
-emma list [--detailed]       # List all forms
-emma preview <form-id>       # Open form preview in browser
-emma delete <form-id>        # Delete a form and build artifacts
-```
-
-**Form Schema Structure:**
+**Form Schema Structure (with Snapshot Tracking):**
 
 ```yaml
-formId: contact-form-001
+formId: contact-form
 name: 'Contact Form'
-version: '1.0.0'
+createdAt: 2025-10-01T10:00:00Z
+lastModified: 2025-10-16T14:30:00Z
+currentSnapshot: 1729089000
 theme: 'default'
 apiEndpoint: 'https://api.example.com/submit'
+
+# Snapshot history for version tracking
+snapshots:
+  - timestamp: 1727780400 # 2025-10-01 10:00:00
+    deployed: true
+    storageKey: contact-form-1727780400.js
+    changes: Initial version
+
+  - timestamp: 1729089000 # 2025-10-16 14:30:00
+    deployed: true
+    storageKey: contact-form-1729089000.js
+    changes: Added phone number field
 
 fields:
   - id: name
@@ -104,6 +112,12 @@ fields:
     validation:
       pattern: 'email'
 
+  - id: phone
+    type: tel
+    label: 'Phone Number'
+    required: false
+    addedAt: 1729089000 # Tracks when field was added
+
   - id: message
     type: textarea
     label: 'Message'
@@ -120,6 +134,8 @@ settings:
     enabled: true
     fieldName: 'website'
 ```
+
+**Note:** Emma uses snapshot-based versioning instead of semantic versioning. Each edit creates a new immutable snapshot with a timestamp. For detailed information, see [05-architectural-decisions.md](./05-architectural-decisions.md#3-form-versioning-strategy).
 
 ### 2.2 Form Renderer (JavaScript Library)
 
@@ -196,7 +212,8 @@ Content-Type: application/json
 
 Request Body:
 {
-  "formId": "contact-form-001",
+  "formId": "contact-form",
+  "formSnapshot": 1729089000,
   "data": {
     "name": "John Doe",
     "email": "john@example.com",
@@ -231,7 +248,7 @@ CREATE TABLE forms (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   schema TEXT NOT NULL, -- JSON schema
-  version TEXT NOT NULL,
+  current_snapshot INTEGER NOT NULL, -- Timestamp of current snapshot
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
   active INTEGER DEFAULT 1
@@ -241,6 +258,8 @@ CREATE TABLE forms (
 CREATE TABLE submissions (
   id TEXT PRIMARY KEY,
   form_id TEXT NOT NULL,
+  form_snapshot INTEGER NOT NULL, -- Snapshot timestamp when submitted
+  form_bundle TEXT NOT NULL, -- e.g., "contact-form-1729089000.js"
   data TEXT NOT NULL, -- JSON data
   meta TEXT, -- JSON metadata (IP, user agent, etc)
   created_at INTEGER NOT NULL,
@@ -250,7 +269,10 @@ CREATE TABLE submissions (
 -- Create indexes for performance
 CREATE INDEX idx_submissions_form_id ON submissions(form_id);
 CREATE INDEX idx_submissions_created_at ON submissions(created_at);
+CREATE INDEX idx_submissions_form_snapshot ON submissions(form_snapshot);
 ```
+
+**Note:** Submissions include `form_snapshot` and `form_bundle` to track which version of the form was used. This allows proper display of submissions even as forms evolve. See [05-architectural-decisions.md](./05-architectural-decisions.md#4-form-changes-and-submissions) for details.
 
 **Security Measures:**
 

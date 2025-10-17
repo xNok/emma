@@ -116,7 +116,7 @@ Based on the architectural decisions, here are the implementation tasks ready fo
 
 - [ ] Add snapshot tracking to form YAML schema:
   - `currentSnapshot` field
-  - `snapshots` array with timestamp, r2Key, changes
+  - `snapshots` array with timestamp, storageKey, changes
   - `addedAt` field for form fields
 - [ ] Implement timestamp-based bundle naming:
   - Format: `<form-id>-<timestamp>.js`

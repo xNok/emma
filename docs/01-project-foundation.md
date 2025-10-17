@@ -130,13 +130,13 @@ Before laying down code, we need to complete these documentation files:
 5. Initialize package configurations
 6. Set up development tooling
 
-## 8. Open Questions
+## 8. Architectural Decisions
 
-- [x] ~~Should we use a monorepo tool (Turborepo, Nx) or simple npm workspaces?~~ **Resolved**: Using Yarn workspaces (simple, no additional tooling)
-- [x] ~~What's our versioning strategy for the form schema?~~ **Resolved**: See [05-architectural-decisions.md](./05-architectural-decisions.md#3-form-schema-versioning-strategy)
-- [x] ~~Do we need a migration path for form updates?~~ **Resolved**: See [05-architectural-decisions.md](./05-architectural-decisions.md#4-schema-migrations-and-field-updates)
-- [x] ~~Should the TUI support local testing/preview of forms?~~ **Resolved**: Yes, implemented with local Express server
-- [x] ~~What authentication method for the form builder API access?~~ **Resolved**: See [05-architectural-decisions.md](./05-architectural-decisions.md#2-authentication-strategy-for-cli-deployment)
+All open questions have been resolved. For detailed architectural decisions on the following topics, please refer to [05-architectural-decisions.md](./05-architectural-decisions.md):
+
+- **Authentication Strategy** ([Section 2](./05-architectural-decisions.md#2-authentication-strategy-for-cli-deployment)): Environment variables only - no credential storage
+- **Form Versioning** ([Section 3](./05-architectural-decisions.md#3-form-versioning-strategy)): Linear history with timestamp-based immutable snapshots
+- **Form Changes & Submissions** ([Section 4](./05-architectural-decisions.md#4-form-changes-and-submissions)): Create new forms for major changes - no migrations
 
 ## 9. Success Criteria
 

@@ -32,36 +32,204 @@ Emma stores configuration and forms in `~/.emma/`:
 
 ### `emma init`
 
-Initialize Emma configuration. Run this once after installation.
+Initialize Emma configuration and deploy infrastructure to your chosen provider.
 
 ```bash
-emma init
+emma init [--override]
 ```
 
-**Prompts:**
+**Options:**
 
-- Default theme for new forms
-- Local server port for previews
-- Local server host
-- Optional: Configure deployment provider(s), e.g., Cloudflare R2
+- `--override` - Reconfigure provider setup and restart entire initialization process
 
-**Example:**
+**What it Does:**
+
+1. **Provider Selection**: Choose deployment provider (Cloudflare, custom, etc.)
+2. **Environment Verification**: Check required environment variables are set
+3. **Infrastructure Deployment**:
+   - Creates R2 bucket for form storage
+   - Deploys API Worker to handle submissions
+   - Creates D1 database
+   - Runs database migrations
+   - Tests infrastructure health
+4. **Configuration Save**: Stores non-sensitive config to `~/.emma/config.json`
+
+**First-Time Setup:**
 
 ```bash
 $ emma init
 🚀 Initializing Emma Forms CLI...
 
-? Default theme for new forms: default
-? Local server port for previews: 3333
-? Local server host: localhost
-✓ Emma CLI initialized successfully!
+? Select deployment provider: Cloudflare (Workers + R2 + D1)
 
-Configuration:
+Checking environment variables...
+✓ CLOUDFLARE_API_TOKEN found
+✓ R2_ACCESS_KEY_ID found
+✓ R2_SECRET_ACCESS_KEY found
+
+Deploying infrastructure...
+→ Creating R2 bucket "emma-forms"... ✓
+→ Deploying API worker to Cloudflare... ✓
+→ Creating D1 database "emma-submissions"... ✓
+→ Running database migrations... ✓
+→ Testing API worker endpoint... ✓
+
+✓ Infrastructure deployed successfully!
+
+Configuration saved:
+  Provider: cloudflare
   Forms directory: /home/user/.emma/forms
   Builds directory: /home/user/.emma/builds
   Default theme: default
   Local server: http://localhost:3333
-  Cloudflare: configured (bucket: emma-forms, publicUrl: https://forms.example.com)
+```
+
+**Reconfiguration:**
+
+```bash
+$ emma init --override
+⚠️  This will reconfigure your Emma setup.
+? Continue? Yes
+
+? Select deployment provider: Cloudflare (Workers + R2 + D1)
+...
+✓ Configuration updated successfully!
+```
+
+**Required Environment Variables:**
+
+For Cloudflare provider:
+
+```bash
+# R2 Storage Access
+export R2_ACCESS_KEY_ID="your-access-key-id"
+export R2_SECRET_ACCESS_KEY="your-secret-access-key"
+export R2_ACCOUNT_ID="your-cloudflare-account-id"
+export R2_BUCKET_NAME="emma-forms"
+export R2_PUBLIC_URL="https://forms.example.com"
+
+# API Worker Deployment
+export CLOUDFLARE_API_TOKEN="your-api-token"
+export CLOUDFLARE_ACCOUNT_ID="your-cloudflare-account-id"
+```
+
+See [Environment Setup Guide](./environment-setup.md) for detailed instructions.
+
+**Important:** Emma CLI never stores credentials. All authentication uses environment variables only.
+
+---
+
+### `emma edit <form-id>`
+
+Edit an existing form and create a new snapshot. Each edit creates an immutable snapshot with a timestamp.
+
+```bash
+emma edit <form-id>
+```
+
+**Arguments:**
+
+- `form-id` - The form ID to edit
+
+**What it Does:**
+
+- Opens interactive editor for form fields
+- Allows adding, removing, or modifying fields
+- Creates new snapshot when saved
+- Updates `currentSnapshot` pointer
+- Preserves complete history
+
+**Example:**
+
+```bash
+$ emma edit contact-form
+
+📝 Editing form: Contact Form
+
+Current fields:
+  1. name (text) - Your Name
+  2. email (email) - Email Address
+  3. message (textarea) - Message
+
+? What would you like to do?
+  > Add new field
+    Edit existing field
+    Remove field
+    Change settings
+    Save and exit
+
+? Add new field: Phone
+
+? Field type: Phone
+? Field label: Phone Number
+? Field ID: phone
+? Required field? No
+
+📝 Changes summary:
+  + Added field: phone (tel)
+
+? Save changes and create new snapshot? Yes
+
+✓ Form updated successfully!
+
+New snapshot created:
+  Timestamp: 1729089000
+  Changes: Added phone number field
+  Bundle: contact-form-1729089000.js
+
+Next steps:
+  $ emma build contact-form
+  $ emma deploy contact-form
+  $ emma history contact-form  # View complete history
+```
+
+**When to Edit vs. Create New Form:**
+
+- **Edit (same form)**: Non-breaking changes like adding optional fields, updating labels, or styling
+- **Create new (different form)**: Breaking changes like removing required fields or changing field types
+
+See [Form History Guide](./form-history.md) for detailed guidance.
+
+---
+
+### `emma history <form-id>`
+
+View the complete snapshot history for a form, including all changes over time.
+
+```bash
+emma history <form-id>
+```
+
+**Arguments:**
+
+- `form-id` - The form ID to view history for
+
+**Example:**
+
+```bash
+$ emma history contact-form
+
+📋 Form History: Contact Form
+
+Current snapshot: 1729089000 (2025-10-16 14:30:00)
+
+Snapshots (newest first):
+
+  1729089000 - 2025-10-16 14:30:00 ✓ Deployed
+  Changes: Added phone number field
+  Bundle: contact-form-1729089000.js
+  Fields: name, email, phone, message
+
+  1727780400 - 2025-10-01 10:00:00 ✓ Deployed
+  Changes: Initial version
+  Bundle: contact-form-1727780400.js
+  Fields: name, email, message
+
+Total snapshots: 2
+Total submissions: 45 (15 on older snapshot, 30 on current)
+
+To deploy a specific snapshot:
+  $ emma deploy contact-form --snapshot 1727780400
 ```
 
 ---
@@ -218,20 +386,24 @@ Next steps:
 
 ### `emma deploy`
 
-Deploy a form either locally (simulation) or to Cloudflare R2 using subcommands.
+Deploy a form either locally (simulation) or to Cloudflare R2. Supports deploying specific snapshots for rollback.
 
 ```bash
 # Default behavior: emma deploy <form-id> -> local
-emma deploy <form-id>
+emma deploy <form-id> [--snapshot <timestamp>]
 
 # Explicit subcommands
 emma deploy local <form-id> [--port <port>] [--host <host>]
-emma deploy cloudflare <form-id> --bucket <name> --public-url <url> [--overwrite]
+emma deploy cloudflare <form-id> [--snapshot <timestamp>] [--bucket <name>] [--public-url <url>] [--overwrite]
 ```
 
 **Arguments:**
 
 - `form-id` - The form ID to deploy
+
+**General Options:**
+
+- `--snapshot <timestamp>` - Deploy a specific snapshot (for rollback or testing). If not specified, deploys current snapshot.
 
 **Local Options:**
 
@@ -270,17 +442,54 @@ You can authenticate via either method:
 **Examples:**
 
 ```bash
-# Local simulation
-emma deploy local contact-form-001
+# Deploy current snapshot locally
+emma deploy local contact-form
 
-# Cloudflare R2
-emma deploy cloudflare contact-form-001 \
+# Deploy current snapshot to Cloudflare
+emma deploy cloudflare contact-form \
   --bucket emma-forms \
   --public-url https://forms.example.com
 
+# Deploy specific snapshot (rollback)
+emma deploy cloudflare contact-form --snapshot 1727780400
+
+# If you've previously run `emma init` and configured Cloudflare
+emma deploy contact-form  # Uses saved config
+```
+
+**Snapshot Deployment:**
+
+When deploying a specific snapshot, Emma will:
+
+1. Build the form bundle from that snapshot's configuration
+2. Upload the bundle to R2 with snapshot timestamp in filename
+3. Update the form registry to point to this snapshot
+4. Log the deployment for history tracking
+
+This allows you to:
+
+- **Rollback** to a previous version if issues arise
+- **Test** historical snapshots before making them current
+- **Deploy multiple versions** simultaneously for A/B testing
+
+```bash
+# Example: Rolling back to previous version
+$ emma history contact-form
+Current snapshot: 1729089000
+Previous: 1727780400
+
+$ emma deploy contact-form --snapshot 1727780400
+
+✓ Deployed snapshot 1727780400 to R2
+  Bundle: contact-form-1727780400.js
+  URL: https://forms.example.com/contact-form-1727780400.js
+
+⚠️  Note: Current snapshot is still 1729089000
+   To make this the current snapshot, edit the form config.
+```
+
 If you've previously run `emma init` and configured Cloudflare, you can omit
 `--bucket` and `--public-url`. The saved values from `~/.emma/config.json` will be used.
-```
 
 ---
 
@@ -372,14 +581,28 @@ When you run `emma deploy` or `emma preview`, a local Express.js server starts w
 
 ## Form Schema Format
 
-Forms are stored as YAML files in `~/.emma/forms/`:
+Forms are stored as YAML files in `~/.emma/forms/` with snapshot tracking:
 
 ```yaml
-formId: contact-form-001
+formId: contact-form
 name: Contact Form
-version: 1.0.0
+createdAt: 2025-10-01T10:00:00Z
+lastModified: 2025-10-16T14:30:00Z
+currentSnapshot: 1729089000
 theme: default
-apiEndpoint: http://localhost:3333/api/submit/contact-form-001
+apiEndpoint: http://localhost:3333/api/submit/contact-form
+
+# Snapshot history
+snapshots:
+  - timestamp: 1727780400 # 2025-10-01 10:00:00
+    deployed: true
+    storageKey: contact-form-1727780400.js
+    changes: Initial version
+
+  - timestamp: 1729089000 # 2025-10-16 14:30:00
+    deployed: true
+    storageKey: contact-form-1729089000.js
+    changes: Added phone number field
 
 fields:
   - id: name
@@ -395,6 +618,12 @@ fields:
     label: Email Address
     required: true
 
+  - id: phone
+    type: tel
+    label: Phone Number
+    required: false
+    addedAt: 1729089000 # Tracks when field was added
+
   - id: message
     type: textarea
     label: Message
@@ -409,6 +638,17 @@ settings:
     enabled: true
     fieldName: website
 ```
+
+**Snapshot-Based Versioning:**
+
+Emma uses timestamp-based snapshots instead of semantic versioning (no more `version: 1.0.0`). Each edit creates a new immutable snapshot that can be independently deployed. This approach:
+
+- Eliminates manual version number management
+- Maintains complete form history
+- Enables easy rollback to any previous state
+- Allows deploying multiple versions simultaneously
+
+For more details, see [Form History Guide](./form-history.md) and [05-architectural-decisions.md](../05-architectural-decisions.md#3-form-versioning-strategy).
 
 ## Validation Rules
 
