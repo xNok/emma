@@ -86,12 +86,12 @@ apiEndpoint: 'https://api.example.com/submit'
 
 # Snapshot history for version tracking
 snapshots:
-  - timestamp: 1727780400            # 2025-10-01 10:00:00
+  - timestamp: 1727780400 # 2025-10-01 10:00:00
     deployed: true
     r2Key: contact-form-1727780400.js
     changes: Initial version
 
-  - timestamp: 1729089000            # 2025-10-16 14:30:00
+  - timestamp: 1729089000 # 2025-10-16 14:30:00
     deployed: true
     r2Key: contact-form-1729089000.js
     changes: Added phone number field
@@ -116,7 +116,7 @@ fields:
     type: tel
     label: 'Phone Number'
     required: false
-    addedAt: 1729089000              # Tracks when field was added
+    addedAt: 1729089000 # Tracks when field was added
 
   - id: message
     type: textarea

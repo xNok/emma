@@ -126,6 +126,7 @@ emma init
 ```
 
 **Solution**: Verify API token has correct permissions:
+
 - Account - Workers R2 Storage: Edit
 - Account - Workers Scripts: Edit
 - Account - D1: Edit
@@ -136,7 +137,8 @@ emma init
 ✗ Error: Failed to deploy API worker
 ```
 
-**Solution**: 
+**Solution**:
+
 1. Check CLOUDFLARE_API_TOKEN is valid
 2. Verify account has Workers enabled
 3. Check account quotas (free tier limits)
@@ -212,6 +214,7 @@ emma build contact-form
 ```
 
 This creates:
+
 - `~/.emma/builds/contact-form/form.js` - JavaScript bundle
 - `~/.emma/builds/contact-form/index.html` - Preview page
 - `~/.emma/builds/contact-form/themes/` - Theme CSS files
@@ -331,6 +334,7 @@ emma deploy contact-form --snapshot 1727780400
 ```
 
 **Use cases:**
+
 - **Rollback**: Revert to previous working version
 - **Testing**: Deploy historical version for comparison
 - **A/B Testing**: Deploy multiple snapshots simultaneously
@@ -418,6 +422,7 @@ emma deploy contact-form
 ```
 
 **Result:**
+
 - New snapshot created with timestamp
 - Old snapshot remains available
 - Can rollback if issues arise
@@ -482,19 +487,19 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install Emma CLI
         run: npm install -g @emma/form-builder
-      
+
       - name: Deploy Forms
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -507,7 +512,7 @@ jobs:
         run: |
           # Initialize (skips if already done)
           emma init
-          
+
           # Deploy all forms
           for form in ~/.emma/forms/*.yaml; do
             form_id=$(basename "$form" .yaml)
@@ -523,13 +528,13 @@ jobs:
 deploy-forms:
   stage: deploy
   image: node:18
-  
+
   only:
     refs:
       - main
     changes:
       - .emma/forms/**
-  
+
   script:
     - npm install -g @emma/form-builder
     - emma init
@@ -539,7 +544,7 @@ deploy-forms:
         echo "Deploying $form_id..."
         emma deploy "$form_id"
       done
-  
+
   variables:
     R2_ACCESS_KEY_ID: $R2_ACCESS_KEY_ID
     R2_SECRET_ACCESS_KEY: $R2_SECRET_ACCESS_KEY
@@ -659,7 +664,7 @@ emma deploy contact-form
 ```yaml
 snapshots:
   - timestamp: 1729089000
-    changes: "Added phone field per sales team request (Ticket #456)"
+    changes: 'Added phone field per sales team request (Ticket #456)'
     # Not just: "Updated form"
 ```
 
@@ -673,11 +678,13 @@ Keep a changelog for significant form updates:
 ## Contact Form
 
 ### 2025-10-16 - Added Phone Field
+
 - Added optional phone number field
 - Snapshot: 1729089000
 - Reason: Sales team requested for better follow-up
 
 ### 2025-10-14 - Updated Messages
+
 - Improved success message clarity
 - Snapshot: 1728900000
 ```
@@ -685,6 +692,7 @@ Keep a changelog for significant form updates:
 ### 5. Monitor Submission Rates
 
 Set up alerts for unusual patterns:
+
 - Sudden drop in submissions (form broken?)
 - Sudden spike (spam attack?)
 - High error rates (validation issues?)

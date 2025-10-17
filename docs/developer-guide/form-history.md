@@ -30,17 +30,17 @@ name: Contact Form
 currentSnapshot: 1729089000
 
 snapshots:
-  - timestamp: 1727780400            # 2025-10-01 10:00:00
+  - timestamp: 1727780400 # 2025-10-01 10:00:00
     deployed: true
     r2Key: contact-form-1727780400.js
     changes: Initial version
 
-  - timestamp: 1728900000            # 2025-10-14 08:00:00
+  - timestamp: 1728900000 # 2025-10-14 08:00:00
     deployed: true
     r2Key: contact-form-1728900000.js
     changes: Updated success message
 
-  - timestamp: 1729089000            # 2025-10-16 14:30:00
+  - timestamp: 1729089000 # 2025-10-16 14:30:00
     deployed: true
     r2Key: contact-form-1729089000.js
     changes: Added phone number field
@@ -53,6 +53,7 @@ snapshots:
 Use `emma edit <form-id>` for **non-breaking changes** that won't affect existing submissions:
 
 ✅ **Safe Changes:**
+
 - Adding optional fields
 - Updating field labels or help text
 - Changing validation messages
@@ -74,6 +75,7 @@ emma edit contact-form
 ```
 
 **Result:**
+
 - Old submissions still display correctly (phone shows as N/A)
 - New submissions include phone field
 - Form URL remains the same
@@ -84,6 +86,7 @@ emma edit contact-form
 Use `emma create <new-form-name>` for **breaking changes** that would affect how old submissions display:
 
 ⚠️ **Breaking Changes:**
+
 - Removing required fields
 - Changing field types (e.g., text → number)
 - Renaming field IDs
@@ -102,6 +105,7 @@ emma create contact-form-v2
 ```
 
 **Result:**
+
 - Old form (`contact-form`) still works for existing uses
 - New form (`contact-form-v2`) has the new structure
 - Old submissions remain intact and fully viewable
@@ -171,6 +175,7 @@ emma edit contact-form
 ```
 
 Follow the interactive prompts to modify fields, then save. Emma automatically:
+
 1. Creates new snapshot with current timestamp
 2. Updates `currentSnapshot` pointer
 3. Preserves complete history
@@ -291,6 +296,7 @@ Message:  Hello there!
 ### No Migration Needed
 
 Because submissions include snapshot information:
+
 - Old submissions display correctly even as forms evolve
 - New fields show "N/A" for old submissions
 - No database migrations required
@@ -397,7 +403,7 @@ emma deploy contact-form --snapshot 1729090000
 When creating snapshots, provide clear descriptions:
 
 ```yaml
-changes: "Added phone field and updated success message"
+changes: 'Added phone field and updated success message'
 # Better than: "Updated form"
 ```
 
@@ -416,6 +422,7 @@ emma deploy contact-form
 ### 3. Keep Snapshot History Clean
 
 While snapshots are cheap to store, consider your needs:
+
 - Development: Keep all snapshots for debugging
 - Production: Archive very old snapshots (manual cleanup)
 - Most forms: Keep last 10-20 snapshots
@@ -428,12 +435,13 @@ For significant updates, add details to your form documentation:
 # In form YAML or separate docs
 snapshots:
   - timestamp: 1729089000
-    changes: "Added phone field - requested by sales team, ticket #123"
+    changes: 'Added phone field - requested by sales team, ticket #123'
 ```
 
 ### 5. Coordinate with Teammates
 
 When working in a team:
+
 - Pull latest form YAML before editing
 - Communicate major changes
 - Use version control for form YAML files
@@ -474,6 +482,7 @@ emma deploy contact-form --snapshot 1729089000
 ### Lost Snapshot History
 
 If form YAML is corrupted:
+
 1. Check version control for previous version
 2. Restore from backup
 3. R2 bundles remain intact - can manually reconstruct history
@@ -481,6 +490,7 @@ If form YAML is corrupted:
 ### Submissions Not Showing Correct Fields
 
 Check submission's `form_snapshot` matches expected snapshot:
+
 - View submission metadata
 - Compare with `emma history contact-form`
 - Verify R2 bundle exists for that snapshot
@@ -494,9 +504,9 @@ While `emma edit` handles this automatically, you can manually edit form YAML:
 ```yaml
 snapshots:
   - timestamp: 1729089000
-    deployed: false              # Mark as not yet deployed
+    deployed: false # Mark as not yet deployed
     r2Key: contact-form-1729089000.js
-    changes: "Manual snapshot for testing"
+    changes: 'Manual snapshot for testing'
 ```
 
 Then build and deploy:

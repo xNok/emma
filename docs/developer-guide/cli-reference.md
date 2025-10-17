@@ -460,12 +460,14 @@ emma deploy contact-form  # Uses saved config
 **Snapshot Deployment:**
 
 When deploying a specific snapshot, Emma will:
+
 1. Build the form bundle from that snapshot's configuration
 2. Upload the bundle to R2 with snapshot timestamp in filename
 3. Update the form registry to point to this snapshot
 4. Log the deployment for history tracking
 
 This allows you to:
+
 - **Rollback** to a previous version if issues arise
 - **Test** historical snapshots before making them current
 - **Deploy multiple versions** simultaneously for A/B testing
@@ -592,12 +594,12 @@ apiEndpoint: http://localhost:3333/api/submit/contact-form
 
 # Snapshot history
 snapshots:
-  - timestamp: 1727780400            # 2025-10-01 10:00:00
+  - timestamp: 1727780400 # 2025-10-01 10:00:00
     deployed: true
     r2Key: contact-form-1727780400.js
     changes: Initial version
 
-  - timestamp: 1729089000            # 2025-10-16 14:30:00
+  - timestamp: 1729089000 # 2025-10-16 14:30:00
     deployed: true
     r2Key: contact-form-1729089000.js
     changes: Added phone number field
@@ -620,7 +622,7 @@ fields:
     type: tel
     label: Phone Number
     required: false
-    addedAt: 1729089000              # Tracks when field was added
+    addedAt: 1729089000 # Tracks when field was added
 
   - id: message
     type: textarea

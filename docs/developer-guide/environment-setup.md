@@ -92,6 +92,7 @@ export R2_PUBLIC_URL="https://pub-[bucket-hash].r2.dev"
 ```
 
 To get this URL:
+
 1. Go to R2 → Your bucket → Settings
 2. Enable "Public Access" under "Public Bucket Access"
 3. Copy the R2.dev domain
@@ -214,15 +215,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install Emma CLI
         run: npm install -g @emma/form-builder
-      
+
       - name: Deploy Forms
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -325,6 +326,7 @@ secrets/
 ### 2. Use Minimal Required Permissions
 
 Create separate API tokens for different purposes:
+
 - **Development**: Token with read-only access
 - **CI/CD**: Token with write access but restricted IPs
 - **Production**: Token with full access but short expiry
@@ -338,6 +340,7 @@ Create separate API tokens for different purposes:
 ### 4. Use Secret Management Tools
 
 For production environments, consider:
+
 - **1Password CLI**: `op read "op://vault/item/field"`
 - **AWS Secrets Manager**: `aws secretsmanager get-secret-value`
 - **HashiCorp Vault**: `vault kv get secret/emma`
@@ -403,6 +406,7 @@ export R2_ACCESS_KEY_ID="value"
 ```
 
 **Solutions**:
+
 1. Verify credentials are correct (copy-paste errors are common)
 2. Check token permissions match requirements
 3. Ensure token hasn't expired
@@ -415,6 +419,7 @@ export R2_ACCESS_KEY_ID="value"
 ```
 
 **Solution**: Update your API token permissions:
+
 1. Go to API Tokens in Cloudflare dashboard
 2. Edit the token
 3. Add missing permissions

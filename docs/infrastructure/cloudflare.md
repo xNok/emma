@@ -107,6 +107,7 @@ Then source it: `source .env`
 **Option 3: Secret Manager (Production)**
 
 For production/CI environments, use your preferred secret manager:
+
 - GitHub Actions Secrets
 - AWS Secrets Manager
 - HashiCorp Vault
@@ -114,6 +115,7 @@ For production/CI environments, use your preferred secret manager:
 - etc.
 
 **Important Security Notes:**
+
 - Never commit credentials to version control
 - Add `.env` to `.gitignore`
 - Use separate tokens for development and production
@@ -144,6 +146,7 @@ Save this token securely - you'll need it for the TUI configuration.
 ### 3.1 Overview
 
 The `emma init` command handles complete infrastructure setup, including:
+
 - Provider selection (Cloudflare, custom, etc.)
 - Environment variable verification
 - R2 bucket creation
@@ -223,17 +226,20 @@ Try: emma create my-first-form
 ### 3.4 What Gets Deployed
 
 **R2 Bucket:**
+
 - Bucket name: `emma-forms` (or custom)
 - Purpose: Store form JavaScript bundles
 - Access: Public read via Worker or custom domain
 
 **API Worker:**
+
 - Worker name: `emma-api`
 - Purpose: Handle form submissions
 - Bindings: D1 database, R2 bucket
 - Routes: Configured based on your domain
 
 **D1 Database:**
+
 - Database name: `emma-submissions`
 - Purpose: Store form schemas and submissions
 - Schema: Automatically migrated with snapshot support
@@ -262,6 +268,7 @@ emma init --override
 ```
 
 This will:
+
 - Restart the entire setup process
 - Allow changing provider or configuration
 - Preserve existing forms (they remain in `~/.emma/forms/`)

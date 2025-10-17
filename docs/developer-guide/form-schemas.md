@@ -44,18 +44,18 @@ settings:
 
 ### Top-Level Properties
 
-| Property          | Type   | Required | Description                            |
-| ----------------- | ------ | -------- | -------------------------------------- |
-| `formId`          | string | Yes      | Unique form identifier                 |
-| `name`            | string | Yes      | Human-readable form name               |
-| `createdAt`       | string | Yes      | ISO 8601 creation timestamp            |
-| `lastModified`    | string | Yes      | ISO 8601 last modification timestamp   |
-| `currentSnapshot` | number | Yes      | Unix timestamp of current snapshot     |
-| `theme`           | string | Yes      | Theme name                             |
-| `apiEndpoint`     | string | Yes      | API endpoint URL                       |
-| `snapshots`       | array  | Yes      | Array of snapshot history              |
-| `fields`          | array  | Yes      | Array of field definitions             |
-| `settings`        | object | No       | Form settings                          |
+| Property          | Type   | Required | Description                          |
+| ----------------- | ------ | -------- | ------------------------------------ |
+| `formId`          | string | Yes      | Unique form identifier               |
+| `name`            | string | Yes      | Human-readable form name             |
+| `createdAt`       | string | Yes      | ISO 8601 creation timestamp          |
+| `lastModified`    | string | Yes      | ISO 8601 last modification timestamp |
+| `currentSnapshot` | number | Yes      | Unix timestamp of current snapshot   |
+| `theme`           | string | Yes      | Theme name                           |
+| `apiEndpoint`     | string | Yes      | API endpoint URL                     |
+| `snapshots`       | array  | Yes      | Array of snapshot history            |
+| `fields`          | array  | Yes      | Array of field definitions           |
+| `settings`        | object | No       | Form settings                        |
 
 ### Field Properties
 
