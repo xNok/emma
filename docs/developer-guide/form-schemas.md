@@ -7,9 +7,18 @@ Form schemas define the structure, fields, and behavior of your forms. They are 
 ```yaml
 formId: unique-form-id # Unique identifier
 name: 'Form Display Name' # Human-readable name
-version: '1.0.0' # Schema version
+createdAt: 2025-10-01T10:00:00Z # Creation timestamp
+lastModified: 2025-10-16T14:30:00Z # Last modification timestamp
+currentSnapshot: 1729089000 # Current snapshot timestamp
 theme: 'default' # Theme name (default or minimal)
 apiEndpoint: 'https://api.example.com/submit' # Submission endpoint
+
+# Snapshot history
+snapshots:
+  - timestamp: 1729089000
+    deployed: true
+    r2Key: unique-form-id-1729089000.js
+    changes: Initial version
 
 fields:
   - id: fieldName # Unique field ID
@@ -29,19 +38,24 @@ settings:
     fieldName: 'website'
 ```
 
+**Note:** Emma uses snapshot-based versioning instead of semantic versioning. Each edit creates a new immutable snapshot with a timestamp.
+
 ## Schema Properties
 
 ### Top-Level Properties
 
-| Property      | Type   | Required | Description                |
-| ------------- | ------ | -------- | -------------------------- |
-| `formId`      | string | Yes      | Unique form identifier     |
-| `name`        | string | Yes      | Human-readable form name   |
-| `version`     | string | Yes      | Schema version (semver)    |
-| `theme`       | string | Yes      | Theme name                 |
-| `apiEndpoint` | string | Yes      | API endpoint URL           |
-| `fields`      | array  | Yes      | Array of field definitions |
-| `settings`    | object | No       | Form settings              |
+| Property          | Type   | Required | Description                            |
+| ----------------- | ------ | -------- | -------------------------------------- |
+| `formId`          | string | Yes      | Unique form identifier                 |
+| `name`            | string | Yes      | Human-readable form name               |
+| `createdAt`       | string | Yes      | ISO 8601 creation timestamp            |
+| `lastModified`    | string | Yes      | ISO 8601 last modification timestamp   |
+| `currentSnapshot` | number | Yes      | Unix timestamp of current snapshot     |
+| `theme`           | string | Yes      | Theme name                             |
+| `apiEndpoint`     | string | Yes      | API endpoint URL                       |
+| `snapshots`       | array  | Yes      | Array of snapshot history              |
+| `fields`          | array  | Yes      | Array of field definitions             |
+| `settings`        | object | No       | Form settings                          |
 
 ### Field Properties
 
@@ -74,11 +88,19 @@ settings:
 ## Complete Example
 
 ```yaml
-formId: contact-form-001
+formId: contact-form
 name: 'Contact Form'
-version: '1.0.0'
+createdAt: 2025-10-01T10:00:00Z
+lastModified: 2025-10-16T14:30:00Z
+currentSnapshot: 1729089000
 theme: 'default'
 apiEndpoint: 'https://api.example.com/submit'
+
+snapshots:
+  - timestamp: 1729089000
+    deployed: true
+    r2Key: contact-form-1729089000.js
+    changes: Initial version
 
 fields:
   # Text input
@@ -197,13 +219,21 @@ Invalid schemas will be rejected with detailed error messages.
 
 ## Versioning
 
-Use semantic versioning for schemas:
+Emma uses **snapshot-based versioning** with timestamps instead of semantic versioning:
 
-- **Major**: Breaking changes to field structure
-- **Minor**: New optional fields
-- **Patch**: Fixes, text changes, validation tweaks
+- **Snapshots**: Each edit creates a new immutable snapshot with a Unix timestamp (e.g., `1729089000`)
+- **History**: Complete snapshot history is maintained in the form YAML
+- **Rollback**: Any snapshot can be deployed or rolled back independently
+- **No Manual Versioning**: Timestamps are automatic - no need to manage version numbers
 
-Example: `1.0.0` → `1.1.0` (added optional field) → `2.0.0` (removed required field)
+**When to Edit vs. Create New Form:**
+
+- **Edit (creates new snapshot)**: Non-breaking changes like adding optional fields, updating text, or styling
+- **Create new form**: Breaking changes like removing required fields or changing field types
+
+Example: `contact-form` with snapshots `1727780400` (initial) → `1729089000` (added phone field)
+
+For detailed guidance, see [Form History Guide](./form-history.md).
 
 ## Next Steps
 

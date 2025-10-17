@@ -419,10 +419,10 @@ Create the database schema:
 
 -- Forms table: metadata about each form
 CREATE TABLE forms (
-  id TEXT PRIMARY KEY,                    -- e.g., "contact-form-001"
+  id TEXT PRIMARY KEY,                    -- e.g., "contact-form"
   name TEXT NOT NULL,                     -- Human-readable name
   schema TEXT NOT NULL,                   -- JSON schema definition
-  version TEXT NOT NULL,                  -- Schema version "1.0.0"
+  current_snapshot INTEGER NOT NULL,      -- Current snapshot timestamp
   api_endpoint TEXT,                      -- Custom API endpoint if any
   created_at INTEGER NOT NULL,            -- Unix timestamp
   updated_at INTEGER NOT NULL,            -- Unix timestamp
@@ -435,6 +435,8 @@ CREATE TABLE forms (
 CREATE TABLE submissions (
   id TEXT PRIMARY KEY,                    -- e.g., "sub_abc123xyz"
   form_id TEXT NOT NULL,                  -- Foreign key to forms.id
+  form_snapshot INTEGER NOT NULL,         -- Snapshot timestamp when submitted
+  form_bundle TEXT NOT NULL,              -- e.g., "contact-form-1729089000.js"
   data TEXT NOT NULL,                     -- JSON of submitted data
   meta TEXT,                              -- JSON metadata (IP, UA, referrer)
   spam_score INTEGER DEFAULT 0,           -- Spam detection score
@@ -447,6 +449,7 @@ CREATE TABLE submissions (
 CREATE INDEX idx_submissions_form_id ON submissions(form_id);
 CREATE INDEX idx_submissions_created_at ON submissions(created_at DESC);
 CREATE INDEX idx_submissions_status ON submissions(status);
+CREATE INDEX idx_submissions_form_snapshot ON submissions(form_snapshot);
 CREATE INDEX idx_forms_active ON forms(active);
 
 -- Metadata table: for system configuration
