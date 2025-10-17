@@ -17,7 +17,7 @@ apiEndpoint: 'https://api.example.com/submit' # Submission endpoint
 snapshots:
   - timestamp: 1729089000
     deployed: true
-    r2Key: unique-form-id-1729089000.js
+    storageKey: unique-form-id-1729089000.js
     changes: Initial version
 
 fields:
@@ -99,7 +99,7 @@ apiEndpoint: 'https://api.example.com/submit'
 snapshots:
   - timestamp: 1729089000
     deployed: true
-    r2Key: contact-form-1729089000.js
+    storageKey: contact-form-1729089000.js
     changes: Initial version
 
 fields:

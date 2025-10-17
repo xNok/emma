@@ -596,12 +596,12 @@ apiEndpoint: http://localhost:3333/api/submit/contact-form
 snapshots:
   - timestamp: 1727780400 # 2025-10-01 10:00:00
     deployed: true
-    r2Key: contact-form-1727780400.js
+    storageKey: contact-form-1727780400.js
     changes: Initial version
 
   - timestamp: 1729089000 # 2025-10-16 14:30:00
     deployed: true
-    r2Key: contact-form-1729089000.js
+    storageKey: contact-form-1729089000.js
     changes: Added phone number field
 
 fields:

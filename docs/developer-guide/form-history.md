@@ -32,17 +32,17 @@ currentSnapshot: 1729089000
 snapshots:
   - timestamp: 1727780400 # 2025-10-01 10:00:00
     deployed: true
-    r2Key: contact-form-1727780400.js
+    storageKey: contact-form-1727780400.js
     changes: Initial version
 
   - timestamp: 1728900000 # 2025-10-14 08:00:00
     deployed: true
-    r2Key: contact-form-1728900000.js
+    storageKey: contact-form-1728900000.js
     changes: Updated success message
 
   - timestamp: 1729089000 # 2025-10-16 14:30:00
     deployed: true
-    r2Key: contact-form-1729089000.js
+    storageKey: contact-form-1729089000.js
     changes: Added phone number field
 ```
 
@@ -505,7 +505,7 @@ While `emma edit` handles this automatically, you can manually edit form YAML:
 snapshots:
   - timestamp: 1729089000
     deployed: false # Mark as not yet deployed
-    r2Key: contact-form-1729089000.js
+    storageKey: contact-form-1729089000.js
     changes: 'Manual snapshot for testing'
 ```
 
