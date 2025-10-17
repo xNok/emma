@@ -9,6 +9,8 @@ To use Emma with Cloudflare, you need to set up the following services:
 -   **D1:** For storing form submissions.
 -   **Workers:** For running the API worker that processes form submissions.
 
+**Note:** The `emma init` command will automatically handle the creation and configuration of these services for you. The following steps are provided for your reference and for manual setup if needed.
+
 ## Step 1: Create an R2 Bucket
 
 1.  Log in to your Cloudflare account and navigate to the **R2** section.
