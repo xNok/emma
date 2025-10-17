@@ -1,0 +1,18 @@
+{{ define "main" }}
+  <div class="ph3">
+    <h1 class="f3 f2-m f1-l tc">{{ .Title }}</h1>
+    <div class="center mw6">
+      {{ .Content }}
+    </div>
+    <ul class="list pl0">
+      {{ range .Pages }}
+        <li class="mb3">
+          <a href="{{ .RelPermalink }}" class="link blue hover-dark-gray">
+            <h2 class="f4 f3-ns lh-title measure-narrow">{{ .Title }}</h2>
+            <time class="f6 ttu tracked gray">{{ .Date.Format "January 2, 2006" }}</time>
+          </a>
+        </li>
+      {{ end }}
+    </ul>
+  </div>
+{{ end }}
