@@ -1,5 +1,5 @@
 ---
-title: "Installation"
+title: 'Installation'
 weight: 2
 ---
 
@@ -7,8 +7,8 @@ To get started with Emma, you need to install the `emma-cli` package globally us
 
 ## Prerequisites
 
--   Node.js (v20 or higher)
--   npm (v8 or higher)
+- Node.js (v20 or higher)
+- npm (v8 or higher)
 
 ## Installation Command
 

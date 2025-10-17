@@ -1,5 +1,5 @@
 ---
-title: "Full Workflow Tutorial"
+title: 'Full Workflow Tutorial'
 weight: 5
 ---
 

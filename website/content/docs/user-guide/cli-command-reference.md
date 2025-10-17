@@ -1,5 +1,5 @@
 ---
-title: "CLI Command Reference"
+title: 'CLI Command Reference'
 weight: 7
 ---
 
@@ -11,7 +11,7 @@ Initializes your project and deploys the necessary infrastructure to Cloudflare.
 
 **Options:**
 
--   `--override`: Re-runs the initialization process, overriding any existing configuration.
+- `--override`: Re-runs the initialization process, overriding any existing configuration.
 
 ### `emma create <form-id>`
 
@@ -27,8 +27,8 @@ Deploys your form to the configured target.
 
 **Options:**
 
--   `--target <target>`: Specifies the deployment target (e.g., `cloudflare`).
--   `--snapshot <timestamp>`: Deploys a specific snapshot of the form.
+- `--target <target>`: Specifies the deployment target (e.g., `cloudflare`).
+- `--snapshot <timestamp>`: Deploys a specific snapshot of the form.
 
 ### `emma list`
 

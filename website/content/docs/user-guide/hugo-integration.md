@@ -1,5 +1,5 @@
 ---
-title: "Hugo Integration"
+title: 'Hugo Integration'
 weight: 6
 ---
 

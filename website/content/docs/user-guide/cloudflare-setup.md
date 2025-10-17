@@ -1,13 +1,13 @@
 ---
-title: "Cloudflare Setup"
+title: 'Cloudflare Setup'
 weight: 3
 ---
 
 To use Emma with Cloudflare, you need to set up the following services:
 
--   **R2:** For storing form assets.
--   **D1:** For storing form submissions.
--   **Workers:** For running the API worker that processes form submissions.
+- **R2:** For storing form assets.
+- **D1:** For storing form submissions.
+- **Workers:** For running the API worker that processes form submissions.
 
 **Note:** The `emma init` command will automatically handle the creation and configuration of these services for you. The following steps are provided for your reference and for manual setup if needed.
 
@@ -35,10 +35,10 @@ To use Emma with Cloudflare, you need to set up the following services:
 2.  Click **Create Token** and select **Create Custom Token**.
 3.  Give your token a name (e.g., `emma-cli-token`).
 4.  Grant the following permissions:
-    -   **Account** > **Workers R2 Storage**: `Edit`
-    -   **Account** > **Workers Scripts**: `Edit`
-    -   **Account** > **D1**: `Edit`
-    -   **Zone** > **Workers Routes**: `Edit` (if using a custom domain)
+    - **Account** > **Workers R2 Storage**: `Edit`
+    - **Account** > **Workers Scripts**: `Edit`
+    - **Account** > **D1**: `Edit`
+    - **Zone** > **Workers Routes**: `Edit` (if using a custom domain)
 5.  Click **Continue to summary** and then **Create Token**.
 6.  Copy the generated token and store it in a secure location.
 

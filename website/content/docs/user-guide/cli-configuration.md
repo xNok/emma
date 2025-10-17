@@ -1,5 +1,5 @@
 ---
-title: "CLI Configuration"
+title: 'CLI Configuration'
 weight: 4
 ---
 

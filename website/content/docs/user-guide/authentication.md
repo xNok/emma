@@ -1,5 +1,5 @@
 ---
-title: "Authentication"
+title: 'Authentication'
 weight: 8
 ---
 
@@ -9,10 +9,10 @@ Emma uses a token-based authentication strategy to securely interact with Cloudf
 
 To deploy and manage the API worker, D1 database, and R2 bucket, you need a Cloudflare API token with the following permissions:
 
--   **Account** > **Workers R2 Storage**: `Edit`
--   **Account** > **Workers Scripts**: `Edit`
--   **Account** > **D1**: `Edit`
--   **Zone** > **Workers Routes**: `Edit` (if using a custom domain)
+- **Account** > **Workers R2 Storage**: `Edit`
+- **Account** > **Workers Scripts**: `Edit`
+- **Account** > **D1**: `Edit`
+- **Zone** > **Workers Routes**: `Edit` (if using a custom domain)
 
 You can create this token in the Cloudflare dashboard under **My Profile** > **API Tokens**.
 
