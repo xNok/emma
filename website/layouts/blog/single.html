@@ -1,0 +1,9 @@
+{{ define "main" }}
+  <article class="pa3 pa4-ns nested-copy-line-height">
+    <h1 class="f3 f2-m f1-l tc">{{ .Title }}</h1>
+    <p class="f6 ttu tracked gray tc">{{ .Date.Format "January 2, 2006" }}</p>
+    <div class="measure-wide center">
+      {{ .Content }}
+    </div>
+  </article>
+{{ end }}
