@@ -1,7 +1,13 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'Hugo Integration'
 weight: 6
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 Emma provides a Hugo shortcode to easily embed your forms into a Hugo website.
 

@@ -1,7 +1,13 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'Full Workflow Tutorial'
 weight: 5
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 This tutorial will walk you through the entire process of creating and deploying a form with Emma.
 

@@ -1,7 +1,16 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'Authentication'
 weight: 8
+menu:
+  docs:
+    parent: 'user-guide'
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 Emma uses a token-based authentication strategy to securely interact with Cloudflare services. All authentication is handled through environment variables, ensuring that no sensitive credentials are ever stored on your local machine.
 

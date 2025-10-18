@@ -1,7 +1,13 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'CLI Command Reference'
 weight: 7
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 This section provides a detailed reference for all available `emma` commands.
 
