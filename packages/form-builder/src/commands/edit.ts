@@ -7,22 +7,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import type { EmmaConfig } from '../config.js';
 import type { FormSchema, FormField, FieldType } from '@xnok/emma-shared/types';
-
-const FIELD_TYPES: { name: string; value: FieldType }[] = [
-  { name: 'Text Input', value: 'text' },
-  { name: 'Email', value: 'email' },
-  { name: 'Textarea', value: 'textarea' },
-  { name: 'Number', value: 'number' },
-  { name: 'Phone', value: 'tel' },
-  { name: 'URL', value: 'url' },
-  { name: 'Select Dropdown', value: 'select' },
-  { name: 'Radio Buttons', value: 'radio' },
-  { name: 'Checkboxes', value: 'checkbox' },
-  { name: 'Date', value: 'date' },
-  { name: 'Time', value: 'time' },
-  { name: 'Date & Time', value: 'datetime-local' },
-  { name: 'Hidden Field', value: 'hidden' },
-];
+import { FIELD_TYPES } from '../constants.js';
 
 export function editCommand(config: EmmaConfig): Command {
   return new Command('edit')
