@@ -12,6 +12,8 @@ const mockEnv: Env = {
   } as unknown as D1Database,
   submissionRepository: {
     saveSubmission: vi.fn(),
+    getSubmissions: vi.fn(),
+    getSubmissionsByFormId: vi.fn(),
   },
   schemaRepository: {
     getSchema: vi.fn(),
@@ -206,5 +208,162 @@ describe('API Worker', () => {
       undefined,
       undefined
     );
+  });
+
+  it('should list submissions with snapshot grouping', async () => {
+    const mockSubmissions = [
+      {
+        id: 'sub_1',
+        form_id: 'contact-form',
+        data: JSON.stringify({ name: 'User 1', email: 'user1@test.com' }),
+        meta: JSON.stringify({ timestamp: '2025-10-18T12:00:00Z' }),
+        spam_score: 0,
+        status: 'new' as const,
+        created_at: 1729260000,
+        form_snapshot: 1729089000,
+        form_bundle: 'contact-form-1729089000.js',
+      },
+      {
+        id: 'sub_2',
+        form_id: 'contact-form',
+        data: JSON.stringify({ name: 'User 2', email: 'user2@test.com' }),
+        meta: JSON.stringify({ timestamp: '2025-10-18T13:00:00Z' }),
+        spam_score: 0,
+        status: 'new' as const,
+        created_at: 1729263600,
+        form_snapshot: 1729189000,
+        form_bundle: 'contact-form-1729189000.js',
+      },
+      {
+        id: 'sub_3',
+        form_id: 'feedback-form',
+        data: JSON.stringify({ feedback: 'Great!' }),
+        meta: JSON.stringify({ timestamp: '2025-10-18T14:00:00Z' }),
+        spam_score: 0,
+        status: 'new' as const,
+        created_at: 1729267200,
+        form_snapshot: 1729100000,
+        form_bundle: 'feedback-form-1729100000.js',
+      },
+    ];
+
+    mockEnv.submissionRepository.getSubmissions = vi
+      .fn()
+      .mockResolvedValue(mockSubmissions);
+
+    const req = new Request('http://localhost/submissions', {
+      method: 'GET',
+    });
+
+    const res = await app.fetch(req, mockEnv);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      success: boolean;
+      submissions: typeof mockSubmissions;
+      grouped: Record<string, unknown>;
+      pagination: { limit: number; offset: number; count: number };
+    };
+
+    expect(body.success).toBe(true);
+    expect(body.submissions).toHaveLength(3);
+    expect(body.grouped).toHaveProperty('contact-form');
+    expect(body.grouped).toHaveProperty('feedback-form');
+    expect(body.pagination).toEqual({ limit: 50, offset: 0, count: 3 });
+
+    // Verify grouping structure
+    const contactFormGroup = body.grouped[
+      'contact-form'
+    ] as typeof body.grouped;
+    expect(contactFormGroup).toHaveProperty('snapshots');
+  });
+
+  it('should filter submissions by form ID', async () => {
+    const mockSubmissions = [
+      {
+        id: 'sub_1',
+        form_id: 'contact-form',
+        data: JSON.stringify({ name: 'User 1' }),
+        meta: null,
+        spam_score: 0,
+        status: 'new' as const,
+        created_at: 1729260000,
+        form_snapshot: 1729089000,
+        form_bundle: 'contact-form-1729089000.js',
+      },
+    ];
+
+    mockEnv.submissionRepository.getSubmissions = vi
+      .fn()
+      .mockResolvedValue(mockSubmissions);
+
+    const req = new Request(
+      'http://localhost/submissions?formId=contact-form',
+      {
+        method: 'GET',
+      }
+    );
+
+    const res = await app.fetch(req, mockEnv);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { success: boolean };
+    expect(body.success).toBe(true);
+
+    // Verify repository was called with correct formId
+    expect(mockEnv.submissionRepository.getSubmissions).toHaveBeenCalledWith(
+      'contact-form',
+      undefined,
+      50,
+      0
+    );
+  });
+
+  it('should filter submissions by snapshot', async () => {
+    const mockSubmissions = [
+      {
+        id: 'sub_1',
+        form_id: 'contact-form',
+        data: JSON.stringify({ name: 'User 1' }),
+        meta: null,
+        spam_score: 0,
+        status: 'new' as const,
+        created_at: 1729260000,
+        form_snapshot: 1729089000,
+        form_bundle: 'contact-form-1729089000.js',
+      },
+    ];
+
+    mockEnv.submissionRepository.getSubmissions = vi
+      .fn()
+      .mockResolvedValue(mockSubmissions);
+
+    const req = new Request(
+      'http://localhost/submissions?snapshot=1729089000',
+      {
+        method: 'GET',
+      }
+    );
+
+    const res = await app.fetch(req, mockEnv);
+    expect(res.status).toBe(200);
+
+    // Verify repository was called with correct snapshot
+    expect(mockEnv.submissionRepository.getSubmissions).toHaveBeenCalledWith(
+      undefined,
+      1729089000,
+      50,
+      0
+    );
+  });
+
+  it('should validate pagination parameters', async () => {
+    const req = new Request('http://localhost/submissions?limit=200', {
+      method: 'GET',
+    });
+
+    const res = await app.fetch(req, mockEnv);
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+    expect(body.error).toBe('Limit must be between 1 and 100');
   });
 });
