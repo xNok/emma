@@ -1,6 +1,6 @@
 {
   "name": "@xnok/emma-form-builder",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Terminal User Interface for creating and managing embeddable forms",
   "type": "module",
   "main": "dist/index.js",
