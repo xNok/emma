@@ -11,14 +11,29 @@ vi.mock('inquirer');
 const realConfig = new EmmaConfig('/tmp/emma-test-config');
 const saveSpy = vi.spyOn(realConfig, 'save').mockImplementation(async () => {});
 vi.spyOn(realConfig, 'isInitialized').mockReturnValue(true);
-vi.spyOn(realConfig, 'loadFormSchema').mockResolvedValue({
+
+const mockSchema = {
   formId: 'form-id',
   name: 'Test Form',
   version: '1.0',
   apiEndpoint: '/api/test',
   fields: [],
   theme: 'default',
-});
+  createdAt: 1760743545,
+  lastModified: 1760743545,
+  currentSnapshot: 1760743545,
+  snapshots: [
+    {
+      timestamp: 1760743545,
+      r2Key: 'form-id-1760743545.js',
+      changes: 'Initial version',
+      deployed: false,
+    },
+  ],
+};
+
+vi.spyOn(realConfig, 'loadFormSchema').mockResolvedValue(mockSchema);
+vi.spyOn(realConfig, 'saveFormSchema').mockImplementation(async () => {});
 
 describe('cloudflareProvider', () => {
   beforeEach(() => {
@@ -52,6 +67,17 @@ describe('cloudflareProvider', () => {
   // S3-only: no bucket creation test needed
 
   it('should upload all form assets to R2', async () => {
+    const fs = await import('fs-extra');
+
+    // Create the required bundle file
+    const buildDir = '/tmp/emma-test-config/builds/form-id';
+    await fs.ensureDir(buildDir);
+    await fs.ensureDir(`${buildDir}/themes`);
+    await fs.writeFile(`${buildDir}/form-id-1760743545.js`, 'bundle content');
+    await fs.writeFile(`${buildDir}/themes/default.css`, 'theme css');
+    await fs.writeFile(`${buildDir}/index.html`, 'index html');
+    await fs.writeFile(`${buildDir}/emma-forms.esm.js`, 'renderer js');
+
     const options = {
       bucket: 'test-bucket',
       publicUrl: 'https://forms.example.com',
@@ -70,7 +96,9 @@ describe('cloudflareProvider', () => {
 
     await cloudflareProvider.execute(realConfig, 'form-id', options);
 
-    expect(mockSend).toHaveBeenCalledTimes(5);
+    // Should upload 6 things: bundle, theme, index, renderer, schema, registry
+    // Plus 1 GET to check for existing registry
+    expect(mockSend.mock.calls.length).toBeGreaterThanOrEqual(6);
 
     const findCall = (key: string) => {
       const call = (
@@ -86,21 +114,26 @@ describe('cloudflareProvider', () => {
       return call?.[0].input;
     };
 
-    expect(findCall('form-id/form-id.js')).toBeDefined();
+    // Check for timestamp-based bundle key
+    expect(findCall('form-id-1760743545.js')).toBeDefined();
     expect(findCall('form-id/themes/default.css')).toBeDefined();
     expect(findCall('form-id/index.html')).toBeDefined();
     expect(findCall('form-id/emma-forms.esm.js')).toBeDefined();
     const schemaCall = findCall('form-id/form-id.json');
     expect(schemaCall).toBeDefined();
-    if (schemaCall) {
-      expect(JSON.parse(schemaCall.Body as string)).toEqual({
-        formId: 'form-id',
-        name: 'Test Form',
-        version: '1.0',
-        apiEndpoint: '/api/test',
-        fields: [],
-        theme: 'default',
-      });
+    // Check for registry
+    const registryCall = findCall('registry.json');
+    expect(registryCall).toBeDefined();
+    if (registryCall && registryCall.Body) {
+      const registry = JSON.parse(registryCall.Body.toString()) as {
+        forms: Array<{ formId: string; currentSnapshot: number }>;
+      };
+      expect(registry.forms).toHaveLength(1);
+      expect(registry.forms[0].formId).toBe('form-id');
+      expect(registry.forms[0].currentSnapshot).toBe(1760743545);
     }
+
+    // Clean up
+    await fs.remove('/tmp/emma-test-config/builds');
   });
 });

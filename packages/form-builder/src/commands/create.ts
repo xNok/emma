@@ -12,6 +12,7 @@ import type {
   FieldType,
   ValidationRules,
 } from '@xnok/emma-shared/types';
+import { FIELD_TYPES, THEMES } from '../constants.js';
 
 interface InquirerPrompt {
   type: string;
@@ -46,52 +47,6 @@ interface TextareaAnswer extends FieldAnswer {
 interface SelectAnswer extends FieldAnswer {
   defaultValue?: string;
 }
-
-// Available field types
-const FIELD_TYPES: { name: string; value: FieldType; description: string }[] = [
-  { name: 'Text Input', value: 'text', description: 'Single-line text field' },
-  {
-    name: 'Email',
-    value: 'email',
-    description: 'Email address with validation',
-  },
-  { name: 'Textarea', value: 'textarea', description: 'Multi-line text field' },
-  { name: 'Number', value: 'number', description: 'Numeric input' },
-  { name: 'Phone', value: 'tel', description: 'Phone number' },
-  { name: 'URL', value: 'url', description: 'Website URL' },
-  {
-    name: 'Select Dropdown',
-    value: 'select',
-    description: 'Dropdown selection',
-  },
-  {
-    name: 'Radio Buttons',
-    value: 'radio',
-    description: 'Single choice from options',
-  },
-  { name: 'Checkboxes', value: 'checkbox', description: 'Multiple selections' },
-  { name: 'Date', value: 'date', description: 'Date picker' },
-  { name: 'Time', value: 'time', description: 'Time picker' },
-  {
-    name: 'Date & Time',
-    value: 'datetime-local',
-    description: 'Date and time picker',
-  },
-  {
-    name: 'Hidden Field',
-    value: 'hidden',
-    description: 'Hidden value (for tracking)',
-  },
-];
-
-const THEMES = [
-  { name: 'Default', value: 'default', description: 'Clean, modern styling' },
-  {
-    name: 'Minimal',
-    value: 'minimal',
-    description: 'Minimal, borderless design',
-  },
-];
 
 export function createCommand(config: EmmaConfig): Command {
   return new Command('create')
@@ -205,6 +160,7 @@ export function createCommand(config: EmmaConfig): Command {
       ])) as { enableHoneypot: boolean };
 
       // Create form schema
+      const now = Math.floor(Date.now() / 1000); // Unix timestamp
       const schema: FormSchema = {
         formId,
         name: basicInfo.formName,
@@ -222,7 +178,24 @@ export function createCommand(config: EmmaConfig): Command {
             fieldName: 'website', // Common honeypot field name
           },
         },
+        // Initialize snapshot tracking
+        createdAt: now,
+        lastModified: now,
+        currentSnapshot: now,
+        snapshots: [
+          {
+            timestamp: now,
+            r2Key: `${formId}-${now}.js`,
+            changes: 'Initial version',
+            deployed: false,
+          },
+        ],
       };
+
+      // Mark fields with creation timestamp
+      fields.forEach((field) => {
+        field.addedAt = now;
+      });
 
       // Save form schema
       try {

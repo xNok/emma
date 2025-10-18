@@ -9,10 +9,11 @@ import {
   S3Client,
   PutObjectCommand,
   HeadObjectCommand,
+  GetObjectCommand,
   type S3ServiceException,
 } from '@aws-sdk/client-s3';
 import type { EmmaConfig as EmmaConfigType } from '../config.js';
-import type { FormSchema } from '@xnok/emma-shared/types';
+import type { FormSchema, FormRegistry } from '@xnok/emma-shared/types';
 
 export interface CloudflareDeploymentOptions {
   bucket: string; // R2 bucket name
@@ -20,6 +21,7 @@ export interface CloudflareDeploymentOptions {
   accountId?: string | undefined; // Optional explicit account ID
   apiToken?: string | undefined; // Optional explicit API token
   overwrite?: boolean; // Overwrite existing objects
+  snapshot?: string; // Optional snapshot timestamp to deploy
   // S3-only
   accessKeyId?: string; // R2 access key id
   secretAccessKey?: string; // R2 secret access key
@@ -50,22 +52,47 @@ export class CloudflareR2Deployment {
     if (!options.bucket) throw new Error('Missing R2 bucket name');
     if (!options.publicUrl) throw new Error('Missing publicUrl');
 
-    // Resolve build artifacts
-    const buildDir = this.config.getBuildPath(formId);
-    const bundlePath = path.join(buildDir, `${formId}.js`);
-
-    if (!(await fs.pathExists(bundlePath))) {
-      throw new Error(`Bundle not found. Build first: ${bundlePath}`);
-    }
-
-    // Upload bundle and theme under per-form subdirectory
-    const bundleKey = `${formId}/${formId}.js`;
-    await this.uploadToR2(bundlePath, options.bucket, bundleKey, options);
-
     const schema: FormSchema | null = await this.config.loadFormSchema(formId);
     if (!schema) {
       throw new Error(`Schema not found for form "${formId}"`);
     }
+
+    // Determine which snapshot to deploy
+    let snapshotTimestamp: number;
+    if (options.snapshot) {
+      snapshotTimestamp = parseInt(options.snapshot, 10);
+      if (isNaN(snapshotTimestamp)) {
+        throw new Error('Invalid snapshot timestamp');
+      }
+      // Verify snapshot exists
+      const snapshotExists = schema.snapshots?.some(
+        (s) => s.timestamp === snapshotTimestamp
+      );
+      if (!snapshotExists) {
+        throw new Error(
+          `Snapshot ${snapshotTimestamp} not found. Use "emma history ${formId}" to see available snapshots.`
+        );
+      }
+    } else {
+      // Use current snapshot
+      snapshotTimestamp =
+        schema.currentSnapshot || Math.floor(Date.now() / 1000);
+    }
+
+    // Resolve build artifacts with snapshot timestamp
+    const buildDir = this.config.getBuildPath(formId);
+    const bundleName = `${formId}-${snapshotTimestamp}.js`;
+    const bundlePath = path.join(buildDir, bundleName);
+
+    if (!(await fs.pathExists(bundlePath))) {
+      throw new Error(
+        `Bundle not found: ${bundlePath}. Run "emma build ${formId}${options.snapshot ? ` --snapshot ${snapshotTimestamp}` : ''}" first.`
+      );
+    }
+
+    // Upload bundle with timestamp-based key (flat structure in bucket root)
+    const bundleKey = bundleName;
+    await this.uploadToR2(bundlePath, options.bucket, bundleKey, options);
 
     const themeCss = path.join(buildDir, 'themes', `${schema.theme}.css`);
     const indexPath = path.join(buildDir, 'index.html');
@@ -91,6 +118,20 @@ export class CloudflareR2Deployment {
       options
     );
 
+    // Update form registry
+    await this.updateRegistry(formId, schema, snapshotTimestamp, options);
+
+    // Mark snapshot as deployed in local schema
+    if (schema.snapshots) {
+      const snapshot = schema.snapshots.find(
+        (s) => s.timestamp === snapshotTimestamp
+      );
+      if (snapshot) {
+        snapshot.deployed = true;
+        await this.config.saveFormSchema(formId, schema);
+      }
+    }
+
     return {
       bundleKey,
       bundleUrl: this.joinUrl(options.publicUrl, bundleKey),
@@ -105,6 +146,109 @@ export class CloudflareR2Deployment {
       schemaKey,
       schemaUrl: this.joinUrl(options.publicUrl, schemaKey),
     };
+  }
+
+  /**
+   * Update the form registry in R2
+   * The registry tracks all forms and their current snapshots
+   */
+  private async updateRegistry(
+    formId: string,
+    schema: FormSchema,
+    deployedSnapshot: number,
+    options: CloudflareDeploymentOptions
+  ): Promise<void> {
+    const registryKey = 'registry.json';
+
+    // Try to fetch existing registry
+    let registry: FormRegistry;
+    try {
+      const existingRegistry = await this.fetchRegistry(options);
+      registry = existingRegistry;
+    } catch (error) {
+      // Registry doesn't exist yet, create new one
+      registry = {
+        forms: [],
+        lastUpdated: Math.floor(Date.now() / 1000),
+      };
+    }
+
+    // Find or create entry for this form
+    let formEntry = registry.forms.find((f) => f.formId === formId);
+    const allSnapshots =
+      schema.snapshots?.map((s) => s.timestamp).sort((a, b) => a - b) || [];
+
+    if (formEntry) {
+      // Update existing entry
+      formEntry.name = schema.name;
+      formEntry.currentSnapshot = deployedSnapshot;
+      formEntry.allSnapshots = allSnapshots;
+      formEntry.publicUrl = this.joinUrl(
+        options.publicUrl,
+        `${formId}-${deployedSnapshot}.js`
+      );
+    } else {
+      // Create new entry
+      formEntry = {
+        formId,
+        name: schema.name,
+        currentSnapshot: deployedSnapshot,
+        allSnapshots,
+        publicUrl: this.joinUrl(
+          options.publicUrl,
+          `${formId}-${deployedSnapshot}.js`
+        ),
+      };
+      registry.forms.push(formEntry);
+    }
+
+    // Update last modified timestamp
+    registry.lastUpdated = Math.floor(Date.now() / 1000);
+
+    // Upload updated registry
+    await this.uploadContentToR2(
+      JSON.stringify(registry, null, 2),
+      options.bucket,
+      registryKey,
+      { ...options, overwrite: true } // Always overwrite registry
+    );
+  }
+
+  /**
+   * Fetch the existing registry from R2
+   */
+  private async fetchRegistry(
+    options: CloudflareDeploymentOptions
+  ): Promise<FormRegistry> {
+    const s3 = this.getS3Client(options);
+    const registryKey = 'registry.json';
+
+    try {
+      const response = await s3.send(
+        new GetObjectCommand({
+          Bucket: options.bucket,
+          Key: registryKey,
+        })
+      );
+
+      if (!response.Body) {
+        throw new Error('Empty registry response');
+      }
+
+      const bodyString = await response.Body.transformToString();
+      return JSON.parse(bodyString) as FormRegistry;
+    } catch (error) {
+      const err = error as S3ServiceException;
+      if (
+        err.$metadata?.httpStatusCode === 404 ||
+        err.name === 'NoSuchKey' ||
+        err.message?.includes('not found')
+      ) {
+        // Registry doesn't exist yet
+        throw new Error('Registry not found');
+      }
+      throw error;
+    }
   }
 
   private async uploadContentToR2(
@@ -275,6 +419,10 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
       )
       // S3-only: no --api-token flag
       .option('--overwrite', 'Overwrite existing objects in R2', false)
+      .option(
+        '-s, --snapshot <timestamp>',
+        'Deploy a specific snapshot by timestamp'
+      )
       .action(async (formId: string, options: GenericProviderOptions) => {
         await this.execute(config, formId, options);
       });
@@ -314,6 +462,7 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
         endpoint: (options.endpoint as string) || process.env.R2_ENDPOINT,
         accountId: (options.accountId as string) || cfConfig?.accountId,
         overwrite: Boolean(options.overwrite),
+        snapshot: options.snapshot as string | undefined,
       };
 
       if (!cfOptions.bucket || !cfOptions.publicUrl) {

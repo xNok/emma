@@ -23,10 +23,14 @@ function ensureContainerId(el, index) {
  * Initialize all forms with data attribute
  */
 function init() {
-  const containers = document.querySelectorAll('[data-emma-form="__FORM_ID__"]');
-  
+  const containers = document.querySelectorAll(
+    '[data-emma-form="__FORM_ID__"]'
+  );
+
   if (containers.length === 0) {
-    console.warn('[Emma] No containers found for form "__FORM_ID__". Add data-emma-form="__FORM_ID__" to your container element.');
+    console.warn(
+      '[Emma] No containers found for form "__FORM_ID__". Add data-emma-form="__FORM_ID__" to your container element.'
+    );
   }
 
   containers.forEach((container, idx) => {
