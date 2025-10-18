@@ -1,7 +1,13 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'Installation'
 weight: 2
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 To get started with Emma, you need to install the `emma-cli` package globally using `npm`.
 

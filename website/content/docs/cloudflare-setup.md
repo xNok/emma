@@ -1,7 +1,13 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'Cloudflare Setup'
 weight: 3
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 To use Emma with Cloudflare, you need to set up the following services:
 

@@ -74,8 +74,42 @@ jobs:
         with:
           path: ./website/public
 
-      # Commit all changed files back to the repository
-      # - uses: stefanzweifel/git-auto-commit-action@v5
+  # Playwright job
+  playwright:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: ./website/public
+
+      - name: Install Dependencies
+        working-directory: ./website
+        run: npm install
+
+      - name: Install Playwright Browsers
+        working-directory: ./website
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright Tests
+        working-directory: ./website
+        run: npx playwright test --reporter=list
+        env:
+          BASE_URL: file://${{ github.workspace }}/website/public
+
+      - name: Upload screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot
+          path: screenshot.png
 
   deploy:
     if: github.ref == 'refs/heads/main'

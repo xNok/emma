@@ -1,7 +1,13 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'Form Schema Versioning'
 weight: 9
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 Emma uses a snapshot-based approach to versioning forms, which provides a simple yet powerful way to manage changes over time.
 

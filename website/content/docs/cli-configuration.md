@@ -1,7 +1,13 @@
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 title: 'CLI Configuration'
 weight: 4
 ---
+menu:
+  docs:
+    parent: 'user-guide'
 
 Once you have set up your Cloudflare services and obtained the necessary credentials, you need to configure the `emma-cli` to use them. Emma uses environment variables for all authentication, so no credentials are ever stored on your local machine.
 
