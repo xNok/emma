@@ -2,11 +2,13 @@
 
 **Document Type:** User Guide
 **Date:** October 18, 2025
-**Status:** Final
+**Status:** Draft - CLI Implementation Pending
 
 ## Overview
 
 This guide explains how to view and manage form submissions in the Emma system, with a focus on understanding how form snapshots affect submission display and data integrity.
+
+**Important**: For security reasons, submission viewing and export functionality is implemented in the Emma CLI rather than exposed through public API endpoints. The API worker only handles form submission storage.
 
 ## Key Concepts
 
@@ -32,104 +34,44 @@ Each submission includes:
 - **Status**: `new`, `read`, `archived`, or `spam`
 - **Spam Score**: Automated spam detection score
 
-## Viewing Submissions
+## Viewing Submissions via CLI
 
-### List All Submissions
+**Status**: Coming Soon
 
-**Endpoint**: `GET /submissions`
+The Emma CLI will provide commands to securely view and export submissions directly from the D1 database using your Cloudflare credentials.
 
-Retrieves all submissions with optional filtering and pagination.
+### Planned Commands
 
-**Query Parameters**:
-
-- `formId` (optional): Filter by form ID
-- `snapshot` (optional): Filter by snapshot timestamp
-- `limit` (optional, default: 50, max: 100): Results per page
-- `offset` (optional, default: 0): Pagination offset
-
-**Example Request**:
-
+**List submissions**:
 ```bash
-curl https://api.example.com/submissions?formId=contact-form&limit=20
+emma submissions list <form-id>
 ```
 
-**Example Response**:
-
-```json
-{
-  "success": true,
-  "submissions": [
-    {
-      "id": "sub_abc123xyz",
-      "form_id": "contact-form",
-      "data": "{\"name\":\"John Doe\",\"email\":\"john@example.com\"}",
-      "meta": "{\"timestamp\":\"2025-10-18T12:00:00Z\",\"ip\":\"192.168.1.1\"}",
-      "spam_score": 0,
-      "status": "new",
-      "created_at": 1729260000,
-      "form_snapshot": 1729089000,
-      "form_bundle": "contact-form-1729089000.js"
-    }
-  ],
-  "grouped": {
-    "contact-form": {
-      "formId": "contact-form",
-      "snapshots": {
-        "1729089000": {
-          "snapshot": 1729089000,
-          "bundle": "contact-form-1729089000.js",
-          "count": 15,
-          "submissions": [...]
-        },
-        "1729189000": {
-          "snapshot": 1729189000,
-          "bundle": "contact-form-1729189000.js",
-          "count": 8,
-          "submissions": [...]
-        }
-      }
-    }
-  },
-  "pagination": {
-    "limit": 50,
-    "offset": 0,
-    "count": 23
-  }
-}
-```
-
-### Filter by Snapshot
-
-To view only submissions from a specific form version:
-
+**Filter by snapshot**:
 ```bash
-curl https://api.example.com/submissions?formId=contact-form&snapshot=1729089000
+emma submissions list <form-id> --snapshot <timestamp>
 ```
 
-This is useful when:
+**Export to CSV**:
+```bash
+emma submissions export <form-id> --format csv --output submissions.csv
+```
 
-- Analyzing data from before a form change
-- Comparing submission patterns across versions
-- Troubleshooting issues with specific form versions
+**Export to JSON**:
+```bash
+emma submissions export <form-id> --format json --output submissions.json
+```
 
-### Understanding Grouped Data
-
-The `grouped` object in the response organizes submissions by:
-
-1. **Form ID**: Top-level grouping
-2. **Snapshot**: Second-level grouping within each form
-
-This structure makes it easy to:
-
-- See how many submissions each snapshot received
-- Compare submission volumes across form versions
-- Identify which snapshots are most active
+**Compare snapshots**:
+```bash
+emma forms compare <form-id> <snapshot1> <snapshot2>
+```
 
 ## Handling Missing Fields
 
 ### The "N/A" Pattern
 
-When a field exists in a newer snapshot but not in an older one (or vice versa), the system displays "N/A" for that field value.
+When a field exists in a newer snapshot but not in an older one (or vice versa), the export will display "N/A" for that field value.
 
 **Example Scenario**:
 
@@ -137,131 +79,40 @@ When a field exists in a newer snapshot but not in an older one (or vice versa),
 2. **Snapshot 2** (October 15): Form adds field: `phone`
 
 **Viewing Submissions**:
-
 - Submissions from Snapshot 1 will show: `phone: N/A`
 - Submissions from Snapshot 2 will show all three fields
 
 This approach:
-
 - ✅ Preserves original submission data
 - ✅ Makes missing fields explicit
 - ✅ Avoids confusion about incomplete data
 - ✅ No database migrations required
 
-### Best Practices for Display
+## Database Storage
 
-When building a submission viewer UI:
+Submissions are stored in the D1 database with the following schema:
 
-1. **Show Snapshot Information**: Always display which snapshot a submission came from
-2. **Distinguish N/A**: Style N/A values differently from empty strings
-3. **Group by Snapshot**: Use the grouped data to organize the display
-4. **Provide Context**: Show what fields were available in each snapshot
-
-**Example UI Layout**:
-
-```
-Form: Contact Form (contact-form)
-
-📸 Snapshot: 1729089000 (October 10, 2025) - 15 submissions
-┌─────────────────────────────────────────┐
-│ Name          Email              Phone  │
-│ John Doe      john@example.com   N/A    │
-│ Jane Smith    jane@example.com   N/A    │
-└─────────────────────────────────────────┘
-
-📸 Snapshot: 1729189000 (October 15, 2025) - 8 submissions
-┌─────────────────────────────────────────────────────┐
-│ Name          Email              Phone           │
-│ Bob Johnson   bob@example.com    555-1234       │
-│ Alice Brown   alice@example.com  555-5678       │
-└─────────────────────────────────────────────────────┘
+```sql
+CREATE TABLE submissions (
+  id TEXT PRIMARY KEY,
+  form_id TEXT NOT NULL,
+  data TEXT NOT NULL,              -- JSON of submitted data
+  meta TEXT,                        -- JSON metadata
+  spam_score INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'new',
+  created_at INTEGER NOT NULL,
+  form_snapshot INTEGER,            -- Unix timestamp of form snapshot
+  form_bundle TEXT,                 -- Bundle file name
+  FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
+);
 ```
 
-## Advanced Viewing Features
+## Security
 
-### Snapshot Comparison
-
-Compare two form snapshots to see what changed:
-
-**Endpoint**: `GET /forms/:formId/compare?snapshot1=<ts1>&snapshot2=<ts2>`
-
-**Example Request**:
-
-```bash
-curl https://api.example.com/forms/contact-form/compare?snapshot1=1729089000&snapshot2=1729189000
-```
-
-**Example Response**:
-
-```json
-{
-  "success": true,
-  "formId": "contact-form",
-  "snapshot1": {
-    "timestamp": 1729089000,
-    "bundle": "contact-form-1729089000.js",
-    "fieldCount": 2
-  },
-  "snapshot2": {
-    "timestamp": 1729189000,
-    "bundle": "contact-form-1729189000.js",
-    "fieldCount": 3
-  },
-  "changes": {
-    "added": [
-      {
-        "fieldId": "phone",
-        "type": "added",
-        "newField": {
-          "id": "phone",
-          "type": "tel",
-          "label": "Phone Number"
-        }
-      }
-    ],
-    "removed": [],
-    "modified": []
-  },
-  "summary": {
-    "totalChanges": 1,
-    "addedCount": 1,
-    "removedCount": 0,
-    "modifiedCount": 0
-  }
-}
-```
-
-### Export Submissions
-
-See the [Export Format Guide](./export-format.md) for details on exporting submission data.
-
-## Troubleshooting
-
-### Submission Shows Unexpected N/A Values
-
-**Cause**: The form was edited after the submission was made.
-
-**Solution**:
-
-1. Check the submission's `form_snapshot` timestamp
-2. Compare with the form's snapshot history using `emma history <form-id>`
-3. The field may have been added or removed in a later snapshot
-
-### Cannot Find Submissions
-
-**Cause**: Filtering by wrong snapshot or form ID.
-
-**Solution**:
-
-1. List all snapshots: `emma history <form-id>`
-2. List submissions without filters: `GET /submissions?formId=<form-id>`
-3. Check the `grouped` response to see available snapshots
-
-### Mixed Field Sets in UI
-
-**Cause**: Displaying submissions from multiple snapshots together.
-
-**Solution**: Use snapshot grouping from the API response to organize display by version.
+- Submissions are **only** accessible through authenticated CLI commands
+- No public API endpoints expose submission data
+- Cloudflare credentials are required for all access
+- Data is stored securely in your Cloudflare D1 database
 
 ## See Also
 
