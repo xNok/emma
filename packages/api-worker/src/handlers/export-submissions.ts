@@ -58,7 +58,9 @@ function exportAsJson(submissions: SubmissionRecord[]): Response {
   const exportData = submissions.map((submission) => ({
     id: submission.id,
     formId: submission.form_id,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data: JSON.parse(submission.data),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     meta: submission.meta ? JSON.parse(submission.meta) : null,
     snapshot: {
       timestamp: submission.form_snapshot,
@@ -81,22 +83,21 @@ function exportAsJson(submissions: SubmissionRecord[]): Response {
 /**
  * Export submissions as CSV with snapshot columns
  */
-async function exportAsCsv(
+function exportAsCsv(
   submissions: SubmissionRecord[],
   _schemaRepository: { getSchema: (formId: string) => Promise<unknown> },
   c: Context<{ Bindings: Env }>
-): Promise<Response> {
+): Response {
   if (submissions.length === 0) {
-    return c.json(
-      { success: false, error: 'No submissions to export' },
-      404
-    );
+    return c.json({ success: false, error: 'No submissions to export' }, 404);
   }
 
   // Collect all unique field names from all submissions
   const allFields = new Set<string>();
   submissions.forEach((submission) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data = JSON.parse(submission.data);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     Object.keys(data).forEach((key) => allFields.add(key));
   });
 
@@ -114,6 +115,7 @@ async function exportAsCsv(
 
   // Build CSV rows
   const rows = submissions.map((submission) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data = JSON.parse(submission.data);
     const row: string[] = [
       submission.id,
@@ -127,6 +129,7 @@ async function exportAsCsv(
 
     // Add field values in order
     Array.from(allFields).forEach((field) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const value = data[field];
       if (value === undefined || value === null) {
         row.push('N/A');

@@ -85,12 +85,17 @@ describe('API Worker', () => {
     expect(body.submissionId).toBeDefined();
 
     // Verify snapshot metadata was stored
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockEnv.submissionRepository.saveSubmission).toHaveBeenCalledWith(
       expect.any(String),
       formId,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       { name: 'Test User', email: 'test@example.com' },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         timestamp: expect.any(String),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ip: expect.any(String),
       }),
       1729089000,
@@ -198,11 +203,15 @@ describe('API Worker', () => {
     expect(body.submissionId).toBeDefined();
 
     // Verify submission was saved without snapshot metadata
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockEnv.submissionRepository.saveSubmission).toHaveBeenCalledWith(
       expect.any(String),
       formId,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       { name: 'Test User', email: 'test@example.com' },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         timestamp: expect.any(String),
       }),
       undefined,
@@ -309,6 +318,7 @@ describe('API Worker', () => {
     expect(body.success).toBe(true);
 
     // Verify repository was called with correct formId
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockEnv.submissionRepository.getSubmissions).toHaveBeenCalledWith(
       'contact-form',
       undefined,
@@ -347,6 +357,7 @@ describe('API Worker', () => {
     expect(res.status).toBe(200);
 
     // Verify repository was called with correct snapshot
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockEnv.submissionRepository.getSubmissions).toHaveBeenCalledWith(
       undefined,
       1729089000,
@@ -492,12 +503,9 @@ describe('API Worker', () => {
   });
 
   it('should validate export format parameter', async () => {
-    const req = new Request(
-      'http://localhost/submissions/export?format=xml',
-      {
-        method: 'GET',
-      }
-    );
+    const req = new Request('http://localhost/submissions/export?format=xml', {
+      method: 'GET',
+    });
 
     const res = await app.fetch(req, mockEnv);
     expect(res.status).toBe(400);

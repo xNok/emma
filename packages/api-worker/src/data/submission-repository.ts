@@ -87,7 +87,10 @@ export class D1SubmissionRepository implements SubmissionRepository {
     query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
     bindings.push(limit, offset);
 
-    const result = await this.db.prepare(query).bind(...bindings).all();
+    const result = await this.db
+      .prepare(query)
+      .bind(...bindings)
+      .all();
     return (result.results || []) as unknown as SubmissionRecord[];
   }
 

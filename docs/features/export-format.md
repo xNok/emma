@@ -13,6 +13,7 @@ Emma supports exporting form submissions in two formats: **JSON** and **CSV**. B
 **Endpoint**: `GET /submissions/export`
 
 **Query Parameters**:
+
 - `format` (optional, default: `json`): Export format (`json` or `csv`)
 - `formId` (optional): Filter by form ID
 - `snapshot` (optional): Filter by snapshot timestamp
@@ -26,12 +27,14 @@ Emma supports exporting form submissions in two formats: **JSON** and **CSV**. B
 JSON exports provide the most complete representation of submission data, including full metadata and nested structures.
 
 **Example Request**:
+
 ```bash
 curl https://api.example.com/submissions/export?format=json&formId=contact-form \
   -o submissions.json
 ```
 
 **Example Output**:
+
 ```json
 [
   {
@@ -84,21 +87,22 @@ curl https://api.example.com/submissions/export?format=json&formId=contact-form 
 
 ### Field Descriptions
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique submission identifier |
-| `formId` | string | Form ID this submission belongs to |
-| `data` | object | Submitted form field values (parsed from JSON) |
-| `meta` | object | Submission metadata (timestamp, user agent, etc.) |
-| `snapshot.timestamp` | number | Unix timestamp of form snapshot used |
-| `snapshot.bundle` | string | Bundle file name for this snapshot |
-| `spamScore` | number | Automated spam detection score (0-100) |
-| `status` | string | Submission status: `new`, `read`, `archived`, `spam` |
-| `createdAt` | number | Unix timestamp when submission was created |
+| Field                | Type   | Description                                          |
+| -------------------- | ------ | ---------------------------------------------------- |
+| `id`                 | string | Unique submission identifier                         |
+| `formId`             | string | Form ID this submission belongs to                   |
+| `data`               | object | Submitted form field values (parsed from JSON)       |
+| `meta`               | object | Submission metadata (timestamp, user agent, etc.)    |
+| `snapshot.timestamp` | number | Unix timestamp of form snapshot used                 |
+| `snapshot.bundle`    | string | Bundle file name for this snapshot                   |
+| `spamScore`          | number | Automated spam detection score (0-100)               |
+| `status`             | string | Submission status: `new`, `read`, `archived`, `spam` |
+| `createdAt`          | number | Unix timestamp when submission was created           |
 
 ### Use Cases
 
 JSON format is best for:
+
 - ✅ Programmatic data processing
 - ✅ Preserving data types and structures
 - ✅ Importing into other systems
@@ -112,12 +116,14 @@ JSON format is best for:
 CSV exports provide a tabular format suitable for spreadsheet applications and basic data analysis.
 
 **Example Request**:
+
 ```bash
 curl https://api.example.com/submissions/export?format=csv&formId=contact-form \
   -o submissions.csv
 ```
 
 **Example Output**:
+
 ```csv
 "id","form_id","created_at","status","spam_score","form_snapshot","form_bundle","name","email","phone","message"
 "sub_abc123xyz","contact-form","2025-10-18T12:00:00.000Z","new","0","1729089000","contact-form-1729089000.js","John Doe","john@example.com","N/A","Hello, this is a test submission."
@@ -127,6 +133,7 @@ curl https://api.example.com/submissions/export?format=csv&formId=contact-form \
 ### Column Structure
 
 **Fixed Columns** (always present):
+
 1. `id` - Submission ID
 2. `form_id` - Form ID
 3. `created_at` - ISO 8601 timestamp
@@ -136,6 +143,7 @@ curl https://api.example.com/submissions/export?format=csv&formId=contact-form \
 7. `form_bundle` - Bundle name or "N/A"
 
 **Dynamic Columns** (vary by form):
+
 - All unique field names from all submissions
 - Order is consistent within an export
 - Fields appear in the order they were encountered
@@ -145,18 +153,21 @@ curl https://api.example.com/submissions/export?format=csv&formId=contact-form \
 #### Missing Fields
 
 When a field doesn't exist in a submission's snapshot:
+
 ```csv
 "name","email","phone"
 "John Doe","john@example.com","N/A"
 ```
 
 The value is explicitly set to `"N/A"` to distinguish from:
+
 - Empty strings: `""`
 - Null values: (not applicable in CSV)
 
 #### Array Values
 
 Multi-value fields (checkboxes) are joined with semicolons:
+
 ```csv
 "interests"
 "sports; music; reading"
@@ -165,6 +176,7 @@ Multi-value fields (checkboxes) are joined with semicolons:
 #### Special Characters
 
 Values containing special characters are properly escaped:
+
 ```csv
 "message"
 "He said, ""Hello!"" to me."  # Quotes are doubled
@@ -173,6 +185,7 @@ Values containing special characters are properly escaped:
 ### Use Cases
 
 CSV format is best for:
+
 - ✅ Opening in Excel, Google Sheets, etc.
 - ✅ Quick data review and sorting
 - ✅ Simple data analysis
@@ -186,6 +199,7 @@ CSV format is best for:
 Both formats include snapshot information:
 
 **In JSON**:
+
 ```json
 "snapshot": {
   "timestamp": 1729089000,
@@ -194,6 +208,7 @@ Both formats include snapshot information:
 ```
 
 **In CSV**:
+
 ```csv
 "form_snapshot","form_bundle"
 "1729089000","contact-form-1729089000.js"
@@ -204,12 +219,14 @@ Both formats include snapshot information:
 Snapshot timestamps are Unix timestamps (seconds since epoch):
 
 **JavaScript**:
+
 ```javascript
 const date = new Date(1729089000 * 1000);
 console.log(date.toISOString()); // "2025-10-16T09:30:00.000Z"
 ```
 
 **Python**:
+
 ```python
 from datetime import datetime
 date = datetime.fromtimestamp(1729089000)
@@ -217,6 +234,7 @@ print(date.isoformat())  # "2025-10-16T09:30:00"
 ```
 
 **Excel**:
+
 ```excel
 =DATE(1970,1,1)+A2/86400  # Where A2 contains the timestamp
 ```
@@ -226,8 +244,9 @@ print(date.isoformat())  # "2025-10-16T09:30:00"
 To analyze submissions by form version:
 
 **SQL** (after importing CSV):
+
 ```sql
-SELECT 
+SELECT
   form_snapshot,
   COUNT(*) as submission_count,
   MIN(created_at) as first_submission,
@@ -238,6 +257,7 @@ ORDER BY form_snapshot;
 ```
 
 **Excel Pivot Table**:
+
 1. Import CSV
 2. Create Pivot Table
 3. Rows: `form_snapshot`
@@ -250,6 +270,7 @@ ORDER BY form_snapshot;
 - **Large exports**: Use pagination with multiple requests
 
 **Example: Large Export**:
+
 ```bash
 # Export first 1000
 curl "https://api.example.com/submissions/export?format=json&formId=contact-form" \
@@ -263,13 +284,13 @@ curl "https://api.example.com/submissions/export?format=json&formId=contact-form
 
 ### Choosing a Format
 
-| Need | Format | Why |
-|------|--------|-----|
-| Human review | CSV | Easy to open in spreadsheets |
-| Data analysis | CSV | Works with Excel, R, Python pandas |
-| System integration | JSON | Preserves data types and structure |
-| Backup | JSON | Most complete representation |
-| Debugging | JSON | Includes all metadata |
+| Need               | Format | Why                                |
+| ------------------ | ------ | ---------------------------------- |
+| Human review       | CSV    | Easy to open in spreadsheets       |
+| Data analysis      | CSV    | Works with Excel, R, Python pandas |
+| System integration | JSON   | Preserves data types and structure |
+| Backup             | JSON   | Most complete representation       |
+| Debugging          | JSON   | Includes all metadata              |
 
 ### Regular Exports
 
@@ -281,6 +302,7 @@ For regular data backup:
 4. **Storage**: Keep in version-controlled repository
 
 **Example Script**:
+
 ```bash
 #!/bin/bash
 DATE=$(date +%Y%m%d)

@@ -41,17 +41,20 @@ Each submission includes:
 Retrieves all submissions with optional filtering and pagination.
 
 **Query Parameters**:
+
 - `formId` (optional): Filter by form ID
 - `snapshot` (optional): Filter by snapshot timestamp
 - `limit` (optional, default: 50, max: 100): Results per page
 - `offset` (optional, default: 0): Pagination offset
 
 **Example Request**:
+
 ```bash
 curl https://api.example.com/submissions?formId=contact-form&limit=20
 ```
 
 **Example Response**:
+
 ```json
 {
   "success": true,
@@ -104,6 +107,7 @@ curl https://api.example.com/submissions?formId=contact-form&snapshot=1729089000
 ```
 
 This is useful when:
+
 - Analyzing data from before a form change
 - Comparing submission patterns across versions
 - Troubleshooting issues with specific form versions
@@ -111,10 +115,12 @@ This is useful when:
 ### Understanding Grouped Data
 
 The `grouped` object in the response organizes submissions by:
+
 1. **Form ID**: Top-level grouping
 2. **Snapshot**: Second-level grouping within each form
 
 This structure makes it easy to:
+
 - See how many submissions each snapshot received
 - Compare submission volumes across form versions
 - Identify which snapshots are most active
@@ -131,10 +137,12 @@ When a field exists in a newer snapshot but not in an older one (or vice versa),
 2. **Snapshot 2** (October 15): Form adds field: `phone`
 
 **Viewing Submissions**:
+
 - Submissions from Snapshot 1 will show: `phone: N/A`
 - Submissions from Snapshot 2 will show all three fields
 
 This approach:
+
 - ✅ Preserves original submission data
 - ✅ Makes missing fields explicit
 - ✅ Avoids confusion about incomplete data
@@ -150,6 +158,7 @@ When building a submission viewer UI:
 4. **Provide Context**: Show what fields were available in each snapshot
 
 **Example UI Layout**:
+
 ```
 Form: Contact Form (contact-form)
 
@@ -177,11 +186,13 @@ Compare two form snapshots to see what changed:
 **Endpoint**: `GET /forms/:formId/compare?snapshot1=<ts1>&snapshot2=<ts2>`
 
 **Example Request**:
+
 ```bash
 curl https://api.example.com/forms/contact-form/compare?snapshot1=1729089000&snapshot2=1729189000
 ```
 
 **Example Response**:
+
 ```json
 {
   "success": true,
@@ -230,7 +241,8 @@ See the [Export Format Guide](./export-format.md) for details on exporting submi
 
 **Cause**: The form was edited after the submission was made.
 
-**Solution**: 
+**Solution**:
+
 1. Check the submission's `form_snapshot` timestamp
 2. Compare with the form's snapshot history using `emma history <form-id>`
 3. The field may have been added or removed in a later snapshot
@@ -240,6 +252,7 @@ See the [Export Format Guide](./export-format.md) for details on exporting submi
 **Cause**: Filtering by wrong snapshot or form ID.
 
 **Solution**:
+
 1. List all snapshots: `emma history <form-id>`
 2. List submissions without filters: `GET /submissions?formId=<form-id>`
 3. Check the `grouped` response to see available snapshots

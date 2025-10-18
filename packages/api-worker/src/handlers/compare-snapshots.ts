@@ -262,9 +262,7 @@ function compareFields(
   });
 
   // Compare validation rules
-  if (
-    JSON.stringify(field1.validation) !== JSON.stringify(field2.validation)
-  ) {
+  if (JSON.stringify(field1.validation) !== JSON.stringify(field2.validation)) {
     changes.push({
       property: 'validation',
       oldValue: field1.validation,

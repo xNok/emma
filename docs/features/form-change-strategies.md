@@ -44,6 +44,7 @@ Emma is designed to **never require database migrations** when forms change. Thi
 Use `emma edit <form-id>` for **non-breaking changes**:
 
 ✅ **Add new fields**
+
 ```yaml
 # Before (snapshot 1729089000)
 fields:
@@ -58,6 +59,7 @@ fields:
 ```
 
 ✅ **Remove optional fields**
+
 ```yaml
 # Before
 fields:
@@ -73,18 +75,20 @@ fields:
 ```
 
 ✅ **Update labels or help text**
+
 ```yaml
 # Before
 - id: email
-  label: "Email"
+  label: 'Email'
 
 # After
 - id: email
-  label: "Email Address"
+  label: 'Email Address'
   helpText: "We'll never share your email"
 ```
 
 ✅ **Change validation rules (less strict)**
+
 ```yaml
 # Before
 - id: age
@@ -95,11 +99,12 @@ fields:
 # After
 - id: age
   validation:
-    min: 13  # Less strict
+    min: 13 # Less strict
     max: 100
 ```
 
 ✅ **Adjust field order**
+
 ```yaml
 # Order changes don't affect data
 ```
@@ -107,17 +112,20 @@ fields:
 ### Impact of Minor Changes
 
 **Positive**:
+
 - ✅ All submissions under one form ID
 - ✅ Single form to manage
 - ✅ Continuous submission history
 - ✅ Easy to track form evolution
 
 **Considerations**:
+
 - ⚠️ Old submissions show "N/A" for new fields
 - ⚠️ Removed fields show in old submissions
 - ⚠️ Viewer must handle mixed field sets
 
 **Example Workflow**:
+
 ```bash
 # Edit the form
 emma edit contact-form
@@ -144,28 +152,30 @@ emma history contact-form
 Use `emma create <new-form-id>` for **breaking changes**:
 
 ❌ **Change field meaning**
+
 ```yaml
 # BAD: Editing existing form
 # Before
 - id: age
   type: number
-  label: "Age"
+  label: 'Age'
 
 # After - WRONG APPROACH
 - id: age
   type: text
-  label: "Age Range"  # Now expects "18-25" not "23"
+  label: 'Age Range' # Now expects "18-25" not "23"
 
 # GOOD: Create new form
 # contact-form-v2:
 - id: age_range
   type: select
   options:
-    - "18-25"
-    - "26-35"
+    - '18-25'
+    - '26-35'
 ```
 
 ❌ **Restructure data collection**
+
 ```yaml
 # BAD: Major restructure in same form
 # Before
@@ -185,6 +195,7 @@ Use `emma create <new-form-id>` for **breaking changes**:
 ```
 
 ❌ **Change target audience**
+
 ```yaml
 # Before: contact-form (general public)
 - id: name
@@ -192,14 +203,14 @@ Use `emma create <new-form-id>` for **breaking changes**:
 - id: message
 
 # After - WRONG APPROACH: Same form for customers
-- id: customer_id  # Doesn't make sense for old submissions
+- id: customer_id # Doesn't make sense for old submissions
 - id: account_number
 - id: support_request
-
 # GOOD: Create customer-support-form
 ```
 
 ❌ **Completely different purpose**
+
 ```yaml
 # Before: Contact form
 # After: Job application form
@@ -209,17 +220,20 @@ Use `emma create <new-form-id>` for **breaking changes**:
 ### Impact of Major Changes
 
 **Creating a New Form**:
+
 - ✅ Clear separation of data
 - ✅ No confusion about field meanings
 - ✅ Clean data model
 - ✅ Easier to analyze submissions
 
 **Drawbacks**:
+
 - ⚠️ Two forms to manage
 - ⚠️ Must update website to use new form ID
 - ⚠️ Split submission history
 
 **Example Workflow**:
+
 ```bash
 # Create new form
 emma create contact-form-v2
@@ -254,6 +268,7 @@ emma edit newsletter-signup
 ```
 
 **Result**:
+
 - Old submissions: `gdpr_consent: N/A` (pre-GDPR)
 - New submissions: `gdpr_consent: true` (explicit consent)
 - All submissions under one form ID
@@ -266,6 +281,7 @@ emma edit newsletter-signup
 **Decision**: ❌ **CREATE** (Major change - different purpose)
 
 **Before** (`contact-form`):
+
 ```yaml
 fields:
   - id: name
@@ -274,6 +290,7 @@ fields:
 ```
 
 **After** (`support-tickets`):
+
 ```yaml
 fields:
   - id: customer_id
@@ -284,6 +301,7 @@ fields:
 ```
 
 **Reasoning**:
+
 - Completely different field structure
 - Different data meaning
 - Different audience (customers vs. general public)
@@ -294,6 +312,7 @@ fields:
 **Scenario**: Annual event registration form needs updates.
 
 **Option A**: Year-specific forms ✅
+
 ```
 event-2024
 event-2025
@@ -301,6 +320,7 @@ event-2026
 ```
 
 **Option B**: Single form with snapshots ✅
+
 ```
 annual-event-registration
   ├─ Snapshot 1729089000 (2024 version)
@@ -309,7 +329,7 @@ annual-event-registration
 ```
 
 **Recommendation**: **Option B** if field changes are minor (dates, pricing tiers).
-                   **Option A** if events are fundamentally different.
+**Option A** if events are fundamentally different.
 
 ### Example 4: A/B Testing
 
@@ -323,6 +343,7 @@ contact-form-variant-b
 ```
 
 **After testing**, consolidate winners:
+
 ```bash
 # If variant B wins, make it the main form
 # Update website to use contact-form-variant-b
@@ -336,6 +357,7 @@ contact-form-variant-b
 When you create a new form version:
 
 1. **Deploy New Form**:
+
 ```bash
 emma create contact-form-v2
 emma build contact-form-v2
@@ -343,6 +365,7 @@ emma deploy cloudflare contact-form-v2
 ```
 
 2. **Update Website** (gradual rollout):
+
 ```html
 <!-- Phase 1: Deploy both, route traffic 50/50 -->
 <div data-emma-form="contact-form" class="form-a"></div>
@@ -353,11 +376,13 @@ emma deploy cloudflare contact-form-v2
 ```
 
 3. **Keep Old Form Active**:
+
 - Do NOT delete old form
 - Historical submissions reference it
 - May need to display old form for reference
 
 4. **Archive Old Form** (optional):
+
 ```bash
 # Mark as inactive in database (future feature)
 # But keep form definition for historical reference
@@ -368,6 +393,7 @@ emma deploy cloudflare contact-form-v2
 ### Viewing Mixed Snapshots
 
 **List by snapshot**:
+
 ```bash
 # View all submissions
 curl https://api.example.com/submissions?formId=contact-form
@@ -388,6 +414,7 @@ curl https://api.example.com/submissions?formId=contact-form
 ### Exporting for Analysis
 
 **Separate by snapshot**:
+
 ```bash
 # Export old snapshot
 curl "https://api.example.com/submissions/export?formId=contact-form&snapshot=1729089000" \
@@ -399,6 +426,7 @@ curl "https://api.example.com/submissions/export?formId=contact-form&snapshot=17
 ```
 
 **Combined export**:
+
 ```bash
 # All snapshots together
 curl "https://api.example.com/submissions/export?formId=contact-form" \
@@ -406,6 +434,7 @@ curl "https://api.example.com/submissions/export?formId=contact-form" \
 ```
 
 The CSV will show:
+
 ```csv
 "name","email","phone","form_snapshot","form_bundle"
 "John","john@example.com","N/A","1729089000","contact-form-1729089000.js"
@@ -415,13 +444,15 @@ The CSV will show:
 ## Best Practices Summary
 
 ### ✅ DO: Edit for Minor Changes
+
 - Adding optional fields
-- Removing optional fields  
+- Removing optional fields
 - Updating labels/help text
 - Relaxing validations
 - Cosmetic changes
 
 ### ❌ DON'T: Edit for Major Changes
+
 - Changing field meanings
 - Complete restructuring
 - Different target audience
@@ -429,7 +460,9 @@ The CSV will show:
 - Breaking data compatibility
 
 ### 🔍 When in Doubt
+
 If you're unsure, ask:
+
 1. **Can old and new submissions be meaningfully compared?**
    - YES → Edit
    - NO → Create new form
@@ -439,7 +472,7 @@ If you're unsure, ask:
    - NO → Create new form
 
 3. **Is this the same form, evolved?**
-   - YES → Edit  
+   - YES → Edit
    - NO → Create new form
 
 ## See Also
