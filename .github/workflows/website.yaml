@@ -91,14 +91,17 @@ jobs:
           name: github-pages
           path: ./website/public
 
-      - name: Install Playwright
-        run: |
-          pip install playwright
-          playwright install
+      - name: Install Dependencies
+        working-directory: ./website
+        run: npm install
 
-      - name: Run Playwright
-        run: |
-          python -c "from playwright.sync_api import sync_playwright; p = sync_playwright().__enter__(); b = p.chromium.launch(); c = b.new_context(); page = c.new_page(); page.goto('file://./website/public/index.html'); page.screenshot(path='screenshot.png'); b.close(); p.__exit__(None, None, None)"
+      - name: Install Playwright Browsers
+        working-directory: ./website
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright Tests
+        working-directory: ./website
+        run: npx playwright test --reporter=list
 
       - name: Upload screenshot
         uses: actions/upload-artifact@v4
