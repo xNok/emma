@@ -1,0 +1,48 @@
+name: "Contact Us"
+version: "0.0.1"
+fields:
+  - name: "name"
+    label: "Your Name"
+    type: "text"
+    required: true
+  - name: "email"
+    label: "Your Email"
+    type: "email"
+    required: true
+  - name: "message"
+    label: "Message"
+    type: "textarea"
+    required: true
+    rows: 5
+    resize: "vertical"
+options:
+  theme: "default"
+  honeypot: "website"
+  apiEndpoint: "/api/submit/contact-form"
+  successUrl: "/thank-you"
+  errorUrl: "/error"
+  spamThreshold: 0.8
+  allowedOrigins:
+    - "http://localhost:1313"
+    - "https://example.com"
+  saveSubmissions: true
+  submissionFormat: "json"
+  submissionFilename: "submissions/contact-form/{{timestamp}}-{{uuid}}.json"
+  enableRecaptcha: false
+  enableTurnstile: false
+  enableAkismet: false
+  sendEmail: false
+  emailSettings:
+    fromAddress: "noreply@example.com"
+    toAddress: "contact@example.com"
+    subject: "New Contact Form Submission"
+    template: "default-email"
+  customStyles: |
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      font-weight: bold;
+    }
+  customScripts: |
+    console.log("Contact form loaded!");

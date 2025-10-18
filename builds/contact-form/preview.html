@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Emma Form Preview</title>
+
+    <!-- Form Theme CSS -->
+    <link rel="stylesheet" href="/forms/contact-form/themes/undefined.css">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .preview-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .preview-header h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .preview-info {
+            color: #666;
+            font-size: 14px;
+        }
+        .preview-info code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .debug-links {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .debug-links a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .debug-links a:hover {
+            text-decoration: underline;
+        }
+        #form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+        .instructions p {
+            margin: 8px 0;
+        }
+        .instructions code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-header">
+        <h1>📝 Form Preview</h1>
+        <div class="preview-info">
+            <strong>Form ID:</strong> <code>contact-form</code><br>
+            <strong>Theme:</strong> <code>undefined</code><br>
+            <strong>Fields:</strong> 3<br>
+            <strong>API Endpoint:</strong> <code>undefined</code>
+        </div>
+
+        <div class="debug-links">
+            <strong>🔧 Debug Assets:</strong><br>
+            <a href="/forms/contact-form/contact-form.js">📄 Form Bundle (ESM)</a>
+            <a href="/forms/contact-form/emma-forms.esm.js">⚙️ Runtime Module</a>
+            <a href="/forms/contact-form/themes/undefined.css">🎨 Theme CSS</a>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>ℹ️ How This Works (ESM Module Pattern)</h3>
+        <p><strong>1. Runtime:</strong> <code>emma-forms.esm.js</code> - The FormRenderer class</p>
+        <p><strong>2. Bundle:</strong> <code>contact-form.js</code> - Form-specific code with embedded schema</p>
+        <p>The bundle imports the runtime and auto-initializes on <code>[data-emma-form="contact-form"]</code> containers.</p>
+    </div>
+
+    <div id="form-container" data-emma-form="contact-form">
+        <!-- Form will be rendered here by the bundle's auto-init -->
+    </div>
+
+    <!-- ESM Module: Load the form bundle which imports the runtime -->
+    <script type="module" src="/forms/contact-form/contact-form.js"></script>
+
+    <!-- Fallback for browsers without module support -->
+    <script nomodule>
+        document.getElementById('form-container').innerHTML =
+            '<div style="background: #fee; border: 2px solid #c00; padding: 20px; border-radius: 8px; color: #c00;">' +
+            '<strong>⚠️ Browser Not Supported</strong><br>' +
+            'This form requires a modern browser with ES Module support.' +
+            '</div>';
+    </script>
+
+</body>
+</html>

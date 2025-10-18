@@ -1,0 +1,8 @@
+{
+  "initialized": true,
+  "formsDirectory": "./.emma/forms",
+  "buildsDirectory": "./.emma/builds",
+  "defaultTheme": "default",
+  "localServerHost": "localhost",
+  "localServerPort": 3000
+}

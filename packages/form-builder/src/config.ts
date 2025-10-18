@@ -86,6 +86,9 @@ export class EmmaConfig {
    * Check if Emma is initialized
    */
   isInitialized(): boolean {
+    console.log('Checking if initialized...');
+    console.log('Config file path:', this.configFile);
+    console.log('Initialized flag:', this.data.initialized);
     return this.data.initialized;
   }
 

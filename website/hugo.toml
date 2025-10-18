@@ -6,3 +6,8 @@ theme = 'ananke'
 [caches]
   [caches.images]
     dir = ':cacheDir/images'
+
+[[menu.main]]
+  name = "Showcase"
+  url = "/docs/showcase"
+  weight = 30

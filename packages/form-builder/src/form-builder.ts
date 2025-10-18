@@ -27,7 +27,7 @@ export class FormBuilder {
     await fs.ensureDir(outputDir);
 
     // Generate the form bundle JavaScript
-    const bundleContent = this.generateFormBundle(schema);
+    const bundleContent = this.generateFormBundle(formId, schema);
 
     // Write bundle file with unique name
     const bundlePath = path.join(outputDir, `${schema.formId}.js`);
@@ -62,11 +62,11 @@ export class FormBuilder {
   /**
    * Generate the JavaScript bundle content
    */
-  private generateFormBundle(schema: FormSchema): string {
+  private generateFormBundle(formId: string, schema: FormSchema): string {
     const template = this.readTemplate('bundle.template.js');
     return template
       .replace('__FORM_SCHEMA__', JSON.stringify(schema, null, 2))
-      .replace(/__FORM_ID__/g, schema.formId);
+      .replace(/__FORM_ID__/g, formId);
   }
 
   /**
