@@ -68,7 +68,7 @@ describe('cloudflareProvider', () => {
 
   it('should upload all form assets to R2', async () => {
     const fs = await import('fs-extra');
-    
+
     // Create the required bundle file
     const buildDir = '/tmp/emma-test-config/builds/form-id';
     await fs.ensureDir(buildDir);
@@ -125,12 +125,14 @@ describe('cloudflareProvider', () => {
     const registryCall = findCall('registry.json');
     expect(registryCall).toBeDefined();
     if (registryCall && registryCall.Body) {
-      const registry = JSON.parse(registryCall.Body.toString());
+      const registry = JSON.parse(registryCall.Body.toString()) as {
+        forms: Array<{ formId: string; currentSnapshot: number }>;
+      };
       expect(registry.forms).toHaveLength(1);
       expect(registry.forms[0].formId).toBe('form-id');
       expect(registry.forms[0].currentSnapshot).toBe(1760743545);
     }
-    
+
     // Clean up
     await fs.remove('/tmp/emma-test-config/builds');
   });

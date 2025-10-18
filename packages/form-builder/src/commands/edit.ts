@@ -2,11 +2,13 @@
  * Edit Command - Interactive form editing with snapshot creation
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { Command } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import type { EmmaConfig } from '../config.js';
-import type { FormSchema, FormField, FieldType } from '@xnok/emma-shared/types';
+import type { FormSchema, FormField } from '@xnok/emma-shared/types';
 import { FIELD_TYPES } from '../constants.js';
 
 export function editCommand(config: EmmaConfig): Command {
@@ -72,7 +74,12 @@ export function editCommand(config: EmmaConfig): Command {
             break;
           case 'save':
             if (hasChanges) {
-              await saveWithSnapshot(config, formId, schema, changeDescriptions);
+              await saveWithSnapshot(
+                config,
+                formId,
+                schema,
+                changeDescriptions
+              );
             } else {
               console.log(chalk.yellow('No changes to save.'));
             }

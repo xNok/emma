@@ -13,10 +13,7 @@ import {
   type S3ServiceException,
 } from '@aws-sdk/client-s3';
 import type { EmmaConfig as EmmaConfigType } from '../config.js';
-import type {
-  FormSchema,
-  FormRegistry,
-} from '@xnok/emma-shared/types';
+import type { FormSchema, FormRegistry } from '@xnok/emma-shared/types';
 
 export interface CloudflareDeploymentOptions {
   bucket: string; // R2 bucket name
@@ -78,7 +75,8 @@ export class CloudflareR2Deployment {
       }
     } else {
       // Use current snapshot
-      snapshotTimestamp = schema.currentSnapshot || Math.floor(Date.now() / 1000);
+      snapshotTimestamp =
+        schema.currentSnapshot || Math.floor(Date.now() / 1000);
     }
 
     // Resolve build artifacts with snapshot timestamp
@@ -125,7 +123,9 @@ export class CloudflareR2Deployment {
 
     // Mark snapshot as deployed in local schema
     if (schema.snapshots) {
-      const snapshot = schema.snapshots.find((s) => s.timestamp === snapshotTimestamp);
+      const snapshot = schema.snapshots.find(
+        (s) => s.timestamp === snapshotTimestamp
+      );
       if (snapshot) {
         snapshot.deployed = true;
         await this.config.saveFormSchema(formId, schema);

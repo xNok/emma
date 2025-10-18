@@ -74,7 +74,9 @@ export function buildCommand(config: EmmaConfig): Command {
         console.log(`  Output: ${result.outputDir}`);
         if (snapshotTimestamp) {
           console.log(
-            chalk.dim(`  Snapshot: ${new Date(snapshotTimestamp * 1000).toISOString()}`)
+            chalk.dim(
+              `  Snapshot: ${new Date(snapshotTimestamp * 1000).toISOString()}`
+            )
           );
         }
         console.log('');

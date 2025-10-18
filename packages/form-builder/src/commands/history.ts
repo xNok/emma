@@ -26,11 +26,11 @@ export function historyCommand(config: EmmaConfig): Command {
       }
 
       if (!schema.snapshots || schema.snapshots.length === 0) {
+        console.log(chalk.yellow(`No snapshot history found for "${formId}".`));
         console.log(
-          chalk.yellow(`No snapshot history found for "${formId}".`)
-        );
-        console.log(
-          chalk.dim('This form may have been created before snapshot tracking was added.')
+          chalk.dim(
+            'This form may have been created before snapshot tracking was added.'
+          )
         );
         return;
       }
@@ -55,9 +55,10 @@ export function historyCommand(config: EmmaConfig): Command {
         if (isCurrent) statusIndicators.push(chalk.green('● CURRENT'));
         if (isDeployed) statusIndicators.push(chalk.blue('✓ DEPLOYED'));
 
-        const header = statusIndicators.length > 0
-          ? `${chalk.bold(`Snapshot ${sortedSnapshots.length - index}`)} ${statusIndicators.join(' ')}`
-          : chalk.bold(`Snapshot ${sortedSnapshots.length - index}`);
+        const header =
+          statusIndicators.length > 0
+            ? `${chalk.bold(`Snapshot ${sortedSnapshots.length - index}`)} ${statusIndicators.join(' ')}`
+            : chalk.bold(`Snapshot ${sortedSnapshots.length - index}`);
 
         console.log(header);
         console.log(chalk.dim(`  Timestamp: ${snapshot.timestamp}`));

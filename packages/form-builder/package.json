@@ -44,7 +44,6 @@
     "@types/inquirer": "^9.0.7",
     "@types/js-yaml": "^4.0.9",
     "@types/node-fetch": "^2.6.13",
-    "@vitest/coverage-v8": "^0.34.6",
     "eslint": "^8.50.0",
     "node-fetch": "^3.3.2",
     "prettier": "^3.0.3",

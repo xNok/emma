@@ -199,16 +199,12 @@ describe('Snapshot Workflow Integration', () => {
 
       // Build old snapshot
       const oldResult = await builder.build('test-form', schema, oldTimestamp);
-      expect(oldResult.bundlePath).toContain(
-        `test-form-${oldTimestamp}.js`
-      );
+      expect(oldResult.bundlePath).toContain(`test-form-${oldTimestamp}.js`);
       expect(await fs.pathExists(oldResult.bundlePath)).toBe(true);
 
       // Build current snapshot
       const newResult = await builder.build('test-form', schema, newTimestamp);
-      expect(newResult.bundlePath).toContain(
-        `test-form-${newTimestamp}.js`
-      );
+      expect(newResult.bundlePath).toContain(`test-form-${newTimestamp}.js`);
       expect(await fs.pathExists(newResult.bundlePath)).toBe(true);
 
       // Both bundles should exist
