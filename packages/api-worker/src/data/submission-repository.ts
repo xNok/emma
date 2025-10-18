@@ -88,7 +88,7 @@ export class D1SubmissionRepository implements SubmissionRepository {
     bindings.push(limit, offset);
 
     const result = await this.db.prepare(query).bind(...bindings).all();
-    return (result.results || []) as SubmissionRecord[];
+    return (result.results || []) as unknown as SubmissionRecord[];
   }
 
   async getSubmissionsByFormId(formId: string): Promise<SubmissionRecord[]> {
@@ -101,6 +101,6 @@ export class D1SubmissionRepository implements SubmissionRepository {
       )
       .bind(formId)
       .all();
-    return (result.results || []) as SubmissionRecord[];
+    return (result.results || []) as unknown as SubmissionRecord[];
   }
 }

@@ -83,7 +83,7 @@ function exportAsJson(submissions: SubmissionRecord[]): Response {
  */
 async function exportAsCsv(
   submissions: SubmissionRecord[],
-  schemaRepository: { getSchema: (formId: string) => Promise<unknown> },
+  _schemaRepository: { getSchema: (formId: string) => Promise<unknown> },
   c: Context<{ Bindings: Env }>
 ): Promise<Response> {
   if (submissions.length === 0) {

@@ -4,6 +4,7 @@ import { logger } from 'hono/logger';
 import handleSubmit from './handlers/submit';
 import handleListSubmissions from './handlers/list-submissions';
 import handleExportSubmissions from './handlers/export-submissions';
+import handleCompareSnapshots from './handlers/compare-snapshots';
 import { Env } from './env';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -16,6 +17,7 @@ app.use('*', cors());
 app.post('/submit/:formId', handleSubmit);
 app.get('/submissions', handleListSubmissions);
 app.get('/submissions/export', handleExportSubmissions);
+app.get('/forms/:formId/compare', handleCompareSnapshots);
 
 app.get('/health', (c) => {
   return c.json({
