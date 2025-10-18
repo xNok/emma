@@ -60,12 +60,20 @@ export default async function handleSubmit(
       ip: clientIP,
     };
 
+    // Extract snapshot information from the form schema
+    const formSnapshot = formSchema.currentSnapshot;
+    const formBundle = formSnapshot
+      ? `${formId}-${formSnapshot}.js`
+      : undefined;
+
     // Save submission to database
     await submissionRepository.saveSubmission(
       submissionId,
       formId,
       sanitizedData,
-      meta
+      meta,
+      formSnapshot,
+      formBundle
     );
 
     // Return success

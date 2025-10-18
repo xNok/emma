@@ -5,7 +5,9 @@ export interface SubmissionRepository {
     submissionId: string,
     formId: string,
     sanitizedData: Record<string, string | string[]>,
-    meta: Record<string, unknown>
+    meta: Record<string, unknown>,
+    formSnapshot?: number,
+    formBundle?: string
   ): Promise<void>;
 }
 
@@ -20,15 +22,17 @@ export class D1SubmissionRepository implements SubmissionRepository {
     submissionId: string,
     formId: string,
     sanitizedData: Record<string, string | string[]>,
-    meta: Record<string, unknown>
+    meta: Record<string, unknown>,
+    formSnapshot?: number,
+    formBundle?: string
   ): Promise<void> {
     const timestamp = Math.floor(Date.now() / 1000);
 
     await this.db.batch([
       this.db
         .prepare(
-          `INSERT INTO submissions (id, form_id, data, meta, spam_score, status, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO submissions (id, form_id, data, meta, spam_score, status, created_at, form_snapshot, form_bundle)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
         .bind(
           submissionId,
@@ -37,7 +41,9 @@ export class D1SubmissionRepository implements SubmissionRepository {
           JSON.stringify(meta),
           0, // spam_score
           'new',
-          timestamp
+          timestamp,
+          formSnapshot ?? null,
+          formBundle ?? null
         ),
       this.db
         .prepare(
