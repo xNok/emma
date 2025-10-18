@@ -64,3 +64,4 @@ forms/*.js
 forms/*.json
 .emma-test*/
 /packages/form-builder/.tmp-emma-test/
+bin
