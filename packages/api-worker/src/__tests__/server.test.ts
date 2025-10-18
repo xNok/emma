@@ -12,6 +12,8 @@ const mockEnv: Env = {
   } as unknown as D1Database,
   submissionRepository: {
     saveSubmission: vi.fn(),
+    getSubmissions: vi.fn(),
+    getSubmissionsByFormId: vi.fn(),
   },
   schemaRepository: {
     getSchema: vi.fn(),
@@ -56,6 +58,7 @@ describe('API Worker', () => {
       theme: 'default',
       version: '1',
       apiEndpoint: '',
+      currentSnapshot: 1729089000,
     };
 
     // Mock the submission repository
@@ -80,6 +83,24 @@ describe('API Worker', () => {
     };
     expect(body.success).toBe(true);
     expect(body.submissionId).toBeDefined();
+
+    // Verify snapshot metadata was stored
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockEnv.submissionRepository.saveSubmission).toHaveBeenCalledWith(
+      expect.any(String),
+      formId,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      { name: 'Test User', email: 'test@example.com' },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        timestamp: expect.any(String),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        ip: expect.any(String),
+      }),
+      1729089000,
+      'test-form-1729089000.js'
+    );
   });
 
   it('should return 404 if form not found', async () => {
@@ -138,5 +159,63 @@ describe('API Worker', () => {
     const body = (await res.json()) as { success: boolean; error: string };
     expect(body.success).toBe(false);
     expect(body.error).toBe('Email is required');
+  });
+
+  it('should handle form submission without snapshot metadata', async () => {
+    const formId = 'legacy-form';
+    const submissionData = {
+      data: { name: 'Test User', email: 'test@example.com' },
+    };
+
+    const mockFormSchema: FormSchema = {
+      formId: formId,
+      name: 'Legacy Form',
+      fields: [
+        { id: 'name', type: 'text', label: 'Name', required: true },
+        { id: 'email', type: 'email', label: 'Email', required: true },
+      ],
+      theme: 'default',
+      version: '1',
+      apiEndpoint: '',
+      // No currentSnapshot defined - backward compatibility
+    };
+
+    mockEnv.schemaRepository.getSchema = vi
+      .fn()
+      .mockResolvedValue(mockFormSchema);
+    mockEnv.submissionRepository.saveSubmission = vi
+      .fn()
+      .mockResolvedValue(undefined);
+
+    const req = new Request(`http://localhost/submit/${formId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(submissionData),
+    });
+
+    const res = await app.fetch(req, mockEnv);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      success: boolean;
+      submissionId: string;
+    };
+    expect(body.success).toBe(true);
+    expect(body.submissionId).toBeDefined();
+
+    // Verify submission was saved without snapshot metadata
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockEnv.submissionRepository.saveSubmission).toHaveBeenCalledWith(
+      expect.any(String),
+      formId,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      { name: 'Test User', email: 'test@example.com' },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        timestamp: expect.any(String),
+      }),
+      undefined,
+      undefined
+    );
   });
 });
