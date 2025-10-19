@@ -2,7 +2,7 @@
 
 **Document Type:** User Guide
 **Date:** October 18, 2025
-**Status:** Draft - CLI Implementation Pending
+**Status:** Published - CLI Implementation Complete
 
 ## Overview
 
