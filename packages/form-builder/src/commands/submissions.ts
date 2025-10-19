@@ -4,10 +4,10 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { spawn } from 'child_process';
 import type { EmmaConfig } from '../config.js';
 import type { SubmissionRecord } from '@xnok/emma-shared/types';
 import fs from 'fs-extra';
+import { getSubmissionProvider } from '../submission-providers/index.js';
 
 interface ListOptions {
   snapshot?: string;
@@ -19,62 +19,6 @@ interface ExportOptions {
   format?: 'json' | 'csv';
   output?: string;
   snapshot?: string;
-}
-
-/**
- * Execute wrangler d1 query and return results
- */
-async function executeD1Query(
-  databaseName: string,
-  query: string
-): Promise<SubmissionRecord[]> {
-  return new Promise((resolve, reject) => {
-    // Build wrangler command with query
-    const args = ['d1', 'execute', databaseName, '--command', query];
-
-    // Add JSON output flag
-    args.push('--json');
-
-    const proc = spawn('wrangler', args, {
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    proc.stdout.on('data', (data) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      stdout += data.toString();
-    });
-
-    proc.stderr.on('data', (data) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      stderr += data.toString();
-    });
-
-    proc.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(`Wrangler command failed: ${stderr}`));
-        return;
-      }
-
-      try {
-        // Parse wrangler output (it returns an array with one result object)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const output = JSON.parse(stdout);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (Array.isArray(output) && output.length > 0 && output[0].results) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          resolve(output[0].results as SubmissionRecord[]);
-        } else {
-          resolve([]);
-        }
-      } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        reject(new Error(`Failed to parse wrangler output: ${error}`));
-      }
-    });
-  });
 }
 
 /**
@@ -95,42 +39,35 @@ function listSubcommand(config: EmmaConfig): Command {
         return;
       }
 
-      // Check if Cloudflare config exists
-      const cloudflareConfig = config.get('cloudflare');
-      if (!cloudflareConfig || !process.env.CLOUDFLARE_DATABASE_NAME) {
-        console.log(
-          chalk.red(
-            'Cloudflare configuration missing. Please set CLOUDFLARE_DATABASE_NAME environment variable.'
-          )
-        );
-        console.log('');
-        console.log(chalk.cyan('Example:'));
-        console.log('  export CLOUDFLARE_DATABASE_NAME=emma-forms-db');
-        return;
-      }
-
-      const databaseName =
-        process.env.CLOUDFLARE_DATABASE_NAME || 'emma-forms-db';
-
       try {
         console.log(
           chalk.cyan(`📥 Fetching submissions for form: ${formId}...`)
         );
 
-        // Build query
-        let query = `SELECT id, form_id, data, meta, spam_score, status, created_at, form_snapshot, form_bundle FROM submissions WHERE form_id = '${formId}'`;
+        // Get the configured submission provider
+        const provider = await getSubmissionProvider();
 
-        if (options.snapshot) {
-          query += ` AND form_snapshot = ${options.snapshot}`;
+        if (!provider) {
+          console.log(
+            chalk.red(
+              'No submission provider available. Please configure a database provider.'
+            )
+          );
+          console.log('');
+          console.log(chalk.cyan('For Cloudflare D1:'));
+          console.log('  export CLOUDFLARE_DATABASE_NAME=emma-forms-db');
+          console.log('  wrangler login');
+          return;
         }
 
-        if (options.status) {
-          query += ` AND status = '${options.status}'`;
-        }
-
-        query += ` ORDER BY created_at DESC LIMIT ${options.limit || 50}`;
-
-        const submissions = await executeD1Query(databaseName, query);
+        const submissions = await provider.querySubmissions({
+          formId,
+          snapshot: options.snapshot
+            ? parseInt(options.snapshot, 10)
+            : undefined,
+          status: options.status,
+          limit: parseInt(options.limit || '50', 10),
+        });
 
         if (submissions.length === 0) {
           console.log(chalk.yellow('No submissions found.'));
@@ -196,7 +133,7 @@ function listSubcommand(config: EmmaConfig): Command {
         console.log('');
         console.log(
           chalk.yellow(
-            'Make sure you are authenticated with Cloudflare (wrangler login)'
+            'Make sure your database provider is properly configured and authenticated'
           )
         );
       }
@@ -221,32 +158,34 @@ function exportSubcommand(config: EmmaConfig): Command {
         return;
       }
 
-      const databaseName =
-        process.env.CLOUDFLARE_DATABASE_NAME || 'emma-forms-db';
-
-      if (!process.env.CLOUDFLARE_DATABASE_NAME) {
-        console.log(
-          chalk.yellow(
-            'Warning: CLOUDFLARE_DATABASE_NAME not set, using default: emma-forms-db'
-          )
-        );
-      }
-
       try {
         console.log(
           chalk.cyan(`📥 Exporting submissions for form: ${formId}...`)
         );
 
-        // Build query
-        let query = `SELECT id, form_id, data, meta, spam_score, status, created_at, form_snapshot, form_bundle FROM submissions WHERE form_id = '${formId}'`;
+        // Get the configured submission provider
+        const provider = await getSubmissionProvider();
 
-        if (options.snapshot) {
-          query += ` AND form_snapshot = ${options.snapshot}`;
+        if (!provider) {
+          console.log(
+            chalk.red(
+              'No submission provider available. Please configure a database provider.'
+            )
+          );
+          console.log('');
+          console.log(chalk.cyan('For Cloudflare D1:'));
+          console.log('  export CLOUDFLARE_DATABASE_NAME=emma-forms-db');
+          console.log('  wrangler login');
+          return;
         }
 
-        query += ` ORDER BY created_at DESC`;
-
-        const submissions = await executeD1Query(databaseName, query);
+        const submissions = await provider.querySubmissions({
+          formId,
+          snapshot: options.snapshot
+            ? parseInt(options.snapshot, 10)
+            : undefined,
+          limit: 10000, // Large limit for export
+        });
 
         if (submissions.length === 0) {
           console.log(chalk.yellow('No submissions found to export.'));
