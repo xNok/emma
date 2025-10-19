@@ -268,13 +268,12 @@ export class ApiWorkerDeployment {
       // Try to use yarn/npx to run wrangler, which handles Yarn PnP properly
       const useYarn = process.env.npm_config_user_agent?.includes('yarn');
       const command = useYarn ? 'yarn' : 'npx';
-      const fullArgs = useYarn ? ['wrangler', ...args] : ['wrangler', ...args];
+      const fullArgs = ['wrangler', ...args];
 
       const proc = spawn(command, fullArgs, {
         cwd: cwd || this.apiWorkerPath,
         env: { ...process.env, ...env },
         stdio: ['pipe', 'pipe', 'pipe'],
-        shell: true,
       });
 
       let stdout = '';
