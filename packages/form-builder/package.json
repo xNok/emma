@@ -48,7 +48,8 @@
     "node-fetch": "^3.3.2",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
+    "vitest": "^0.34.6",
+    "wrangler": "^4.43.0"
   },
   "engines": {
     "node": ">=18.0.0"
