@@ -31,7 +31,7 @@
     "composite": true,
     "incremental": true
   },
-  "include": ["packages/*/src/**/*", "shared/**/*"],
+  "include": ["packages/*/src/**/*", "shared/**/*", "website/**/*"],
   "exclude": [
     "node_modules",
     "dist",
