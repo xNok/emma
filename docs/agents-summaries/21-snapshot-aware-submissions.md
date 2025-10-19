@@ -84,6 +84,7 @@ Implemented snapshot-aware submission **storage** as specified in `docs/05-archi
 ### Why CLI Instead of API?
 
 Exposing submission data through public API endpoints creates significant security risks:
+
 - Submissions contain sensitive user data (PII)
 - Public endpoints are vulnerable to unauthorized access
 - Requires complex authentication/authorization
@@ -92,6 +93,7 @@ Exposing submission data through public API endpoints creates significant securi
 ### Secure CLI Approach
 
 The CLI provides secure access because:
+
 - ✅ Uses Cloudflare credentials already configured
 - ✅ Direct D1 database access (no public exposure)
 - ✅ Runs in authenticated user environment
@@ -111,6 +113,7 @@ The CLI provides secure access because:
 ### Test Coverage
 
 ✅ **Snapshot Storage**
+
 - Submission with snapshot metadata
 - Submission without snapshot (backward compatible)
 - Bundle name generation
@@ -147,6 +150,7 @@ This implementation aligns with `docs/05-architectural-decisions.md` Section 4:
 - ✅ Data integrity maintained
 
 **Deferred to CLI** (for security):
+
 - 🔄 Submission viewer with snapshot awareness
 - 🔄 Export functionality with snapshot metadata
 - 🔄 Form comparison tool
@@ -156,6 +160,7 @@ This implementation aligns with `docs/05-architectural-decisions.md` Section 4:
 The following commands need to be implemented in the Emma CLI:
 
 ### Submission Management
+
 ```bash
 emma submissions list <form-id>
 emma submissions list <form-id> --snapshot <timestamp>
@@ -163,11 +168,13 @@ emma submissions export <form-id> --format json|csv
 ```
 
 ### Form Comparison
+
 ```bash
 emma forms compare <form-id> <snapshot1> <snapshot2>
 ```
 
 ### Implementation Notes
+
 - Use D1 client to access database directly
 - Leverage existing Cloudflare credentials
 - Reuse repository methods already implemented
@@ -195,31 +202,37 @@ emma forms compare <form-id> <snapshot1> <snapshot2>
 From the original issue:
 
 ✅ **Add form_snapshot and form_bundle fields to submission storage**
+
 - Migration created
 - Fields added to repository
 - Tests verify storage
 
 ✅ **Update API worker to store form snapshot and bundle reference**
+
 - Submit handler captures snapshot
 - Repository saves metadata
 - Backward compatible
 
 🔄 **Create submission viewer** (Moving to CLI)
+
 - Viewer endpoints removed from API
 - Repository methods available
 - CLI implementation pending
 
 🔄 **Export functionality** (Moving to CLI)
+
 - Export handlers removed from API
 - Format documented
 - CLI implementation pending
 
 🔄 **Form comparison tool** (Moving to CLI)
+
 - Comparison endpoint removed from API
 - Logic can be reused in CLI
 - CLI implementation pending
 
 ✅ **Documentation**
+
 - Viewing guide created (CLI focus)
 - Export format documented
 - Change strategies documented
@@ -229,6 +242,7 @@ From the original issue:
 Successfully delivered snapshot-aware submission **storage** with proper security architecture. The API worker now safely stores submission data with snapshot context, while keeping sensitive data access restricted to authenticated CLI users.
 
 This approach provides:
+
 - ✅ Secure submission storage
 - ✅ Complete snapshot tracking
 - ✅ Backward compatibility

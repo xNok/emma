@@ -43,26 +43,31 @@ The Emma CLI will provide commands to securely view and export submissions direc
 ### Planned Commands
 
 **List submissions**:
+
 ```bash
 emma submissions list <form-id>
 ```
 
 **Filter by snapshot**:
+
 ```bash
 emma submissions list <form-id> --snapshot <timestamp>
 ```
 
 **Export to CSV**:
+
 ```bash
 emma submissions export <form-id> --format csv --output submissions.csv
 ```
 
 **Export to JSON**:
+
 ```bash
 emma submissions export <form-id> --format json --output submissions.json
 ```
 
 **Compare snapshots**:
+
 ```bash
 emma forms compare <form-id> <snapshot1> <snapshot2>
 ```
@@ -79,10 +84,12 @@ When a field exists in a newer snapshot but not in an older one (or vice versa),
 2. **Snapshot 2** (October 15): Form adds field: `phone`
 
 **Viewing Submissions**:
+
 - Submissions from Snapshot 1 will show: `phone: N/A`
 - Submissions from Snapshot 2 will show all three fields
 
 This approach:
+
 - ✅ Preserves original submission data
 - ✅ Makes missing fields explicit
 - ✅ Avoids confusion about incomplete data

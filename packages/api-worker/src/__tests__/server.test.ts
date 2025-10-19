@@ -12,8 +12,6 @@ const mockEnv: Env = {
   } as unknown as D1Database,
   submissionRepository: {
     saveSubmission: vi.fn(),
-    getSubmissions: vi.fn(),
-    getSubmissionsByFormId: vi.fn(),
   },
   schemaRepository: {
     getSchema: vi.fn(),

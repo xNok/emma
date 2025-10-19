@@ -17,6 +17,7 @@ Emma will support exporting form submissions in two formats: **JSON** and **CSV*
 The Emma CLI will provide secure export commands that access your D1 database directly using Cloudflare credentials.
 
 **Planned Usage**:
+
 ```bash
 # Export as JSON
 emma submissions export <form-id> --format json --output submissions.json
@@ -35,6 +36,7 @@ emma submissions export <form-id> --snapshot <timestamp> --format csv
 JSON exports provide the most complete representation of submission data, including full metadata and nested structures.
 
 **Example Output**:
+
 ```json
 [
   {
@@ -64,17 +66,17 @@ JSON exports provide the most complete representation of submission data, includ
 
 ### Field Descriptions
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique submission identifier |
-| `formId` | string | Form ID this submission belongs to |
-| `data` | object | Submitted form field values |
-| `meta` | object | Submission metadata |
-| `snapshot.timestamp` | number | Unix timestamp of form snapshot used |
-| `snapshot.bundle` | string | Bundle file name for this snapshot |
-| `spamScore` | number | Automated spam detection score |
-| `status` | string | Submission status |
-| `createdAt` | number | Unix timestamp when submission was created |
+| Field                | Type   | Description                                |
+| -------------------- | ------ | ------------------------------------------ |
+| `id`                 | string | Unique submission identifier               |
+| `formId`             | string | Form ID this submission belongs to         |
+| `data`               | object | Submitted form field values                |
+| `meta`               | object | Submission metadata                        |
+| `snapshot.timestamp` | number | Unix timestamp of form snapshot used       |
+| `snapshot.bundle`    | string | Bundle file name for this snapshot         |
+| `spamScore`          | number | Automated spam detection score             |
+| `status`             | string | Submission status                          |
+| `createdAt`          | number | Unix timestamp when submission was created |
 
 ## CSV Format
 
@@ -83,6 +85,7 @@ JSON exports provide the most complete representation of submission data, includ
 CSV exports provide a tabular format suitable for spreadsheet applications and basic data analysis.
 
 **Example Output**:
+
 ```csv
 "id","form_id","created_at","status","spam_score","form_snapshot","form_bundle","name","email","phone","message"
 "sub_abc123xyz","contact-form","2025-10-18T12:00:00.000Z","new","0","1729089000","contact-form-1729089000.js","John Doe","john@example.com","N/A","Hello, this is a test submission."
@@ -92,6 +95,7 @@ CSV exports provide a tabular format suitable for spreadsheet applications and b
 ### Column Structure
 
 **Fixed Columns** (always present):
+
 1. `id` - Submission ID
 2. `form_id` - Form ID
 3. `created_at` - ISO 8601 timestamp
@@ -101,6 +105,7 @@ CSV exports provide a tabular format suitable for spreadsheet applications and b
 7. `form_bundle` - Bundle name or "N/A"
 
 **Dynamic Columns** (vary by form):
+
 - All unique field names from all submissions
 - Order is consistent within an export
 - Fields appear in the order they were encountered
@@ -110,6 +115,7 @@ CSV exports provide a tabular format suitable for spreadsheet applications and b
 #### Missing Fields
 
 When a field doesn't exist in a submission's snapshot:
+
 ```csv
 "name","email","phone"
 "John Doe","john@example.com","N/A"
@@ -120,6 +126,7 @@ The value is explicitly set to `"N/A"` to distinguish from empty strings.
 #### Array Values
 
 Multi-value fields (checkboxes) are joined with semicolons:
+
 ```csv
 "interests"
 "sports; music; reading"
@@ -128,6 +135,7 @@ Multi-value fields (checkboxes) are joined with semicolons:
 #### Special Characters
 
 Values containing special characters are properly escaped:
+
 ```csv
 "message"
 "He said, ""Hello!"" to me."  # Quotes are doubled
@@ -140,6 +148,7 @@ Values containing special characters are properly escaped:
 Both formats include snapshot information to provide full context:
 
 **In JSON**:
+
 ```json
 "snapshot": {
   "timestamp": 1729089000,
@@ -148,6 +157,7 @@ Both formats include snapshot information to provide full context:
 ```
 
 **In CSV**:
+
 ```csv
 "form_snapshot","form_bundle"
 "1729089000","contact-form-1729089000.js"
@@ -158,12 +168,14 @@ Both formats include snapshot information to provide full context:
 Snapshot timestamps are Unix timestamps (seconds since epoch):
 
 **JavaScript**:
+
 ```javascript
 const date = new Date(1729089000 * 1000);
 console.log(date.toISOString());
 ```
 
 **Python**:
+
 ```python
 from datetime import datetime
 date = datetime.fromtimestamp(1729089000)
@@ -174,13 +186,13 @@ print(date.isoformat())
 
 ### Choosing a Format
 
-| Need | Format | Why |
-|------|--------|-----|
-| Human review | CSV | Easy to open in spreadsheets |
-| Data analysis | CSV | Works with Excel, R, Python pandas |
-| System integration | JSON | Preserves data types and structure |
-| Backup | JSON | Most complete representation |
-| Debugging | JSON | Includes all metadata |
+| Need               | Format | Why                                |
+| ------------------ | ------ | ---------------------------------- |
+| Human review       | CSV    | Easy to open in spreadsheets       |
+| Data analysis      | CSV    | Works with Excel, R, Python pandas |
+| System integration | JSON   | Preserves data types and structure |
+| Backup             | JSON   | Most complete representation       |
+| Debugging          | JSON   | Includes all metadata              |
 
 ### Security Considerations
 
