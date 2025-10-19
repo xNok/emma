@@ -259,7 +259,15 @@ function exportSubcommand(config: EmmaConfig): Command {
               if (value === undefined || value === null) {
                 row.push('N/A');
               } else if (Array.isArray(value)) {
-                row.push(value.join('; '));
+                row.push(
+                  value
+                    .map((el) =>
+                      String(el)
+                        .replace(/;/g, '\\;')
+                        .replace(/"/g, '""')
+                    )
+                    .join('; ')
+                );
               } else {
                 row.push(String(value).replace(/"/g, '""'));
               }
