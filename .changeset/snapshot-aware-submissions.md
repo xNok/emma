@@ -1,0 +1,56 @@
+---
+'@xnok/emma-form-builder': minor
+'@xnok/emma-api-worker': minor
+---
+
+Implement snapshot-aware submission storage with CLI viewer
+
+**New Features:**
+
+- Add `form_snapshot` and `form_bundle` fields to submission storage for tracking form versions
+- Implement `emma submissions list <form-id>` command for viewing submissions with snapshot grouping
+- Implement `emma submissions export <form-id>` command for exporting to JSON/CSV with snapshot metadata
+- Add provider abstraction for submission database access supporting multiple infrastructures
+
+**Security Architecture:**
+
+- Submission viewing restricted to authenticated CLI access (not exposed via public API)
+- Direct database access using provider credentials (Cloudflare D1 via wrangler)
+- No public API endpoints for viewing/exporting sensitive submission data
+
+**Provider System:**
+
+- Create `SubmissionProvider` interface for abstracted database operations
+- Implement `CloudflareD1Provider` with wrangler integration
+- Support for future database providers (PostgreSQL, MySQL, etc.)
+- Provider availability checking based on configuration
+
+**CLI Commands:**
+
+- `emma submissions list <form-id>` - View submissions grouped by snapshot
+  - Filter by `--snapshot <timestamp>`, `--status`, `--limit`
+  - Display submission previews with dates and status
+- `emma submissions export <form-id>` - Export submissions with complete snapshot metadata
+  - Support `--format json|csv`
+  - Include "N/A" for fields not present in submission's snapshot
+  - Proper CSV escaping for all field values
+
+**Database:**
+
+- Migration `0002_add_submission_snapshot_fields.sql` adds snapshot columns
+- Automatic snapshot capture in submit handler
+- Backward compatible with NULL snapshot values for existing submissions
+
+**Documentation:**
+
+- Submission viewing guide with CLI usage examples
+- Export format specification for JSON and CSV
+- Form change strategies guide (when to edit vs. create new forms)
+
+**Testing:**
+
+- 94/94 tests passing including snapshot storage verification
+- Backward compatibility tests for submissions without snapshots
+
+**Breaking Changes:**
+None - all changes are additive and backward compatible. Public API remains unchanged with only the storage enhancement.

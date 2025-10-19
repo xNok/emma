@@ -262,9 +262,7 @@ function exportSubcommand(config: EmmaConfig): Command {
                 row.push(
                   value
                     .map((el) =>
-                      String(el)
-                        .replace(/;/g, '\\;')
-                        .replace(/"/g, '""')
+                      String(el).replace(/;/g, '\\;').replace(/"/g, '""')
                     )
                     .join('; ')
                 );
