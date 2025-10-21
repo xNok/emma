@@ -26,15 +26,29 @@ export interface ApiWorkerDeploymentResult {
 }
 
 export class ApiWorkerDeployment {
+  private resourcesPath: string;
   private apiWorkerPath: string;
 
   constructor() {
-    // Find the api-worker package relative to form-builder
-    // Assumes monorepo structure: packages/form-builder and packages/api-worker
-    this.apiWorkerPath = path.resolve(
-      process.cwd(),
-      'packages/api-worker'
-    );
+    // Use bundled resources (migrations) from the form-builder package
+    // This works both in dev (src/resources) and production (dist/resources)
+    const isDev = __filename.includes('/src/');
+    const basePath = isDev
+      ? path.resolve(__dirname, '..')
+      : path.resolve(__dirname, '..');
+    this.resourcesPath = path.join(basePath, 'resources');
+
+    // Find the api-worker package installation
+    // In production (npm install), it will be in node_modules
+    // In development (monorepo), it will be a workspace dependency
+    try {
+      // Try to require.resolve the api-worker package
+      const apiWorkerPackagePath = require.resolve('@xnok/emma-api-worker/package.json');
+      this.apiWorkerPath = path.dirname(apiWorkerPackagePath);
+    } catch (error) {
+      // Fallback to monorepo structure for development
+      this.apiWorkerPath = path.resolve(process.cwd(), 'packages/api-worker');
+    }
   }
 
   /**
@@ -61,10 +75,11 @@ export class ApiWorkerDeployment {
     let spinner = ora('Setting up Cloudflare infrastructure...').start();
 
     try {
-      // Step 1: Check if api-worker package exists
+      // Step 1: Verify api-worker package is available
       if (!(await fs.pathExists(this.apiWorkerPath))) {
         throw new Error(
-          `API worker package not found at ${this.apiWorkerPath}. This is likely a development environment issue.`
+          `API worker package not found at ${this.apiWorkerPath}. ` +
+          'Make sure @xnok/emma-api-worker is installed.'
         );
       }
 
@@ -77,17 +92,17 @@ export class ApiWorkerDeployment {
       );
       spinner.succeed(`D1 database ready: ${databaseName} (${databaseId})`);
 
-      // Step 3: Run migrations
+      // Step 3: Run migrations (using bundled migrations from form-builder)
       spinner = ora('Running database migrations...').start();
       await this.runMigrations(databaseName, apiToken);
       spinner.succeed('Database migrations completed');
 
-      // Step 4: Update wrangler.toml with database ID
+      // Step 4: Update wrangler.toml in api-worker package with database ID
       spinner = ora('Updating worker configuration...').start();
       await this.updateWranglerConfig(databaseId, databaseName, environment);
       spinner.succeed('Worker configuration updated');
 
-      // Step 5: Deploy the worker
+      // Step 5: Deploy the worker from api-worker package
       spinner = ora('Deploying API worker to Cloudflare...').start();
       const workerUrl = await this.deployWorker(
         environment,
@@ -154,10 +169,7 @@ export class ApiWorkerDeployment {
     databaseName: string,
     apiToken: string
   ): Promise<void> {
-    const migrationsDir = path.resolve(
-      this.apiWorkerPath,
-      '../../migrations'
-    );
+    const migrationsDir = path.join(this.resourcesPath, 'migrations');
 
     if (!(await fs.pathExists(migrationsDir))) {
       throw new Error(`Migrations directory not found at ${migrationsDir}`);
@@ -187,7 +199,7 @@ export class ApiWorkerDeployment {
   }
 
   /**
-   * Update wrangler.toml with database configuration
+   * Update wrangler.toml in api-worker package with database configuration
    */
   private async updateWranglerConfig(
     databaseId: string,
@@ -197,7 +209,10 @@ export class ApiWorkerDeployment {
     const wranglerPath = path.join(this.apiWorkerPath, 'wrangler.toml');
     
     if (!(await fs.pathExists(wranglerPath))) {
-      throw new Error(`wrangler.toml not found at ${wranglerPath}`);
+      throw new Error(
+        `wrangler.toml not found at ${wranglerPath}. ` +
+        'Make sure the api-worker package is properly installed.'
+      );
     }
 
     let content = await fs.readFile(wranglerPath, 'utf-8');
@@ -218,7 +233,7 @@ export class ApiWorkerDeployment {
   }
 
   /**
-   * Deploy the worker using wrangler
+   * Deploy the worker using wrangler from api-worker package
    */
   private async deployWorker(
     environment: string,
@@ -271,7 +286,7 @@ export class ApiWorkerDeployment {
       const fullArgs = ['wrangler', ...args];
 
       const proc = spawn(command, fullArgs, {
-        cwd: cwd || this.apiWorkerPath,
+        cwd: cwd || process.cwd(),
         env: { ...process.env, ...env },
         stdio: ['pipe', 'pipe', 'pipe'],
       });

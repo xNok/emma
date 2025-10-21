@@ -3727,7 +3727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xnok/emma-api-worker@workspace:packages/api-worker":
+"@xnok/emma-api-worker@workspace:^, @xnok/emma-api-worker@workspace:packages/api-worker":
   version: 0.0.0-use.local
   resolution: "@xnok/emma-api-worker@workspace:packages/api-worker"
   dependencies:
@@ -3753,6 +3753,7 @@ __metadata:
     "@types/inquirer": "npm:^9.0.7"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node-fetch": "npm:^2.6.13"
+    "@xnok/emma-api-worker": "workspace:^"
     "@xnok/emma-form-renderer": "workspace:*"
     "@xnok/emma-shared": "workspace:*"
     chalk: "npm:^5.3.0"
