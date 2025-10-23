@@ -511,20 +511,16 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
     const inquirerModule = await import('inquirer');
     const inquirer = inquirerModule.default || inquirerModule;
     const { ApiWorkerDeployment } = await import('./api-worker.js');
-    
+
     // Step 1: Validate environment variables
     console.log('');
     const envCheck = ApiWorkerDeployment.validateEnvironment();
-    
+
     if (!envCheck.valid) {
-      console.log(
-        chalk.yellow(
-          '⚠️  Missing required environment variables:'
-        )
-      );
+      console.log(chalk.yellow('⚠️  Missing required environment variables:'));
       envCheck.missing.forEach((v) => console.log(chalk.red(`   - ${v}`)));
       console.log('');
-      
+
       const { setupNow } = (await inquirer.prompt([
         {
           type: 'confirm',
@@ -533,11 +529,11 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
           default: true,
         },
       ])) as { setupNow: boolean };
-      
+
       if (setupNow) {
         ApiWorkerDeployment.displayEnvSetupInstructions();
       }
-      
+
       console.log(
         chalk.red(
           '❌ Cannot proceed without required environment variables. Please set them and run "emma init" again.'
@@ -545,18 +541,16 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
       );
       return;
     }
-    
+
     if (envCheck.warnings.length > 0) {
       console.log(
         chalk.yellow('⚠️  Recommended environment variables not set:')
       );
       envCheck.warnings.forEach((v) => console.log(chalk.dim(`   - ${v}`)));
-      console.log(
-        chalk.dim('   (These are needed for deploying forms to R2)')
-      );
+      console.log(chalk.dim('   (These are needed for deploying forms to R2)'));
       console.log('');
     }
-    
+
     // Step 2: Cloudflare configuration prompts
     console.log(chalk.cyan('Cloudflare Configuration:'));
     console.log('');
@@ -568,17 +562,16 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
         validate: (input: string) =>
           input.trim().length > 0 || 'Account ID is required',
       },
-      { 
-        type: 'input', 
-        name: 'bucket', 
+      {
+        type: 'input',
+        name: 'bucket',
         message: 'R2 bucket name:',
         default: 'emma-forms',
       },
       {
         type: 'input',
         name: 'publicUrl',
-        message:
-          'Public base URL for forms (e.g., https://forms.example.com):',
+        message: 'Public base URL for forms (e.g., https://forms.example.com):',
         validate: (input: string) =>
           input.trim().length > 0 || 'Public URL is required',
       },
@@ -616,7 +609,7 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
       console.log('');
       console.log(chalk.cyan('🚀 Deploying API worker to Cloudflare...'));
       console.log('');
-      
+
       try {
         const deployer = new ApiWorkerDeployment();
         const result = await deployer.deploy({
@@ -629,9 +622,11 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
         console.log('');
         console.log(chalk.cyan('Deployment Details:'));
         console.log(`  Worker URL:    ${result.workerUrl}`);
-        console.log(`  Database:      ${result.databaseName} (${result.databaseId})`);
+        console.log(
+          `  Database:      ${result.databaseName} (${result.databaseId})`
+        );
         console.log('');
-        
+
         // Save worker URL to config
         config.set('cloudflare', {
           ...config.get('cloudflare'),
@@ -639,13 +634,15 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
           databaseId: result.databaseId,
         });
         await config.save();
-        
+
         console.log(chalk.green('✅ Cloudflare configuration saved!'));
         console.log('');
         console.log(chalk.cyan('Next steps:'));
         console.log('  1. Create a form:     $ emma create my-first-form');
         console.log('  2. Preview locally:   $ emma preview my-first-form');
-        console.log('  3. Deploy to R2:      $ emma deploy cloudflare my-first-form');
+        console.log(
+          '  3. Deploy to R2:      $ emma deploy cloudflare my-first-form'
+        );
       } catch (error) {
         console.log('');
         console.log(
@@ -654,8 +651,16 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
           )
         );
         console.log('');
-        console.log(chalk.yellow('Configuration has been saved, but API worker is not deployed.'));
-        console.log(chalk.yellow('You can manually deploy the API worker later or run "emma init --override" to try again.'));
+        console.log(
+          chalk.yellow(
+            'Configuration has been saved, but API worker is not deployed.'
+          )
+        );
+        console.log(
+          chalk.yellow(
+            'You can manually deploy the API worker later or run "emma init --override" to try again.'
+          )
+        );
       }
     } else {
       console.log(chalk.green('\n✅ Cloudflare R2 configuration saved!'));

@@ -28,18 +28,18 @@ describe('ApiWorkerDeployment', () => {
   describe('validateEnvironment', () => {
     it('should validate required environment variables', () => {
       process.env.CLOUDFLARE_API_TOKEN = 'test-token';
-      
+
       const result = ApiWorkerDeployment.validateEnvironment();
-      
+
       expect(result.valid).toBe(true);
       expect(result.missing).toEqual([]);
     });
 
     it('should detect missing CLOUDFLARE_API_TOKEN', () => {
       delete process.env.CLOUDFLARE_API_TOKEN;
-      
+
       const result = ApiWorkerDeployment.validateEnvironment();
-      
+
       expect(result.valid).toBe(false);
       expect(result.missing).toContain('CLOUDFLARE_API_TOKEN');
     });
@@ -47,9 +47,9 @@ describe('ApiWorkerDeployment', () => {
     it('should warn about missing R2 credentials', () => {
       delete process.env.R2_ACCESS_KEY_ID;
       delete process.env.R2_SECRET_ACCESS_KEY;
-      
+
       const result = ApiWorkerDeployment.validateEnvironment();
-      
+
       expect(result.warnings).toContain('R2_ACCESS_KEY_ID');
       expect(result.warnings).toContain('R2_SECRET_ACCESS_KEY');
     });
@@ -57,9 +57,9 @@ describe('ApiWorkerDeployment', () => {
     it('should not warn if R2 credentials are set', () => {
       process.env.R2_ACCESS_KEY_ID = 'test-key';
       process.env.R2_SECRET_ACCESS_KEY = 'test-secret';
-      
+
       const result = ApiWorkerDeployment.validateEnvironment();
-      
+
       expect(result.warnings).not.toContain('R2_ACCESS_KEY_ID');
       expect(result.warnings).not.toContain('R2_SECRET_ACCESS_KEY');
     });
@@ -76,32 +76,37 @@ describe('ApiWorkerDeployment', () => {
 
     it('should throw error if API token is missing', async () => {
       delete process.env.CLOUDFLARE_API_TOKEN;
-      
+
       await expect(
         deployment.deploy({
           accountId: mockAccountId,
         })
-      ).rejects.toThrow('CLOUDFLARE_API_TOKEN environment variable is required');
+      ).rejects.toThrow(
+        'CLOUDFLARE_API_TOKEN environment variable is required'
+      );
     });
 
     it('should use default values when options are not provided', async () => {
       // Mock spawn to prevent actual execution
-      const mockSpawn = vi.spyOn(child_process, 'spawn').mockImplementation(
-        () => {
+      const mockSpawn = vi
+        .spyOn(child_process, 'spawn')
+        .mockImplementation(() => {
           const EventEmitter = require('events');
           const proc = new EventEmitter();
           proc.stdout = new EventEmitter();
           proc.stderr = new EventEmitter();
-          
+
           // Simulate successful execution
           setTimeout(() => {
-            proc.stdout.emit('data', JSON.stringify([{ name: 'emma-submissions', uuid: 'test-db-id' }]));
+            proc.stdout.emit(
+              'data',
+              JSON.stringify([{ name: 'emma-submissions', uuid: 'test-db-id' }])
+            );
             proc.emit('close', 0);
           }, 10);
-          
-          return proc as any;
-        }
-      );
+
+          return proc;
+        });
 
       try {
         await deployment.deploy({
@@ -121,11 +126,11 @@ describe('ApiWorkerDeployment', () => {
     it('should display setup instructions without throwing', () => {
       // Mock console.log to prevent output during tests
       const mockLog = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       expect(() => {
         ApiWorkerDeployment.displayEnvSetupInstructions();
       }).not.toThrow();
-      
+
       expect(mockLog).toHaveBeenCalled();
       mockLog.mockRestore();
     });

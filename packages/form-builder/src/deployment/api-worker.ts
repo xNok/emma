@@ -43,7 +43,9 @@ export class ApiWorkerDeployment {
     // In development (monorepo), it will be a workspace dependency
     try {
       // Try to require.resolve the api-worker package
-      const apiWorkerPackagePath = require.resolve('@xnok/emma-api-worker/package.json');
+      const apiWorkerPackagePath = require.resolve(
+        '@xnok/emma-api-worker/package.json'
+      );
       this.apiWorkerPath = path.dirname(apiWorkerPackagePath);
     } catch (error) {
       // Fallback to monorepo structure for development
@@ -79,7 +81,7 @@ export class ApiWorkerDeployment {
       if (!(await fs.pathExists(this.apiWorkerPath))) {
         throw new Error(
           `API worker package not found at ${this.apiWorkerPath}. ` +
-          'Make sure @xnok/emma-api-worker is installed.'
+            'Make sure @xnok/emma-api-worker is installed.'
         );
       }
 
@@ -134,10 +136,10 @@ export class ApiWorkerDeployment {
     apiToken: string
   ): Promise<string> {
     // First, try to list existing databases
-    const listResult = await this.runWranglerCommand(
-      ['d1', 'list', '--json'],
-      { CLOUDFLARE_API_TOKEN: apiToken, CLOUDFLARE_ACCOUNT_ID: accountId }
-    );
+    const listResult = await this.runWranglerCommand(['d1', 'list', '--json'], {
+      CLOUDFLARE_API_TOKEN: apiToken,
+      CLOUDFLARE_ACCOUNT_ID: accountId,
+    });
 
     try {
       const databases = JSON.parse(listResult.stdout);
@@ -183,16 +185,9 @@ export class ApiWorkerDeployment {
     // Execute each migration
     for (const migrationFile of migrationFiles) {
       const migrationPath = path.join(migrationsDir, migrationFile);
-      
+
       await this.runWranglerCommand(
-        [
-          'd1',
-          'execute',
-          databaseName,
-          '--file',
-          migrationPath,
-          '--remote',
-        ],
+        ['d1', 'execute', databaseName, '--file', migrationPath, '--remote'],
         { CLOUDFLARE_API_TOKEN: apiToken }
       );
     }
@@ -207,11 +202,11 @@ export class ApiWorkerDeployment {
     _environment: string
   ): Promise<void> {
     const wranglerPath = path.join(this.apiWorkerPath, 'wrangler.toml');
-    
+
     if (!(await fs.pathExists(wranglerPath))) {
       throw new Error(
         `wrangler.toml not found at ${wranglerPath}. ` +
-        'Make sure the api-worker package is properly installed.'
+          'Make sure the api-worker package is properly installed.'
       );
     }
 
@@ -315,9 +310,7 @@ export class ApiWorkerDeployment {
       });
 
       proc.on('error', (error) => {
-        reject(
-          new Error(`Failed to execute wrangler: ${error.message}`)
-        );
+        reject(new Error(`Failed to execute wrangler: ${error.message}`));
       });
     });
   }
@@ -364,18 +357,26 @@ export class ApiWorkerDeployment {
     console.log('');
     console.log(chalk.white('  CLOUDFLARE_API_TOKEN'));
     console.log(
-      chalk.dim('    Create a token at: https://dash.cloudflare.com/profile/api-tokens')
+      chalk.dim(
+        '    Create a token at: https://dash.cloudflare.com/profile/api-tokens'
+      )
     );
     console.log(
-      chalk.dim('    Required permissions: Account - Workers Scripts (Edit), D1 (Edit)')
+      chalk.dim(
+        '    Required permissions: Account - Workers Scripts (Edit), D1 (Edit)'
+      )
     );
     console.log('');
-    console.log(chalk.cyan('Recommended Environment Variables (for form deployment):'));
+    console.log(
+      chalk.cyan('Recommended Environment Variables (for form deployment):')
+    );
     console.log('');
     console.log(chalk.white('  R2_ACCESS_KEY_ID'));
     console.log(chalk.white('  R2_SECRET_ACCESS_KEY'));
     console.log(
-      chalk.dim('    Create R2 API tokens at: https://dash.cloudflare.com/[account]/r2/api-tokens')
+      chalk.dim(
+        '    Create R2 API tokens at: https://dash.cloudflare.com/[account]/r2/api-tokens'
+      )
     );
     console.log('');
     console.log(chalk.cyan('Example setup:'));
