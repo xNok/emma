@@ -13,7 +13,7 @@
     "build": "yarn workspaces foreach -Apt run build",
     "test": "yarn workspaces foreach -Aipt run test",
     "test:manual": "yarn workspace @emma/form-renderer exec yarn --cwd test-server dev",
-    "test:website": "cd website && npm test",
+    "test:website": "cd website && playwright test",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",

@@ -17,6 +17,7 @@ import { previewCommand } from './commands/preview.js';
 import { deleteCommand } from './commands/delete.js';
 import { editCommand } from './commands/edit.js';
 import { historyCommand } from './commands/history.js';
+import { submissionsCommand } from './commands/submissions.js';
 
 const program = new Command();
 
@@ -41,6 +42,7 @@ async function main() {
     program.addCommand(previewCommand(config));
     program.addCommand(historyCommand(config));
     program.addCommand(deleteCommand(config));
+    program.addCommand(submissionsCommand(config));
 
     // Enhanced help
     program.on('--help', () => {
