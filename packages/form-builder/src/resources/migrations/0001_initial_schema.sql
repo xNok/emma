@@ -44,7 +44,7 @@ CREATE TABLE metadata (
 
 -- Insert initial metadata (atomic, idempotent)
 BEGIN TRANSACTION;
-INSERT OR IGNORE INTO metadata (key, value, updated_at) VALUES
+INSERT OR IGNORE INTO metadata (key, value, updated_at) VALUES 
   ('schema_version', '1', strftime('%s', 'now')),
   ('created_at', strftime('%s', 'now'), strftime('%s', 'now'));
 COMMIT;
