@@ -15,9 +15,19 @@ theme = 'emma-docs'
 
 # Main menu (top navigation)
 [[menu.main]]
-  name = 'Documentation'
-  url = '/docs/'
+  name = 'Getting Started'
+  url = '/docs/getting-started/'
   weight = 1
+
+[[menu.main]]
+  name = 'Developer Guide'
+  url = '/docs/developer-guide/'
+  weight = 2
+
+[[menu.main]]
+  name = 'References'
+  url = '/docs/references/'
+  weight = 3
 
 [[menu.main]]
   name = 'GitHub'
@@ -28,3 +38,7 @@ theme = 'emma-docs'
 [caches]
   [caches.images]
     dir = ':cacheDir/images'
+
+# Search configuration
+[outputs]
+  home = ["HTML", "JSON"]

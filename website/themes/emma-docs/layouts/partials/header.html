@@ -1,4 +1,5 @@
 <header class="site-header">
+  <link rel="stylesheet" href="{{ "css/search.css" | relURL }}">
   <div class="header-content">
     <a href="{{ .Site.BaseURL }}" class="site-logo">
       {{ .Site.Title }}
@@ -28,4 +29,5 @@
       </svg>
     </button>
   </div>
+  {{ partial "search.html" . }}
 </header>
