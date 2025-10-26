@@ -91,20 +91,27 @@ describe('ApiWorkerDeployment', () => {
       const mockSpawn = vi
         .spyOn(child_process, 'spawn')
         .mockImplementation(() => {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
           const EventEmitter = require('events');
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
           const proc = new EventEmitter();
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           proc.stdout = new EventEmitter();
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           proc.stderr = new EventEmitter();
 
           // Simulate successful execution
           setTimeout(() => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             proc.stdout.emit(
               'data',
               JSON.stringify([{ name: 'emma-submissions', uuid: 'test-db-id' }])
             );
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             proc.emit('close', 0);
           }, 10);
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return proc;
         });
 

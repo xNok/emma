@@ -142,10 +142,11 @@ export class ApiWorkerDeployment {
     });
 
     try {
-      const databases = JSON.parse(listResult.stdout);
-      const existing = databases.find(
-        (db: { name: string; uuid: string }) => db.name === databaseName
-      );
+      const databases = JSON.parse(listResult.stdout) as Array<{
+        name: string;
+        uuid: string;
+      }>;
+      const existing = databases.find((db) => db.name === databaseName);
 
       if (existing) {
         return existing.uuid;
@@ -160,8 +161,11 @@ export class ApiWorkerDeployment {
       { CLOUDFLARE_API_TOKEN: apiToken, CLOUDFLARE_ACCOUNT_ID: accountId }
     );
 
-    const createData = JSON.parse(createResult.stdout);
-    return createData.uuid || createData.database_id;
+    const createData = JSON.parse(createResult.stdout) as {
+      uuid?: string;
+      database_id?: string;
+    };
+    return createData.uuid || createData.database_id || '';
   }
 
   /**
@@ -289,11 +293,11 @@ export class ApiWorkerDeployment {
       let stdout = '';
       let stderr = '';
 
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on('data', (data: Buffer) => {
         stdout += data.toString();
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on('data', (data: Buffer) => {
         stderr += data.toString();
       });
 
