@@ -5,7 +5,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "shared"
+    "shared",
+    "website"
   ],
   "scripts": {
     "dev": "yarn workspaces foreach -pt run dev",
