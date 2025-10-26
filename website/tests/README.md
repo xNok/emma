@@ -5,6 +5,7 @@ This directory contains Playwright end-to-end tests for the Emma documentation w
 ## Overview
 
 The test suite validates:
+
 - Navigation functionality across all pages
 - Responsive design on mobile, tablet, and desktop viewports
 - Accessibility features (keyboard navigation, focus indicators, skip links)
@@ -16,6 +17,7 @@ The test suite validates:
 ### Prerequisites
 
 1. Install dependencies:
+
    ```bash
    cd website
    yarn install
@@ -34,6 +36,7 @@ yarn test
 ```
 
 This will:
+
 1. Start the Hugo server automatically
 2. Run tests across multiple browsers (Chromium, Firefox, WebKit)
 3. Test both desktop and mobile viewports
@@ -64,7 +67,9 @@ yarn test:debug navigation.spec.ts
 ## Test Files
 
 ### `navigation.spec.ts`
+
 Tests core navigation functionality:
+
 - Homepage loading and content
 - Documentation page navigation
 - Sidebar navigation
@@ -74,7 +79,9 @@ Tests core navigation functionality:
 - Accessibility skip links
 
 ### `responsive.spec.ts`
+
 Tests responsive design:
+
 - Mobile viewport (375x667) - Mobile menu, touch targets
 - Tablet viewport (768x1024) - Two-column layout
 - Desktop viewport (1920x1080) - Full sidebar, optimal width
@@ -119,11 +126,13 @@ Tests are designed to run in CI environments:
 ## Debugging Failed Tests
 
 1. **View HTML Report**:
+
    ```bash
    yarn playwright show-report
    ```
 
 2. **Run in Debug Mode**:
+
    ```bash
    yarn test:debug
    ```
@@ -142,6 +151,7 @@ Tests are designed to run in CI environments:
 Follow these conventions:
 
 1. **Use Descriptive Test Names**:
+
    ```typescript
    test('should display mobile menu toggle button', async ({ page }) => {
      // Test code
@@ -149,12 +159,14 @@ Follow these conventions:
    ```
 
 2. **Use Semantic Locators**:
+
    ```typescript
    // Prefer getByRole, getByLabel, getByText
    await page.getByRole('button', { name: 'Toggle menu' });
    ```
 
 3. **Group Related Tests**:
+
    ```typescript
    test.describe('Mobile Navigation', () => {
      test.use({ viewport: { width: 375, height: 667 } });
@@ -182,16 +194,19 @@ Follow these conventions:
 ## Troubleshooting
 
 ### Hugo Server Not Starting
+
 - Check that Hugo is installed: `hugo version`
 - Verify port 8080 is not in use: `lsof -i :8080`
 - Check `playwright.config.ts` webServer configuration
 
 ### Tests Failing Locally But Passing in CI
+
 - Check viewport sizes match
 - Verify Hugo version consistency
 - Check for timing issues (add appropriate waits)
 
 ### Flaky Tests
+
 - Add explicit waits: `await page.waitForSelector()`
 - Check for animations (disable with CSS or wait)
 - Increase timeout for slow operations

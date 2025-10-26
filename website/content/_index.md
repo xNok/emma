@@ -1,5 +1,5 @@
 ---
-title: "Emma Forms"
+title: 'Emma Forms'
 ---
 
 **Emma** is a powerful system for creating, deploying, and embedding forms into Hugo websites. Build forms with an interactive CLI, deploy them to the edge, and embed them with a simple shortcode.
