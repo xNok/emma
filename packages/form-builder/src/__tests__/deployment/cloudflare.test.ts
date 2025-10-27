@@ -1,10 +1,8 @@
 import { describe, it, beforeEach, expect, vi, type Mock } from 'vitest';
-import {
-  cloudflareProvider,
-  CloudflareR2Deployment,
-} from '../../deployment/cloudflare';
+import { cloudflareProvider } from '../../deployment/cloudflare.js';
+import { CloudflareR2Deployment } from '@emma/provider-cloudflare';
 import inquirer from 'inquirer';
-import { EmmaConfig } from '../../config';
+import { EmmaConfig } from '../../config.js';
 
 vi.mock('inquirer');
 
