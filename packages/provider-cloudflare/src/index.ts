@@ -9,7 +9,12 @@ import type {
 } from '@xnok/emma-shared/types';
 import { cloudflareD1Provider } from './submission.js';
 
-export { CloudflareR2Deployment, type CloudflareDeploymentOptions, type CloudflareDeploymentResult, type EmmaConfigInterface } from './deploy.js';
+export {
+  CloudflareR2Deployment,
+  type CloudflareDeploymentOptions,
+  type CloudflareDeploymentResult,
+  type EmmaConfigInterface,
+} from './deploy.js';
 export { cloudflareD1Provider } from './submission.js';
 
 /**
@@ -28,7 +33,7 @@ export const cloudflareProviderManifest: ProviderManifest = {
       !!process.env.R2_ACCESS_KEY_ID && !!process.env.R2_SECRET_ACCESS_KEY;
     const hasCloudflareToken = !!process.env.CLOUDFLARE_API_TOKEN;
     const hasD1Database = await cloudflareD1Provider.isAvailable?.();
-    
+
     return hasR2Credentials || hasCloudflareToken || (hasD1Database ?? false);
   },
 };

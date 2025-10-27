@@ -33,7 +33,10 @@ emma init --provider cloudflare
 ### Programmatic Usage
 
 ```typescript
-import { cloudflareDeploymentProvider, cloudflareSubmissionProvider } from '@emma/provider-cloudflare';
+import {
+  cloudflareDeploymentProvider,
+  cloudflareSubmissionProvider,
+} from '@emma/provider-cloudflare';
 
 // Use in your Emma configuration
 ```
@@ -57,6 +60,7 @@ The provider requires the following environment variables:
 ## Documentation
 
 For detailed setup instructions, see:
+
 - [Cloudflare Quickstart Guide](../../docs/developer-guide/cloudflare-quickstart.md)
 - [Cloudflare Infrastructure](../../docs/infrastructure/cloudflare.md)
 

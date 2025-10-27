@@ -8,9 +8,13 @@ import { cloudflareProviderManifest } from '../index.js';
 describe('Cloudflare Provider', () => {
   it('should have correct manifest properties', () => {
     expect(cloudflareProviderManifest.name).toBe('cloudflare');
-    expect(cloudflareProviderManifest.packageName).toBe('@emma/provider-cloudflare');
+    expect(cloudflareProviderManifest.packageName).toBe(
+      '@emma/provider-cloudflare'
+    );
     expect(cloudflareProviderManifest.capabilities).toContain('deploy');
-    expect(cloudflareProviderManifest.capabilities).toContain('submission-query');
+    expect(cloudflareProviderManifest.capabilities).toContain(
+      'submission-query'
+    );
   });
 
   it('should export deployment functionality', async () => {

@@ -17,7 +17,9 @@ export type { SubmissionQueryOptions };
  * @deprecated Use SubmissionProviderDefinition from @xnok/emma-shared/types
  */
 export interface SubmissionProvider extends SubmissionProviderDefinition {
-  querySubmissions(options: SubmissionQueryOptions): Promise<SubmissionRecord[]>;
+  querySubmissions(
+    options: SubmissionQueryOptions
+  ): Promise<SubmissionRecord[]>;
 }
 
 /**

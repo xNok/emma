@@ -18,7 +18,10 @@ import {
 } from '@emma/provider-cloudflare';
 
 // Re-export types for backward compatibility
-export type { CloudflareDeploymentOptions, CloudflareDeploymentResult } from '@emma/provider-cloudflare';
+export type {
+  CloudflareDeploymentOptions,
+  CloudflareDeploymentResult,
+} from '@emma/provider-cloudflare';
 
 export const cloudflareProvider: DeploymentProviderDefinition = {
   name: 'cloudflare',

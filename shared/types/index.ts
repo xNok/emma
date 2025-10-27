@@ -263,7 +263,9 @@ export interface SubmissionProviderDefinition {
   name: string;
   description: string;
   capabilities?: ProviderCapability[];
-  querySubmissions?: (options: SubmissionQueryOptions) => Promise<SubmissionRecord[]>;
+  querySubmissions?: (
+    options: SubmissionQueryOptions
+  ) => Promise<SubmissionRecord[]>;
   isAvailable?: () => Promise<boolean>;
 }
 
