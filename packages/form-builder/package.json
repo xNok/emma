@@ -27,9 +27,9 @@
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.666.0",
-    "@emma/provider-cloudflare": "workspace:*",
     "@xnok/emma-api-worker": "workspace:^",
     "@xnok/emma-form-renderer": "workspace:*",
+    "@xnok/emma-provider-cloudflare": "workspace:*",
     "@xnok/emma-shared": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",

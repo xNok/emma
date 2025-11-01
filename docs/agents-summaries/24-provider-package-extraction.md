@@ -6,11 +6,11 @@
 
 ## Summary
 
-Successfully extracted the Cloudflare deployment and submission provider code into a standalone `@emma/provider-cloudflare` package and implemented a complete provider discovery and management system in the CLI.
+Successfully extracted the Cloudflare deployment and submission provider code into a standalone `@xnok/emma-provider-cloudflare` package and implemented a complete provider discovery and management system in the CLI.
 
 ## Changes Implemented
 
-### 1. New Package: `@emma/provider-cloudflare`
+### 1. New Package: `@xnok/emma-provider-cloudflare`
 
 Created a new monorepo package at `packages/provider-cloudflare/` with:
 
@@ -26,10 +26,10 @@ Added to `shared/types/index.ts`:
 
 ```typescript
 // Provider capabilities
-export type ProviderCapability = 
-  | 'deploy' 
-  | 'submission-query' 
-  | 'migrations' 
+export type ProviderCapability =
+  | 'deploy'
+  | 'submission-query'
+  | 'migrations'
   | 'preview';
 
 // Provider manifest
@@ -58,23 +58,27 @@ export interface SubmissionQueryOptions { ... }
 Created `packages/form-builder/src/commands/providers.ts` with three subcommands:
 
 #### `emma providers list [--available]`
+
 - Discovers installed providers from `node_modules/@emma/provider-*`
 - Shows provider status (configured or not)
 - Lists capabilities for each provider
 - Optionally shows available (not yet installed) providers
 
 #### `emma providers info <provider-name>`
+
 - Shows detailed information about a specific provider
 - Displays package name, version, capabilities
 - Indicates configuration status
 - Provides next steps if not configured
 
 #### `emma providers install <provider-name> [--npm]`
+
 - Installs a provider package using yarn or npm
 - Prompts user to configure after installation
 - Validates against known provider registry
 
 #### Helper: `ensureProviderAvailable()`
+
 - Checks if a required provider is installed and configured
 - Prompts user to install if missing
 - Used by commands that depend on specific providers
@@ -82,17 +86,20 @@ Created `packages/form-builder/src/commands/providers.ts` with three subcommands
 ### 4. Bridge Files in form-builder
 
 Updated `packages/form-builder/src/deployment/cloudflare.ts` to:
-- Import from `@emma/provider-cloudflare`
+
+- Import from `@xnok/emma-provider-cloudflare`
 - Maintain backward compatibility
 - Keep CLI registration logic
 
 Updated `packages/form-builder/src/submission-providers/cloudflare.ts` to:
-- Re-export from `@emma/provider-cloudflare`
+
+- Re-export from `@xnok/emma-provider-cloudflare`
 - Maintain backward compatibility
 
 ### 5. Documentation
 
 Updated `docs/developer-guide/cli-reference.md` with:
+
 - Complete provider management commands reference
 - Usage examples for each command
 - Provider capabilities explanation
@@ -103,6 +110,7 @@ Updated `docs/developer-guide/cli-reference.md` with:
 ### Provider Discovery
 
 The system discovers providers by:
+
 1. Scanning `node_modules/@emma/` for packages starting with `provider-`
 2. Loading each package's `package.json`
 3. Importing the main entry point
@@ -136,6 +144,7 @@ packages/provider-cloudflare/
 ## Testing
 
 All existing tests pass (96 tests):
+
 - Updated cloudflare deployment tests to import from new package
 - Added basic provider manifest tests
 - Added CLI provider command tests
@@ -159,6 +168,7 @@ All existing tests pass (96 tests):
 ## Files Changed
 
 ### New Files
+
 - `packages/provider-cloudflare/package.json`
 - `packages/provider-cloudflare/tsconfig.json`
 - `packages/provider-cloudflare/vitest.config.ts`
@@ -171,6 +181,7 @@ All existing tests pass (96 tests):
 - `packages/form-builder/src/__tests__/providers.test.ts`
 
 ### Modified Files
+
 - `shared/types/index.ts` - Added provider types
 - `packages/form-builder/package.json` - Added provider dependency
 - `packages/form-builder/src/cli.ts` - Registered provider command

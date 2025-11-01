@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect, vi, type Mock } from 'vitest';
 import { cloudflareProvider } from '../../deployment/cloudflare.js';
-import { CloudflareR2Deployment } from '@emma/provider-cloudflare';
+import { CloudflareR2Deployment } from '@xnok/emma-provider-cloudflare';
 import inquirer from 'inquirer';
 import { EmmaConfig } from '../../config.js';
 

@@ -795,7 +795,7 @@ $ emma providers info cloudflare
 
 📦 Cloudflare R2 + D1
 
-Package: @emma/provider-cloudflare
+Package: @xnok/emma-provider-cloudflare
 Version: 0.1.0
 Description: Deploy forms to Cloudflare R2 and query submissions from D1
 Capabilities: deploy, submission-query, migrations
@@ -828,9 +828,9 @@ emma providers install <provider-name> [--npm]
 ```bash
 $ emma providers install cloudflare
 
-📦 Installing @emma/provider-cloudflare...
+📦 Installing @xnok/emma-provider-cloudflare...
 
-Running: yarn add @emma/provider-cloudflare
+Running: yarn add @xnok/emma-provider-cloudflare
 
 ✅ Provider cloudflare installed successfully!
 
@@ -869,4 +869,4 @@ export const myProviderManifest: ProviderManifest = {
 export default myProviderManifest;
 ```
 
-See the [@emma/provider-cloudflare](../../packages/provider-cloudflare) package for a complete example.
+See the [@xnok/emma-provider-cloudflare](../../packages/provider-cloudflare) package for a complete example.

@@ -1,6 +1,6 @@
 /**
  * Cloudflare R2 Deployment Provider
- * Bridge to the extracted @emma/provider-cloudflare package
+ * Bridge to the extracted @xnok/emma-provider-cloudflare package
  */
 
 import type { Command } from 'commander';
@@ -15,13 +15,13 @@ import type {
 import {
   CloudflareR2Deployment,
   type CloudflareDeploymentOptions,
-} from '@emma/provider-cloudflare';
+} from '@xnok/emma-provider-cloudflare';
 
 // Re-export types for backward compatibility
 export type {
   CloudflareDeploymentOptions,
   CloudflareDeploymentResult,
-} from '@emma/provider-cloudflare';
+} from '@xnok/emma-provider-cloudflare';
 
 export const cloudflareProvider: DeploymentProviderDefinition = {
   name: 'cloudflare',

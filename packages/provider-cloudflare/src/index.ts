@@ -24,7 +24,7 @@ export const cloudflareProviderManifest: ProviderManifest = {
   name: 'cloudflare',
   displayName: 'Cloudflare R2 + D1',
   description: 'Deploy forms to Cloudflare R2 and query submissions from D1',
-  packageName: '@emma/provider-cloudflare',
+  packageName: '@xnok/emma-provider-cloudflare',
   version: '0.1.0',
   capabilities: ['deploy', 'submission-query', 'migrations'],
   async isAvailable() {

@@ -8,44 +8,108 @@ import chalk from 'chalk';
 import ora from 'ora';
 import fs from 'fs-extra';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import type { EmmaConfig } from '../config.js';
 import type { ProviderManifest } from '@xnok/emma-shared/types';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /**
  * Discover providers installed in node_modules
+ * Checks multiple locations to support:
+ * - Local project install (process.cwd()/node_modules)
+ * - Global npm/yarn install (use require.resolve to find installed location)
+ * - npx usage (providers in same location as CLI)
  */
 async function discoverInstalledProviders(): Promise<ProviderManifest[]> {
   const providers: ProviderManifest[] = [];
+  const checkedPaths = new Set<string>();
 
-  try {
-    // Look for packages matching @emma/provider-* or @*/provider-*
-    const nodeModulesPath = path.join(process.cwd(), 'node_modules');
+  // Helper to scan a node_modules directory
+  async function scanNodeModules(nodeModulesPath: string) {
+    if (checkedPaths.has(nodeModulesPath)) return;
+    checkedPaths.add(nodeModulesPath);
 
-    // Check @emma scope
-    const emmaScope = path.join(nodeModulesPath, '@emma');
-    if (await fs.pathExists(emmaScope)) {
-      const packages = await fs.readdir(emmaScope);
+    try {
+      const xnokScope = path.join(nodeModulesPath, '@xnok');
+      if (!(await fs.pathExists(xnokScope))) return;
+
+      const packages = await fs.readdir(xnokScope);
       for (const pkg of packages) {
-        if (pkg.startsWith('provider-')) {
+        if (pkg.startsWith('emma-provider-')) {
           try {
-            const providerPath = path.join(emmaScope, pkg);
+            const providerPath = path.join(xnokScope, pkg);
             const manifest = await loadProviderManifest(providerPath);
-            if (manifest) {
+            if (manifest && !providers.find((p) => p.name === manifest.name)) {
               providers.push(manifest);
             }
           } catch (error) {
-            // Skip invalid providers
-            console.debug(`Skipping invalid provider: @emma/${pkg}`);
+            console.debug(`Skipping invalid provider: @xnok/${pkg}`);
           }
         }
       }
+    } catch (error) {
+      console.debug(`Error scanning ${nodeModulesPath}:`, error);
+    }
+  }
+
+  // 1. Check local project node_modules
+  await scanNodeModules(path.join(process.cwd(), 'node_modules'));
+
+  // 2. Check CLI installation location (for global installs and npx)
+  // When running as ESM, we can use import.meta.url to find our location
+  try {
+    // Find the node_modules relative to where this file is running
+    // Typically: node_modules/@xnok/emma-form-builder/dist/commands/providers.js
+    // So we go up 4 levels to get to node_modules
+    const cliNodeModules = path.join(__dirname, '..', '..', '..', '..');
+    if (await fs.pathExists(cliNodeModules)) {
+      await scanNodeModules(cliNodeModules);
     }
   } catch (error) {
-    // No providers found or error reading directory
-    console.debug('Error discovering providers:', error);
+    console.debug('Error checking CLI location:', error);
+  }
+
+  // 3. For global installs, check parent directories from cwd
+  try {
+    let currentDir = process.cwd();
+    for (let i = 0; i < 5; i++) {
+      // Check up to 5 levels up
+      currentDir = path.dirname(currentDir);
+      const nodeModules = path.join(currentDir, 'node_modules');
+      if (await fs.pathExists(nodeModules)) {
+        await scanNodeModules(nodeModules);
+      }
+    }
+  } catch (error) {
+    console.debug('Error checking parent directories:', error);
   }
 
   return providers;
+}
+
+/**
+ * Package.json structure (minimal)
+ */
+interface PackageJson {
+  name: string;
+  version?: string;
+  description?: string;
+  main?: string;
+}
+
+/**
+ * Type guard to check if an object looks like a ProviderManifest
+ */
+function isProviderManifest(obj: unknown): obj is ProviderManifest {
+  if (!obj || typeof obj !== 'object') return false;
+  const manifest = obj as Record<string, unknown>;
+  return (
+    typeof manifest.name === 'string' &&
+    typeof manifest.packageName === 'string' &&
+    Array.isArray(manifest.capabilities)
+  );
 }
 
 /**
@@ -61,36 +125,27 @@ async function loadProviderManifest(
       return null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    const packageJson = await fs.readJson(packageJsonPath);
+    const packageJson = (await fs.readJson(packageJsonPath)) as PackageJson;
 
     // Try to load the provider's main export
     // Use the explicit path from package.json main/exports field
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const mainFile = (packageJson.main as string) || 'dist/index.js';
+    const mainFile = packageJson.main || 'dist/index.js';
     const providerMainPath = path.join(providerPath, mainFile);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    const providerModule = await import(providerMainPath);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const providerModule = (await import(providerMainPath)) as {
+      default?: unknown;
+      manifest?: unknown;
+    };
     const manifest = providerModule.default || providerModule.manifest;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (manifest && typeof manifest === 'object') {
+    if (isProviderManifest(manifest)) {
       return {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-        name: manifest.name || packageJson.name,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+        name: manifest.name,
         displayName: manifest.displayName || packageJson.name,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         description: manifest.description || packageJson.description || '',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-        packageName: manifest.packageName || packageJson.name,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+        packageName: manifest.packageName,
         version: manifest.version || packageJson.version,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-        capabilities: manifest.capabilities || [],
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+        capabilities: manifest.capabilities,
         isAvailable: manifest.isAvailable,
       };
     }
@@ -112,7 +167,7 @@ function getKnownProviders(): Array<{
   return [
     {
       name: 'cloudflare',
-      packageName: '@emma/provider-cloudflare',
+      packageName: '@xnok/emma-provider-cloudflare',
       description: 'Deploy to Cloudflare R2 and query submissions from D1',
     },
     // Future providers could be added here

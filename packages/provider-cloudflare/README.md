@@ -1,4 +1,4 @@
-# @emma/provider-cloudflare
+# @xnok/emma-provider-cloudflare
 
 Cloudflare deployment and submission provider for Emma Forms.
 
@@ -13,7 +13,7 @@ Cloudflare deployment and submission provider for Emma Forms.
 This provider is typically installed automatically by the Emma CLI when needed.
 
 ```bash
-npm install @emma/provider-cloudflare
+npm install @xnok/emma-provider-cloudflare
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ emma init --provider cloudflare
 import {
   cloudflareDeploymentProvider,
   cloudflareSubmissionProvider,
-} from '@emma/provider-cloudflare';
+} from '@xnok/emma-provider-cloudflare';
 
 // Use in your Emma configuration
 ```
