@@ -24,8 +24,9 @@ const program = new Command();
 
 async function main() {
   try {
-    // Load configuration
-    const config = new EmmaConfig();
+    // Load configuration - allow override via EMMA_HOME environment variable
+    const customConfigDir = process.env.EMMA_HOME;
+    const config = new EmmaConfig(customConfigDir);
     await config.load();
 
     program

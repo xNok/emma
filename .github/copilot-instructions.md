@@ -49,22 +49,13 @@ This process ensures that anyone joining the project can get up to speed quickly
 - Propose improvements
 - **Update docs first** before changing architecture
 
-### Quick Workspace Navigation
+### Always validate code when task is done
 
 ```bash
 # Essential commands
-yarn install                    # Install all workspace dependencies
-yarn typecheck                  # Check types across all packages
-yarn lint                       # ESLint + Prettier check
-yarn format                     # Auto-fix formatting
-
-# Package development
-cd packages/form-renderer       # Client-side bundle (size matters!)
-cd packages/api-worker          # Cloudflare Worker (use wrangler)
-cd packages/form-builder        # CLI tool (not yet implemented)
-cd shared                       # Shared types (dependency for all)
-
-# Documentation
-ls docs/agents-summaries/       # Recent agent work history
-cat docs/02-technical-architecture.md  # Current system design
+yarn build
+yarn lint
+yarn test
+yarn format:check
+yarn typecheck
 ```

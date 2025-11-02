@@ -17,7 +17,9 @@ export default defineConfig({
   workers: 1,
 
   /* Reporter to use */
-  reporter: [['html'], ['list']],
+  reporter: process.env.CI
+    ? [['github'], ['list']] // CI-friendly reporters
+    : [['html', { open: 'never' }], ['list']], // Local development with HTML report but no auto-serve
 
   /* Timeout for each test */
   timeout: 60000,
