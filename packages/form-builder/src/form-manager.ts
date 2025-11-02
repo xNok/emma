@@ -66,20 +66,17 @@ export class FormManager {
    */
   async needsRebuild(formId: string): Promise<boolean> {
     const buildPath = this.config.getBuildPath(formId);
-    
+
     // Get the schema to check current snapshot timestamp
     const schema = await this.getForm(formId);
     if (!schema) {
-  
       return true; // No schema, needs rebuild
     }
-    
+
     // Build path should use timestamp-based naming like FormBuilder
     const timestamp = schema.currentSnapshot;
     const bundleName = timestamp ? `${formId}-${timestamp}.js` : `${formId}.js`;
     const bundlePath = path.join(buildPath, bundleName);
-    
-
 
     // Bundle doesn't exist
     // Bundle doesn't exist

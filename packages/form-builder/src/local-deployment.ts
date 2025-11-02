@@ -49,7 +49,6 @@ export class LocalDeployment {
     const bundleName = timestamp ? `${formId}-${timestamp}.js` : `${formId}.js`;
     const bundlePath = path.join(buildPath, bundleName);
 
-
     if (!(await fs.pathExists(bundlePath))) {
       throw new Error(
         `Form "${formId}" is not built. Run "emma build ${formId}" first or use FormManager.ensureBuilt()`
@@ -121,8 +120,6 @@ export class LocalDeployment {
       const assetPath = fullPath.replace(`/forms/${formId}/`, '');
       const formDir = path.join(buildsDir, formId);
       const fullAssetPath = path.join(formDir, assetPath);
-      
-      console.log(`DEBUG Asset: formId=${formId}, assetPath=${assetPath}, fullAssetPath=${fullAssetPath}`);
 
       if (await fs.pathExists(fullAssetPath)) {
         // Set correct MIME type for JS files
@@ -142,8 +139,6 @@ export class LocalDeployment {
     this.app.get('/forms/:formId', async (req, res) => {
       const formId = req.params.formId;
       const indexPath = path.join(buildsDir, formId, 'index.html');
-      
-      console.log(`DEBUG Form page: formId=${formId}, indexPath=${indexPath}`);
 
       if (await fs.pathExists(indexPath)) {
         res.sendFile(indexPath);

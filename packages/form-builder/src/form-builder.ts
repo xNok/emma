@@ -54,7 +54,10 @@ export class FormBuilder {
     await fs.writeFile(testHtmlPath, testHtmlContent, 'utf8');
 
     // Create a landing page HTML file
-    const landingPageHtmlContent = this.generateLandingPageHtml(schema, bundleName);
+    const landingPageHtmlContent = this.generateLandingPageHtml(
+      schema,
+      bundleName
+    );
     const landingPageHtmlPath = path.join(outputDir, 'index.html');
     await fs.writeFile(landingPageHtmlPath, landingPageHtmlContent, 'utf8');
 
@@ -94,7 +97,10 @@ export class FormBuilder {
   /**
    * Generate landing page HTML file
    */
-  private generateLandingPageHtml(schema: FormSchema, bundleName: string): string {
+  private generateLandingPageHtml(
+    schema: FormSchema,
+    bundleName: string
+  ): string {
     const template = this.readTemplate('landing-page.template.html');
     return template
       .replace('__FORM_NAME__', schema.name)
