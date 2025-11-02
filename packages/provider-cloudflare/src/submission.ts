@@ -105,21 +105,27 @@ export const cloudflareD1Provider: SubmissionProviderDefinition = {
     const databaseName =
       process.env.CLOUDFLARE_DATABASE_NAME || 'emma-forms-db';
 
+    const formId: string = options.formId;
+    const snapshot: number | undefined = options.snapshot;
+    const status: string | undefined = options.status;
+    const limit: number = options.limit || 50;
+    const offset: number | undefined = options.offset;
+
     // Build query
-    let query = `SELECT id, form_id, data, meta, spam_score, status, created_at, form_snapshot, form_bundle FROM submissions WHERE form_id = '${options.formId}'`;
+    let query = `SELECT id, form_id, data, meta, spam_score, status, created_at, form_snapshot, form_bundle FROM submissions WHERE form_id = '${formId}'`;
 
-    if (options.snapshot !== undefined) {
-      query += ` AND form_snapshot = ${options.snapshot}`;
+    if (snapshot !== undefined) {
+      query += ` AND form_snapshot = ${snapshot}`;
     }
 
-    if (options.status) {
-      query += ` AND status = '${options.status}'`;
+    if (status) {
+      query += ` AND status = '${status}'`;
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ${options.limit || 50}`;
+    query += ` ORDER BY created_at DESC LIMIT ${limit}`;
 
-    if (options.offset) {
-      query += ` OFFSET ${options.offset}`;
+    if (offset) {
+      query += ` OFFSET ${offset}`;
     }
 
     return await executeD1Query(databaseName, query);

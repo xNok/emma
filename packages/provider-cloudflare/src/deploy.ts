@@ -12,7 +12,11 @@ import {
   GetObjectCommand,
   type S3ServiceException,
 } from '@aws-sdk/client-s3';
-import type { FormSchema, FormRegistry } from '@xnok/emma-shared/types';
+import type {
+  FormSchema,
+  FormRegistry,
+  FormRegistryEntry,
+} from '@xnok/emma-shared/types';
 
 export interface CloudflareDeploymentOptions {
   bucket: string; // R2 bucket name
@@ -61,7 +65,7 @@ export class CloudflareR2Deployment {
     if (!options.bucket) throw new Error('Missing R2 bucket name');
     if (!options.publicUrl) throw new Error('Missing publicUrl');
 
-    const schema: FormSchema | null = await this.config.loadFormSchema(formId);
+    const schema = await this.config.loadFormSchema(formId);
     if (!schema) {
       throw new Error(`Schema not found for form "${formId}"`);
     }
@@ -74,7 +78,8 @@ export class CloudflareR2Deployment {
         throw new Error('Invalid snapshot timestamp');
       }
       // Verify snapshot exists
-      const snapshotExists = schema.snapshots?.some(
+      const snapshots = schema.snapshots || [];
+      const snapshotExists = snapshots.some(
         (s) => s.timestamp === snapshotTimestamp
       );
       if (!snapshotExists) {
@@ -103,7 +108,8 @@ export class CloudflareR2Deployment {
     const bundleKey = bundleName;
     await this.uploadToR2(bundlePath, options.bucket, bundleKey, options);
 
-    const themeCss = path.join(buildDir, 'themes', `${schema.theme}.css`);
+    const themeFile = schema.theme;
+    const themeCss = path.join(buildDir, 'themes', `${themeFile}.css`);
     const indexPath = path.join(buildDir, 'index.html');
     const rendererPath = path.join(buildDir, 'emma-forms.esm.js');
 
@@ -131,10 +137,9 @@ export class CloudflareR2Deployment {
     await this.updateRegistry(formId, schema, snapshotTimestamp, options);
 
     // Mark snapshot as deployed in local schema
-    if (schema.snapshots) {
-      const snapshot = schema.snapshots.find(
-        (s) => s.timestamp === snapshotTimestamp
-      );
+    const snapshots = schema.snapshots || [];
+    if (snapshots.length > 0) {
+      const snapshot = snapshots.find((s) => s.timestamp === snapshotTimestamp);
       if (snapshot) {
         snapshot.deployed = true;
         await this.config.saveFormSchema(formId, schema);
@@ -183,13 +188,20 @@ export class CloudflareR2Deployment {
     }
 
     // Find or create entry for this form
-    let formEntry = registry.forms.find((f) => f.formId === formId);
-    const allSnapshots =
-      schema.snapshots?.map((s) => s.timestamp).sort((a, b) => a - b) || [];
+    const forms: FormRegistryEntry[] = registry.forms;
+    let formEntry: FormRegistryEntry | undefined = forms.find(
+      (f) => f.formId === formId
+    );
+
+    const snapshots = schema.snapshots || [];
+    const allSnapshots: number[] = snapshots
+      .map((s) => s.timestamp)
+      .sort((a: number, b: number) => a - b);
 
     if (formEntry) {
       // Update existing entry
-      formEntry.name = schema.name;
+      const name: string = schema.name;
+      formEntry.name = name;
       formEntry.currentSnapshot = deployedSnapshot;
       formEntry.allSnapshots = allSnapshots;
       formEntry.publicUrl = this.joinUrl(
@@ -198,9 +210,10 @@ export class CloudflareR2Deployment {
       );
     } else {
       // Create new entry
+      const name: string = schema.name;
       formEntry = {
         formId,
-        name: schema.name,
+        name,
         currentSnapshot: deployedSnapshot,
         allSnapshots,
         publicUrl: this.joinUrl(
@@ -208,7 +221,7 @@ export class CloudflareR2Deployment {
           `${formId}-${deployedSnapshot}.js`
         ),
       };
-      registry.forms.push(formEntry);
+      forms.push(formEntry);
     }
 
     // Update last modified timestamp

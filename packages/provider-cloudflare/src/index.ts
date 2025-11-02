@@ -32,9 +32,9 @@ export const cloudflareProviderManifest: ProviderManifest = {
     const hasR2Credentials =
       !!process.env.R2_ACCESS_KEY_ID && !!process.env.R2_SECRET_ACCESS_KEY;
     const hasCloudflareToken = !!process.env.CLOUDFLARE_API_TOKEN;
-    const hasD1Database = await cloudflareD1Provider.isAvailable?.();
+    const hasD1Database = (await cloudflareD1Provider.isAvailable?.()) ?? false;
 
-    return hasR2Credentials || hasCloudflareToken || (hasD1Database ?? false);
+    return hasR2Credentials || hasCloudflareToken || hasD1Database;
   },
 };
 

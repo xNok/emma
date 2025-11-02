@@ -13,6 +13,8 @@ class MockEmmaConfig {
   }
 
   async loadFormSchema(formId: string) {
+    // Simulate async operation
+    await Promise.resolve();
     return {
       formId,
       name: 'Test Form',
