@@ -200,8 +200,7 @@ export class CloudflareR2Deployment {
 
     if (formEntry) {
       // Update existing entry
-      const name: string = schema.name;
-      formEntry.name = name;
+      formEntry.name = schema.name;
       formEntry.currentSnapshot = deployedSnapshot;
       formEntry.allSnapshots = allSnapshots;
       formEntry.publicUrl = this.joinUrl(
@@ -210,10 +209,9 @@ export class CloudflareR2Deployment {
       );
     } else {
       // Create new entry
-      const name: string = schema.name;
       formEntry = {
         formId,
-        name,
+        name: schema.name,
         currentSnapshot: deployedSnapshot,
         allSnapshots,
         publicUrl: this.joinUrl(

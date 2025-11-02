@@ -11,6 +11,23 @@ import type {
 } from '@xnok/emma-shared/types';
 
 /**
+ * Escape SQL string values to prevent injection
+ */
+function escapeSqlString(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+/**
+ * Validate and sanitize numeric values
+ */
+function sanitizeNumeric(value: number): number {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error('Invalid numeric value');
+  }
+  return Math.floor(value);
+}
+
+/**
  * Execute wrangler d1 query and return results
  */
 async function executeD1Query(
@@ -105,27 +122,31 @@ export const cloudflareD1Provider: SubmissionProviderDefinition = {
     const databaseName =
       process.env.CLOUDFLARE_DATABASE_NAME || 'emma-forms-db';
 
-    const formId: string = options.formId;
-    const snapshot: number | undefined = options.snapshot;
-    const status: string | undefined = options.status;
-    const limit: number = options.limit || 50;
-    const offset: number | undefined = options.offset;
+    // Destructure and sanitize inputs
+    const { formId, snapshot, status, limit = 50, offset } = options;
 
-    // Build query
-    let query = `SELECT id, form_id, data, meta, spam_score, status, created_at, form_snapshot, form_bundle FROM submissions WHERE form_id = '${formId}'`;
+    // Escape string values to prevent SQL injection
+    const escapedFormId = escapeSqlString(formId);
+
+    // Build query with properly sanitized values
+    let query = `SELECT id, form_id, data, meta, spam_score, status, created_at, form_snapshot, form_bundle FROM submissions WHERE form_id = '${escapedFormId}'`;
 
     if (snapshot !== undefined) {
-      query += ` AND form_snapshot = ${snapshot}`;
+      const sanitizedSnapshot = sanitizeNumeric(snapshot);
+      query += ` AND form_snapshot = ${sanitizedSnapshot}`;
     }
 
     if (status) {
-      query += ` AND status = '${status}'`;
+      const escapedStatus = escapeSqlString(status);
+      query += ` AND status = '${escapedStatus}'`;
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ${limit}`;
+    const sanitizedLimit = sanitizeNumeric(limit);
+    query += ` ORDER BY created_at DESC LIMIT ${sanitizedLimit}`;
 
-    if (offset) {
-      query += ` OFFSET ${offset}`;
+    if (offset !== undefined) {
+      const sanitizedOffset = sanitizeNumeric(offset);
+      query += ` OFFSET ${sanitizedOffset}`;
     }
 
     return await executeD1Query(databaseName, query);

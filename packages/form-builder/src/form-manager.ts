@@ -78,7 +78,6 @@ export class FormManager {
     const bundleName = timestamp ? `${formId}-${timestamp}.js` : `${formId}.js`;
     const bundlePath = path.join(buildPath, bundleName);
 
-    // Bundle doesn't exist
     if (!(await fs.pathExists(bundlePath))) {
       return true;
     }

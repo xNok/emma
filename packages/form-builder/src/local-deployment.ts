@@ -204,15 +204,18 @@ export class LocalDeployment {
 
       let formsList = '';
       if (formIds.length > 0) {
-        const formLinks: string[] = [];
-        for (const id of formIds) {
-          const schema = await this.config.loadFormSchema(id);
+        // Load all schemas concurrently for better performance
+        const schemas = await Promise.all(
+          formIds.map((id) => this.config.loadFormSchema(id))
+        );
+
+        const formLinks: string[] = formIds.map((id, index) => {
+          const schema = schemas[index];
           const timestamp = schema?.currentSnapshot;
           const bundleName = timestamp ? `${id}-${timestamp}.js` : `${id}.js`;
-          formLinks.push(
-            `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${bundleName}">Bundle</a></li>`
-          );
-        }
+          return `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${bundleName}">Bundle</a></li>`;
+        });
+
         formsList = '<ul>' + formLinks.join('') + '</ul>';
       } else {
         formsList =
