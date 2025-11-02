@@ -118,7 +118,7 @@ export class LocalDeployment {
       // Extract the asset path from the full URL
       const fullPath = req.path;
       const assetPath = fullPath.replace(`/forms/${formId}/`, '');
-      
+
       // If no asset path (just trailing slash), serve index.html
       if (!assetPath || assetPath === '') {
         const indexPath = path.join(buildsDir, formId, 'index.html');
@@ -133,7 +133,7 @@ export class LocalDeployment {
         }
         return;
       }
-      
+
       const formDir = path.join(buildsDir, formId);
       const fullAssetPath = path.join(formDir, assetPath);
 

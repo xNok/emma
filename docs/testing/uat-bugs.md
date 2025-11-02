@@ -84,37 +84,78 @@ Error: Form "contact-form-616" is not built. Run "emma build contact-form-616" f
 
 ---
 
-## � Bug #2: Local Server Routing and File Serving Issues
+## ✅ Bug #2: Local Server Routing and File Serving Issues
 
 **Priority:** High  
 **Component:** Local Development Server  
-**Status:** New
+**Status:** FIXED
 
 ### Description
 
 After fixing the deploy/preview validation, the local server has routing and file serving issues:
 
-1. **Redirect Issue:** Clicking `http://localhost:3333/forms/contact-form-616` redirects to `http://localhost:3333`
-2. **404 Errors:** Form assets fail to load with 404 errors (likely timestamped files not being served correctly)
+1. **404 Errors:** Form assets (JavaScript bundles and CSS) fail to load with 404 errors
+2. **URL Resolution:** Browser incorrectly resolves relative URLs when form page lacks trailing slash
 
 ### Steps to Reproduce
 
 1. Create and build a form (works fine)
 2. Deploy the form (works fine)
 3. Access the form URL `http://localhost:3333/forms/contact-form-616`
-4. **Expected:** Form displays properly
-5. **Actual:** Redirect to root + 404 errors for form assets
+4. **Expected:** Form displays properly with all assets loaded
+5. **Actual:** 404 errors for form assets (themes/default.css, form-bundle.js, etc.)
 
-### Technical Analysis Needed
+### Root Cause Found
 
-- Local server routing logic for form URLs
-- File serving for timestamped bundles (`contact-form-616-1762103200.js`)
-- Static asset routing
+**URL resolution issue with relative paths in HTML:**
+
+When a form is served at `/forms/test-form-123` (without trailing slash), the browser treats `test-form-123` as a filename, not a directory.
+
+The HTML template contained:
+
+```html
+<link rel="stylesheet" href="themes/default.css" />
+<script type="module" src="test-form-123-1730000000.js"></script>
+```
+
+Browser resolution from base URL `/forms/test-form-123`:
+
+- `themes/default.css` → `/forms/themes/default.css` ❌ (404)
+- `test-form-123-1730000000.js` → `/forms/test-form-123-1730000000.js` ❌ (404)
+
+Correct paths should be:
+
+- `/forms/test-form-123/themes/default.css` ✓
+- `/forms/test-form-123/test-form-123-1730000000.js` ✓
+
+### Fix Applied
+
+**Changes to `LocalDeployment` server routing:**
+
+1. **Added redirect:** `/forms/:formId` → `/forms/:formId/` (with trailing slash)
+2. **Updated asset route:** Modified `/forms/:formId/*` to serve `index.html` when no asset path specified
+3. **Updated formUrl:** Deploy result now returns URL with trailing slash
+
+**Code locations:**
+
+- `LocalDeployment.startServer()` - Added redirect and updated asset serving logic
+- `LocalDeployment.deploy()` - Changed `formUrl` to include trailing slash
+- Test files updated to expect trailing slash in URLs
+
+**Verification:**
+
+- ✅ All 97 unit tests passing
+- ✅ Manual testing with wget confirms all assets load correctly
+- ✅ JavaScript bundle (`form-id-timestamp.js`) loads successfully
+- ✅ ESM module dependency (`emma-forms.esm.js`) loads successfully
+- ✅ Theme CSS files load successfully
+- ✅ Form URL redirects properly to trailing slash version
 
 ### Impact
 
-- Deploy/preview commands succeed but forms can't actually be viewed
-- Breaks the development workflow
+- Local development workflow now fully functional
+- Forms can be viewed and tested in browser
+- Asset serving works correctly for all file types
 
 ---
 
