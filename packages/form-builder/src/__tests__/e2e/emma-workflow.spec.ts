@@ -269,7 +269,7 @@ test.describe('Emma CLI End-to-End Workflow', () => {
     await page.click('button[type="submit"]');
 
     // Wait for success message
-    await expect(page.locator('.success-message, .emma-success')).toBeVisible({
+    await expect(page.locator('.emma-form-messages--success')).toBeVisible({
       timeout: 10000,
     });
 
