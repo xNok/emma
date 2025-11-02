@@ -79,7 +79,6 @@ export class FormManager {
     const bundlePath = path.join(buildPath, bundleName);
 
     // Bundle doesn't exist
-    // Bundle doesn't exist
     if (!(await fs.pathExists(bundlePath))) {
       return true;
     }
