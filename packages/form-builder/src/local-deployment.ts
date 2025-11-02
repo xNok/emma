@@ -120,7 +120,7 @@ export class LocalDeployment {
       const assetPath = fullPath.replace(`/forms/${formId}/`, '');
 
       // If no asset path (just trailing slash), serve index.html
-      if (!assetPath || assetPath === '') {
+      if (!assetPath) {
         const indexPath = path.join(buildsDir, formId, 'index.html');
         if (await fs.pathExists(indexPath)) {
           res.sendFile(indexPath);
