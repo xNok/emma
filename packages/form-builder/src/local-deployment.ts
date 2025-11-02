@@ -45,7 +45,9 @@ export class LocalDeployment {
     // Deployment assumes form is already built
     // Use FormManager.ensureBuilt() before calling this if needed
     const buildPath = this.config.getBuildPath(formId);
-    const bundlePath = path.join(buildPath, `${schema.formId}.js`);
+    const timestamp = schema.currentSnapshot;
+    const bundleName = timestamp ? `${formId}-${timestamp}.js` : `${formId}.js`;
+    const bundlePath = path.join(buildPath, bundleName);
 
     if (!(await fs.pathExists(bundlePath))) {
       throw new Error(
@@ -202,15 +204,19 @@ export class LocalDeployment {
 
       let formsList = '';
       if (formIds.length > 0) {
-        formsList =
-          '<ul>' +
-          formIds
-            .map(
-              (id) =>
-                `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${id}.js">Bundle</a></li>`
-            )
-            .join('') +
-          '</ul>';
+        // Load all schemas concurrently for better performance
+        const schemas = await Promise.all(
+          formIds.map((id) => this.config.loadFormSchema(id))
+        );
+
+        const formLinks: string[] = formIds.map((id, index) => {
+          const schema = schemas[index];
+          const timestamp = schema?.currentSnapshot;
+          const bundleName = timestamp ? `${id}-${timestamp}.js` : `${id}.js`;
+          return `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${bundleName}">Bundle</a></li>`;
+        });
+
+        formsList = '<ul>' + formLinks.join('') + '</ul>';
       } else {
         formsList =
           '<p><em>No forms available. Create one with <code>emma create my-form</code></em></p>';
