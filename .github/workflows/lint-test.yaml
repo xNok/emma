@@ -34,6 +34,12 @@ jobs:
       - name: Run tests
         run: yarn test
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: yarn test:e2e:ci
+
       - name: Check formatting
         run: yarn format:check
 
