@@ -12,7 +12,7 @@ class MockEmmaConfig {
     await fs.ensureDir(path.join(this.basePath, 'builds'));
   }
 
-  loadFormSchema(formId: string) {
+  async loadFormSchema(formId: string) {
     return {
       formId,
       name: 'Test Form',
@@ -26,7 +26,7 @@ class MockEmmaConfig {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  saveFormSchema(_formId: string, _schema: unknown) {
+  async saveFormSchema(_formId: string, _schema: unknown) {
     // No-op for tests
   }
 
