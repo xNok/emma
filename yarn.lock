@@ -2202,7 +2202,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.40.0":
+"@playwright/test@npm:^1.40.0, @playwright/test@npm:^1.56.1":
   version: 1.56.1
   resolution: "@playwright/test@npm:1.56.1"
   dependencies:
@@ -3759,6 +3759,7 @@ __metadata:
   resolution: "@xnok/emma-form-builder@workspace:packages/form-builder"
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.666.0"
+    "@playwright/test": "npm:^1.56.1"
     "@types/express": "npm:^4.17.21"
     "@types/fs-extra": "npm:^11.0.4"
     "@types/inquirer": "npm:^9.0.7"

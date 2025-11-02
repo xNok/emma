@@ -45,7 +45,10 @@ export class LocalDeployment {
     // Deployment assumes form is already built
     // Use FormManager.ensureBuilt() before calling this if needed
     const buildPath = this.config.getBuildPath(formId);
-    const bundlePath = path.join(buildPath, `${schema.formId}.js`);
+    const timestamp = schema.currentSnapshot;
+    const bundleName = timestamp ? `${formId}-${timestamp}.js` : `${formId}.js`;
+    const bundlePath = path.join(buildPath, bundleName);
+
 
     if (!(await fs.pathExists(bundlePath))) {
       throw new Error(
@@ -118,6 +121,8 @@ export class LocalDeployment {
       const assetPath = fullPath.replace(`/forms/${formId}/`, '');
       const formDir = path.join(buildsDir, formId);
       const fullAssetPath = path.join(formDir, assetPath);
+      
+      console.log(`DEBUG Asset: formId=${formId}, assetPath=${assetPath}, fullAssetPath=${fullAssetPath}`);
 
       if (await fs.pathExists(fullAssetPath)) {
         // Set correct MIME type for JS files
@@ -137,6 +142,8 @@ export class LocalDeployment {
     this.app.get('/forms/:formId', async (req, res) => {
       const formId = req.params.formId;
       const indexPath = path.join(buildsDir, formId, 'index.html');
+      
+      console.log(`DEBUG Form page: formId=${formId}, indexPath=${indexPath}`);
 
       if (await fs.pathExists(indexPath)) {
         res.sendFile(indexPath);
@@ -202,15 +209,16 @@ export class LocalDeployment {
 
       let formsList = '';
       if (formIds.length > 0) {
-        formsList =
-          '<ul>' +
-          formIds
-            .map(
-              (id) =>
-                `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${id}.js">Bundle</a></li>`
-            )
-            .join('') +
-          '</ul>';
+        const formLinks: string[] = [];
+        for (const id of formIds) {
+          const schema = await this.config.loadFormSchema(id);
+          const timestamp = schema?.currentSnapshot;
+          const bundleName = timestamp ? `${id}-${timestamp}.js` : `${id}.js`;
+          formLinks.push(
+            `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${bundleName}">Bundle</a></li>`
+          );
+        }
+        formsList = '<ul>' + formLinks.join('') + '</ul>';
       } else {
         formsList =
           '<p><em>No forms available. Create one with <code>emma create my-form</code></em></p>';

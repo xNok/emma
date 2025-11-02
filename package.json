@@ -9,6 +9,7 @@
     "website"
   ],
   "scripts": {
+    "emma": "node packages/form-builder/dist/cli.js",
     "dev": "yarn workspaces foreach -pt run dev",
     "build": "yarn workspaces foreach -Apt run build",
     "test": "yarn workspaces foreach -Aipt --exclude emma-website run test",
