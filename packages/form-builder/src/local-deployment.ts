@@ -59,7 +59,7 @@ export class LocalDeployment {
     await this.ensureServer(options);
 
     const serverUrl = `http://${options.host}:${options.port}`;
-    const formUrl = `${serverUrl}/forms/${formId}`;
+    const formUrl = `${serverUrl}/forms/${formId}/`;
     const apiUrl = `${serverUrl}/api/submit/${formId}`;
 
     return {
@@ -118,6 +118,22 @@ export class LocalDeployment {
       // Extract the asset path from the full URL
       const fullPath = req.path;
       const assetPath = fullPath.replace(`/forms/${formId}/`, '');
+      
+      // If no asset path (just trailing slash), serve index.html
+      if (!assetPath || assetPath === '') {
+        const indexPath = path.join(buildsDir, formId, 'index.html');
+        if (await fs.pathExists(indexPath)) {
+          res.sendFile(indexPath);
+        } else {
+          res.status(404).send(`
+            <h1>Form Not Found</h1>
+            <p>Form "${formId}" has not been built.</p>
+            <p>Run: <code>emma build ${formId}</code></p>
+          `);
+        }
+        return;
+      }
+      
       const formDir = path.join(buildsDir, formId);
       const fullAssetPath = path.join(formDir, assetPath);
 
@@ -134,21 +150,10 @@ export class LocalDeployment {
       }
     });
 
-    // Form preview pages (must come after the asset route)
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.app.get('/forms/:formId', async (req, res) => {
+    // Form preview pages - redirect to trailing slash for proper relative URL resolution
+    this.app.get('/forms/:formId', (req, res) => {
       const formId = req.params.formId;
-      const indexPath = path.join(buildsDir, formId, 'index.html');
-
-      if (await fs.pathExists(indexPath)) {
-        res.sendFile(indexPath);
-      } else {
-        res.status(404).send(`
-          <h1>Form Not Found</h1>
-          <p>Form "${formId}" has not been built.</p>
-          <p>Run: <code>emma build ${formId}</code></p>
-        `);
-      }
+      res.redirect(`/forms/${formId}/`);
     });
 
     // API submission endpoint
