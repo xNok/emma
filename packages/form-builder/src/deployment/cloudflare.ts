@@ -152,7 +152,9 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
       const envCheck = ApiWorkerDeployment.validateEnvironment();
 
       if (!envCheck.valid) {
-        console.log(chalk.yellow('⚠️  Missing required environment variables:'));
+        console.log(
+          chalk.yellow('⚠️  Missing required environment variables:')
+        );
         envCheck.missing.forEach((v) => console.log(chalk.red(`   - ${v}`)));
         console.log('');
 
@@ -171,14 +173,16 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
           console.log('DEBUG: about to throw error');
           return {
             success: false,
-            message: 'Setup instructions displayed. Please set environment variables and run "emma init" again.',
+            message:
+              'Setup instructions displayed. Please set environment variables and run "emma init" again.',
           };
         }
 
         console.log('DEBUG: setupNow is false, throwing error');
         return {
           success: false,
-          message: 'Cannot proceed without required environment variables. Please set them and run "emma init" again.',
+          message:
+            'Cannot proceed without required environment variables. Please set them and run "emma init" again.',
         };
       }
 
@@ -187,7 +191,9 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
           chalk.yellow('⚠️  Recommended environment variables not set:')
         );
         envCheck.warnings.forEach((v) => console.log(chalk.dim(`   - ${v}`)));
-        console.log(chalk.dim('   (These are needed for deploying forms to R2)'));
+        console.log(
+          chalk.dim('   (These are needed for deploying forms to R2)')
+        );
         console.log('');
       }
 
@@ -211,7 +217,8 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
         {
           type: 'input',
           name: 'publicUrl',
-          message: 'Public base URL for forms (e.g., https://forms.example.com):',
+          message:
+            'Public base URL for forms (e.g., https://forms.example.com):',
           validate: (input: string) =>
             input.trim().length > 0 || 'Public URL is required',
         },
@@ -304,7 +311,8 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
           );
           return {
             success: true,
-            message: 'Configuration saved but API worker deployment failed. You can deploy manually later.',
+            message:
+              'Configuration saved but API worker deployment failed. You can deploy manually later.',
           };
         }
       } else {
@@ -321,7 +329,8 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
         );
         return {
           success: true,
-          message: 'Configuration saved but API worker not deployed. Deploy manually when ready.',
+          message:
+            'Configuration saved but API worker not deployed. Deploy manually when ready.',
         };
       }
     } catch (error) {
@@ -356,7 +365,9 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
 
     // Check environment variables for R2 access
     if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
-      issues.push('R2 credentials not set (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)');
+      issues.push(
+        'R2 credentials not set (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)'
+      );
     }
 
     // Check if API worker is deployed
