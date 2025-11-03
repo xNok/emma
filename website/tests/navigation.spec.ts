@@ -33,6 +33,16 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL(/\/docs\//);
   });
 
+  test('should navigate to the blog', async ({ page }) => {
+    await page.goto('/');
+
+    // Click on the Blog link in the header
+    await page.getByRole('link', { name: 'Blog' }).first().click();
+
+    // Should navigate to the blog page
+    await expect(page).toHaveURL(/\/blog\//);
+  });
+
   test('should navigate to installation guide', async ({ page }) => {
     await page.goto('/');
 
