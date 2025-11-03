@@ -44,10 +44,8 @@
     "eslint": "^8.50.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.6"
-  },
-  "peerDependencies": {
-    "@xnok/emma-form-builder": "workspace:*"
+    "vitest": "^0.34.6",
+    "wrangler": "^4.43.0"
   },
   "engines": {
     "node": ">=18.0.0"

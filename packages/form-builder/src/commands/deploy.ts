@@ -22,24 +22,27 @@ export function deployCommand(config: EmmaConfig): Command {
     .argument('[form-id]', 'Form ID to deploy')
     .action(async (formId?: string) => {
       if (!formId) {
-        const providers = getDeploymentProviders()
-          .map((p) => p.name)
-          .join(' | ');
+        const providers = await getDeploymentProviders();
+        const providerNames = providers.map((p) => p.name).join(' | ');
         console.log(
           chalk.yellow(
-            `Usage: emma deploy <provider> <form-id> where <provider> is one of: ${providers}`
+            `Usage: emma deploy <provider> <form-id> where <provider> is one of: ${providerNames}`
           )
         );
         return;
       }
-      const def = getDefaultProvider();
+      const def = await getDefaultProvider();
       await def.execute(config, formId, {});
     });
 
   // Register all providers as subcommands
-  for (const provider of getDeploymentProviders()) {
-    provider.register(cmd, config);
-  }
+  // This needs to be done asynchronously, so we'll do it in the hook
+  cmd.hook('preAction', async () => {
+    const providers = await getDeploymentProviders();
+    for (const provider of providers) {
+      provider.register(cmd, config);
+    }
+  });
 
   return cmd;
 }

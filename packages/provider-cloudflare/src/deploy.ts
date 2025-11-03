@@ -49,9 +49,20 @@ export interface CloudflareDeploymentResult {
  * This allows the provider to work with any config implementation
  */
 export interface EmmaConfigInterface {
+  // Form schema operations
   loadFormSchema(formId: string): Promise<FormSchema | null>;
   saveFormSchema(formId: string, schema: FormSchema): Promise<void>;
   getBuildPath(formId: string): string;
+  
+  // Config state operations
+  isInitialized(): boolean;
+  
+  // Config get/set operations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get(key: string): any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set(key: string, value: any): void;
+  save(): Promise<void>;
 }
 
 export class CloudflareR2Deployment {

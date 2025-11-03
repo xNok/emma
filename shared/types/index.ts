@@ -252,7 +252,9 @@ export interface DeploymentProviderDefinition {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   execute?: (config: any, formId: string, options: any) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  init?: (config: any) => Promise<void>; // Interactive setup
+  init?: (config: any) => Promise<{ success: boolean; message?: string }>; // Interactive setup
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  checkReadiness?: (config: any) => Promise<{ ready: boolean; issues?: string[] }>;
 }
 
 /**

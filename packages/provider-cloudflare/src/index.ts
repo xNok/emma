@@ -3,19 +3,33 @@
  * Exports deployment and submission providers for Cloudflare R2 and D1
  */
 
-import type {
-  ProviderManifest,
-  DeploymentProviderDefinition,
-} from '@xnok/emma-shared/types';
+import type { ProviderManifest } from '@xnok/emma-shared/types';
 import { cloudflareD1Provider } from './submission.js';
 
+// Export deployment implementation
 export {
   CloudflareR2Deployment,
   type CloudflareDeploymentOptions,
   type CloudflareDeploymentResult,
   type EmmaConfigInterface,
 } from './deploy.js';
+
+// Export submission provider
 export { cloudflareD1Provider } from './submission.js';
+
+// Export API worker deployment
+export {
+  ApiWorkerDeployment,
+  type ApiWorkerDeploymentOptions,
+  type ApiWorkerDeploymentResult,
+} from './api-worker.js';
+
+// Export provider definition (for CLI)
+export {
+  cloudflareProvider,
+  createCloudflareProvider,
+  type GenericProviderOptions,
+} from './provider.js';
 
 /**
  * Provider manifest for Cloudflare
@@ -37,18 +51,6 @@ export const cloudflareProviderManifest: ProviderManifest = {
     return hasR2Credentials || hasCloudflareToken || hasD1Database;
   },
 };
-
-/**
- * Create the deployment provider definition for CLI registration
- * This is created as a factory function so it can be imported into form-builder
- */
-export function createCloudflareDeploymentProvider(): DeploymentProviderDefinition {
-  return {
-    name: 'cloudflare',
-    description: 'Deploy to Cloudflare R2',
-    capabilities: ['deploy'],
-  };
-}
 
 /**
  * Default export - the provider manifest

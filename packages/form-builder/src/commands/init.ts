@@ -139,7 +139,7 @@ export function initCommand(config: EmmaConfig): Command {
         config.set('localServerHost', answers.localServerHost);
 
       // Provider setup
-      const providers = getDeploymentProviders();
+      const providers = await getDeploymentProviders();
       const selectedProviderName =
         options.provider ||
         (await (async () => {
