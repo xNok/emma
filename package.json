@@ -10,7 +10,9 @@
   ],
   "scripts": {
     "emma": "node packages/form-builder/dist/cli.js",
-    "dev": "yarn workspaces foreach -pt run dev",
+    "dev:core": "yarn workspaces foreach -A -p --exclude @xnok/emma-api-worker --exclude emma-website run dev",
+    "dev:api": "yarn workspace @xnok/emma-api-worker run dev",
+    "dev:website": "yarn workspace emma-website run dev",
     "build": "yarn workspaces foreach -Apt run build",
     "test": "yarn workspaces foreach -Aipt --exclude emma-website run test",
     "test:website": "yarn workspace emma-website run test",

@@ -100,7 +100,22 @@ export function initCommand(config: EmmaConfig): Command {
         (p: { name: string }) => p.name === providerPrompt.providerName
       );
       if (selectedProvider?.init) {
-        await selectedProvider.init(config);
+        console.log('DEBUG: About to call selectedProvider.init');
+        try {
+          await selectedProvider.init(config);
+          console.log('DEBUG: selectedProvider.init completed successfully');
+        } catch (error) {
+          console.log('DEBUG: Caught error from selectedProvider.init');
+          console.log('');
+          console.log(
+            chalk.red(
+              `❌ Provider initialization failed: ${error instanceof Error ? error.message : String(error)}`
+            )
+          );
+          console.log('');
+          console.log(chalk.yellow('Emma CLI was not fully initialized.'));
+          return;
+        }
       }
 
       // Initialize directories and save config

@@ -165,15 +165,14 @@ export const cloudflareProvider: DeploymentProviderDefinition = {
       ])) as { setupNow: boolean };
 
       if (setupNow) {
+        console.log('DEBUG: setupNow is true, displaying instructions');
         ApiWorkerDeployment.displayEnvSetupInstructions();
+        console.log('DEBUG: about to throw error');
+        throw new Error('Setup instructions displayed. Please set environment variables and run "emma init" again.');
       }
 
-      console.log(
-        chalk.red(
-          '❌ Cannot proceed without required environment variables. Please set them and run "emma init" again.'
-        )
-      );
-      return;
+      console.log('DEBUG: setupNow is false, throwing error');
+      throw new Error('Cannot proceed without required environment variables. Please set them and run "emma init" again.');
     }
 
     if (envCheck.warnings.length > 0) {

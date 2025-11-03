@@ -143,7 +143,22 @@ Data logged locally
 
 ## 🧪 Development & Testing
 
-### Working on Packages
+### Development Watch Mode
+
+For efficient development with automatic rebuilding:
+
+```bash
+# Watch core packages (form-builder, form-renderer, shared, provider-cloudflare)
+yarn dev:core
+
+# Watch API worker (Cloudflare Worker)
+yarn dev:api
+
+# Watch website (Hugo site)
+yarn dev:website
+```
+
+### Working on Individual Packages
 
 ```bash
 # Install and build CLI
@@ -158,7 +173,8 @@ npm link
 
 # Work on other packages
 cd ../form-renderer && yarn dev
-cd ../api-worker && yarn wrangler dev
+cd ../api-worker && yarn dev
+cd ../shared && yarn dev
 ```
 
 ## 🧪 Example: Complete Workflow
