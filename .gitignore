@@ -64,3 +64,5 @@ forms/*.js
 forms/*.json
 .emma-test*/
 /packages/form-builder/.tmp-emma-test/
+packages/form-builder/playwright-report/
+packages/form-builder/test-results/
