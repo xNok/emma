@@ -90,7 +90,9 @@ export function createCloudflareProvider(
         return;
       }
 
-      const spinner = ora('Building and deploying form (Cloudflare)...').start();
+      const spinner = ora(
+        'Building and deploying form (Cloudflare)...'
+      ).start();
 
       // If FormManagerClass was provided, use it to ensure the form is built
       if (FormManagerClass) {

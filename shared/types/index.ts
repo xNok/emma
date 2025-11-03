@@ -262,13 +262,13 @@ export interface ProviderOptions {
 /**
  * Deployment provider definition
  * Used by providers that can deploy forms
- * 
+ *
  * @template TCommand - The CLI command type (e.g., Commander's Command)
  * @template TConfig - The config type (e.g., EmmaConfig)
  */
 export interface DeploymentProviderDefinition<
   TCommand = unknown,
-  TConfig extends ProviderConfigInterface = ProviderConfigInterface
+  TConfig extends ProviderConfigInterface = ProviderConfigInterface,
 > {
   name: string;
   description: string;
