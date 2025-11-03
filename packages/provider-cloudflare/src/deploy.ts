@@ -53,10 +53,10 @@ export interface EmmaConfigInterface {
   loadFormSchema(formId: string): Promise<FormSchema | null>;
   saveFormSchema(formId: string, schema: FormSchema): Promise<void>;
   getBuildPath(formId: string): string;
-  
+
   // Config state operations
   isInitialized(): boolean;
-  
+
   // Config get/set operations
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(key: string): any;

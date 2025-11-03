@@ -23,11 +23,11 @@ class MockEmmaConfig {
     // Mock save
   }
 
-  async loadFormSchema(formId: string) {
+  async loadFormSchema(_formId: string) {
     return mockSchema;
   }
 
-  async saveFormSchema(formId: string, schema: unknown) {
+  async saveFormSchema(_formId: string, _schema: unknown) {
     // Mock save schema
   }
 
@@ -91,7 +91,9 @@ describe('cloudflareProvider', () => {
       await cloudflareProvider.init(realConfig);
     }
 
-    const cloudflareConfig = realConfig.get('cloudflare');
+    const cloudflareConfig = realConfig.get('cloudflare') as
+      | { bucket?: string; publicUrl?: string; accountId?: string }
+      | undefined;
     expect(cloudflareConfig).toBeDefined();
     expect(cloudflareConfig?.bucket).toBe('test-bucket');
     expect(cloudflareConfig?.publicUrl).toBe(
@@ -134,7 +136,9 @@ describe('cloudflareProvider', () => {
       }
     ).getS3Client = () => ({ send: mockSend });
 
-    await cloudflareProvider.execute(realConfig, 'form-id', options);
+    if (cloudflareProvider.execute) {
+      await cloudflareProvider.execute(realConfig, 'form-id', options);
+    }
 
     // Should upload 6 things: bundle, theme, index, renderer, schema, registry
     // Plus 1 GET to check for existing registry

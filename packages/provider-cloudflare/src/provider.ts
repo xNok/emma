@@ -218,9 +218,7 @@ export function createCloudflareProvider(
           console.log(
             chalk.yellow('⚠️  Recommended environment variables not set:')
           );
-          envCheck.warnings.forEach((v) =>
-            console.log(chalk.dim(`   - ${v}`))
-          );
+          envCheck.warnings.forEach((v) => console.log(chalk.dim(`   - ${v}`)));
           console.log(
             chalk.dim('   (These are needed for deploying forms to R2)')
           );
@@ -394,10 +392,7 @@ export function createCloudflareProvider(
       }
 
       // Check environment variables for R2 access
-      if (
-        !process.env.R2_ACCESS_KEY_ID ||
-        !process.env.R2_SECRET_ACCESS_KEY
-      ) {
+      if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
         issues.push(
           'R2 credentials not set (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)'
         );
