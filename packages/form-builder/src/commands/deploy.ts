@@ -8,6 +8,7 @@ import type { EmmaConfig } from '../config.js';
 import {
   getDefaultProvider,
   getDeploymentProviders,
+  getDeploymentProvidersSync,
 } from '../deployment/index.js';
 
 // No provider-specific types here; providers register their own flags
@@ -35,17 +36,16 @@ export function deployCommand(config: EmmaConfig): Command {
       await def.execute(config, formId, {});
     });
 
-  // Register all providers as subcommands
-  // Note: Providers are registered lazily via preAction hook due to async discovery.
-  // This means provider-specific commands won't show in top-level help (`emma deploy --help`),
-  // but will be available when used (e.g., `emma deploy cloudflare <form-id>`).
-  // Help for specific providers (e.g., `emma deploy cloudflare --help`) works correctly.
-  cmd.hook('preAction', async () => {
-    const providers = await getDeploymentProviders();
-    for (const provider of providers) {
+  // Register all providers as subcommands synchronously
+  // Use sync version to ensure subcommands are available for parsing
+  const providers = getDeploymentProvidersSync();
+  for (const provider of providers) {
+    if (typeof provider.register === 'function') {
       provider.register(cmd, config);
+    } else {
+      console.error('ERROR: provider does not have register method:', provider);
     }
-  });
+  }
 
   return cmd;
 }
