@@ -144,30 +144,49 @@ async function loadProvider(
     const mainFile = packageJson.main || 'dist/index.js';
     const providerMainPath = path.join(providerPath, mainFile);
 
-    const providerModule = (await import(providerMainPath)) as {
-      cloudflareProvider?: DeploymentProviderDefinition;
-      createCloudflareProvider?: (
-        FormManagerClass?: unknown
-      ) => DeploymentProviderDefinition;
-      default?: unknown;
-    };
+    const providerModule = (await import(providerMainPath)) as Record<
+      string,
+      unknown
+    >;
 
     // Try different export patterns
     let provider: DeploymentProviderDefinition | null = null;
 
-    // Pattern 1: Named export 'cloudflareProvider' or similar
-    if (providerModule.cloudflareProvider) {
-      provider = providerModule.cloudflareProvider;
+    // Pattern 1: Look for exports ending with 'Provider' (e.g., cloudflareProvider, s3Provider)
+    for (const [key, value] of Object.entries(providerModule)) {
+      if (
+        key.endsWith('Provider') &&
+        typeof value === 'object' &&
+        value !== null &&
+        'name' in value &&
+        'description' in value
+      ) {
+        provider = value as DeploymentProviderDefinition;
+        break;
+      }
     }
-    // Pattern 2: Factory function 'createCloudflareProvider'
-    else if (providerModule.createCloudflareProvider) {
-      // Dynamically import FormManager to pass to the provider
-      try {
-        const { FormManager } = await import('../form-manager.js');
-        provider = providerModule.createCloudflareProvider(FormManager);
-      } catch {
-        // If FormManager import fails, create provider without it
-        provider = providerModule.createCloudflareProvider();
+
+    // Pattern 2: Look for factory functions starting with 'create' (e.g., createCloudflareProvider)
+    if (!provider) {
+      for (const [key, value] of Object.entries(providerModule)) {
+        if (key.startsWith('create') && typeof value === 'function') {
+          try {
+            // Try to create the provider, optionally passing FormManager
+            const { FormManager } = await import('../form-manager.js');
+            provider = value(FormManager) as DeploymentProviderDefinition;
+          } catch {
+            // If FormManager import fails, create provider without it
+            provider = (value as () => DeploymentProviderDefinition)();
+          }
+          if (
+            provider &&
+            typeof provider.name === 'string' &&
+            typeof provider.description === 'string'
+          ) {
+            break;
+          }
+          provider = null; // Reset if validation failed
+        }
       }
     }
 

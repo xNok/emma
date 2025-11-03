@@ -94,14 +94,14 @@ export function createCloudflareProvider(
         return;
       }
 
+      const spinner = ora('Building and deploying form (Cloudflare)...').start();
+
       // If FormManagerClass was provided, use it to ensure the form is built
       if (FormManagerClass) {
-        const manager = new FormManagerClass(config);
-        const spinner = ora('Deploying form (Cloudflare)...').start();
-
         try {
+          const manager = new FormManagerClass(config);
           await manager.ensureBuilt(formId);
-          spinner.stop();
+          spinner.text = 'Deploying to Cloudflare...';
         } catch (error) {
           spinner.fail('Build failed');
           console.log(
@@ -112,8 +112,6 @@ export function createCloudflareProvider(
           throw error;
         }
       }
-
-      const spinner = ora('Deploying form (Cloudflare)...').start();
 
       try {
         const cfConfig = config.get('cloudflare');

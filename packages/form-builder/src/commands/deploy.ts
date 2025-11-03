@@ -36,7 +36,10 @@ export function deployCommand(config: EmmaConfig): Command {
     });
 
   // Register all providers as subcommands
-  // This needs to be done asynchronously, so we'll do it in the hook
+  // Note: Providers are registered lazily via preAction hook due to async discovery.
+  // This means provider-specific commands won't show in top-level help (`emma deploy --help`),
+  // but will be available when used (e.g., `emma deploy cloudflare <form-id>`).
+  // Help for specific providers (e.g., `emma deploy cloudflare --help`) works correctly.
   cmd.hook('preAction', async () => {
     const providers = await getDeploymentProviders();
     for (const provider of providers) {
