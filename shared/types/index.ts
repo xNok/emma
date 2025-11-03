@@ -242,13 +242,27 @@ export interface ProviderManifest {
 /**
  * Generic config interface that providers can use
  * This avoids circular dependencies while providing type safety
+ *
+ * Providers should extend this interface with their specific config structure
+ * to get proper type safety for get/set operations.
  */
 export interface ProviderConfigInterface {
   isInitialized(): boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get(key: string): any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set(key: string, value: any): void;
+  /**
+   * Get a configuration value by key
+   * @param key - The configuration key
+   * @returns The configuration value (type depends on the key)
+   */
+  get(key: string): unknown;
+  /**
+   * Set a configuration value by key
+   * @param key - The configuration key
+   * @param value - The configuration value
+   */
+  set(key: string, value: unknown): void;
+  /**
+   * Save the configuration to persistent storage
+   */
   save(): Promise<void>;
 }
 

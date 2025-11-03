@@ -45,6 +45,18 @@ export interface CloudflareDeploymentResult {
 }
 
 /**
+ * Cloudflare-specific config structure
+ */
+export interface CloudflareConfig {
+  bucket?: string;
+  publicUrl?: string;
+  accountId?: string;
+  databaseName?: string;
+  databaseId?: string;
+  workerUrl?: string;
+}
+
+/**
  * EmmaConfig interface - defines the required config methods
  * This allows the provider to work with any config implementation
  */
@@ -57,11 +69,20 @@ export interface EmmaConfigInterface {
   // Config state operations
   isInitialized(): boolean;
 
-  // Config get/set operations
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get(key: string): any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set(key: string, value: any): void;
+  // Config get/set operations with better typing
+  /**
+   * Get a configuration value by key
+   * For cloudflare config, use: get('cloudflare') returns CloudflareConfig | undefined
+   */
+  get(key: 'cloudflare'): CloudflareConfig | undefined;
+  get(key: string): unknown;
+
+  /**
+   * Set a configuration value by key
+   */
+  set(key: 'cloudflare', value: CloudflareConfig): void;
+  set(key: string, value: unknown): void;
+
   save(): Promise<void>;
 }
 
