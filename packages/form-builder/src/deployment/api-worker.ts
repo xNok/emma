@@ -8,6 +8,11 @@ import path from 'path';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import ora from 'ora';
+import { fileURLToPath } from 'url';
+
+// ES module equivalent of __filename and __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface ApiWorkerDeploymentOptions {
   accountId: string;
