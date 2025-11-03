@@ -66,7 +66,7 @@ export default defineConfig({
   webServer: {
     command: 'hugo server --bind 0.0.0.0 --port 8080',
     url: 'http://localhost:8080/emma/',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });

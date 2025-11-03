@@ -1,0 +1,38 @@
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "sidebar" }}
+  {{ partial "sidebar.html" . }}
+{{ end }}
+
+{{ define "main" }}
+  <div class="list-page">
+    <header class="content-header">
+      <h1 class="page-title">{{ .Title }}</h1>
+      {{ with .Description }}
+      <p class="page-description">{{ . }}</p>
+      {{ end }}
+    </header>
+
+    <div class="content-body">
+      {{ .Content }}
+    </div>
+
+    {{ if .Pages }}
+    <section class="page-list">
+      {{ range .Pages }}
+      <article class="page-list-item">
+        <h2 class="page-list-title">
+          <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </h2>
+        {{ with .Description }}
+        <p class="page-list-description">{{ . }}</p>
+        {{ end }}
+        {{ with .Params.weight }}
+        <span class="page-list-meta text-muted text-small">Section {{ . }}</span>
+        {{ end }}
+      </article>
+      {{ end }}
+    </section>
+    {{ end }}
+  </div>
+{{ end }}
