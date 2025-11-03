@@ -6,20 +6,16 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import type { DeploymentProviderDefinition } from '@xnok/emma-shared/types';
+import type {
+  DeploymentProviderDefinition,
+  ProviderOptions,
+} from '@xnok/emma-shared/types';
 import {
   CloudflareR2Deployment,
   type CloudflareDeploymentOptions,
   type EmmaConfigInterface,
 } from './deploy.js';
 import { ApiWorkerDeployment } from './api-worker.js';
-
-/**
- * Generic provider options passed from CLI
- */
-export interface GenericProviderOptions {
-  [key: string]: string | boolean | undefined;
-}
 
 /**
  * Form Manager interface - minimal interface needed for deployment
@@ -34,7 +30,7 @@ export interface FormManagerInterface {
  */
 export function createCloudflareProvider(
   FormManagerClass?: new (config: EmmaConfigInterface) => FormManagerInterface
-): DeploymentProviderDefinition {
+): DeploymentProviderDefinition<Command, EmmaConfigInterface> {
   return {
     name: 'cloudflare',
     description: 'Deploy to Cloudflare R2',
@@ -71,7 +67,7 @@ export function createCloudflareProvider(
           '-s, --snapshot <timestamp>',
           'Deploy a specific snapshot by timestamp'
         )
-        .action(async (formId: string, options: GenericProviderOptions) => {
+        .action(async (formId: string, options: ProviderOptions) => {
           await this.execute?.(config, formId, options);
         });
     },
@@ -79,7 +75,7 @@ export function createCloudflareProvider(
     async execute(
       config: EmmaConfigInterface,
       formId: string,
-      options: GenericProviderOptions
+      options: ProviderOptions
     ): Promise<void> {
       if (!config.isInitialized()) {
         console.log(

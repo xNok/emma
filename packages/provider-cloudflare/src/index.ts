@@ -25,11 +25,7 @@ export {
 } from './api-worker.js';
 
 // Export provider definition (for CLI)
-export {
-  cloudflareProvider,
-  createCloudflareProvider,
-  type GenericProviderOptions,
-} from './provider.js';
+export { cloudflareProvider, createCloudflareProvider } from './provider.js';
 
 /**
  * Provider manifest for Cloudflare

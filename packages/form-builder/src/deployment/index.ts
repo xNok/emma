@@ -5,6 +5,7 @@
 
 import type { Command } from 'commander';
 import type { EmmaConfig } from '../config.js';
+import type { DeploymentProviderDefinition as SharedDeploymentProviderDefinition } from '@xnok/emma-shared/types';
 import { localProvider } from './local.js';
 import fs from 'fs-extra';
 import path from 'path';
@@ -15,32 +16,25 @@ const __dirname = path.dirname(__filename);
 
 export interface GenericProviderOptions {
   // Allow arbitrary flags from CLI; providers perform validation
-  [key: string]: string | boolean | undefined;
+  [key: string]: string | boolean | number | undefined;
 }
 
-export interface DeploymentProviderDefinition {
-  name: string; // e.g., 'local', 'cloudflare'
-  description: string;
-  register(parent: Command, config: EmmaConfig): void; // adds subcommand and flags
+/**
+ * Deployment provider definition with concrete types for form-builder
+ * Extends the shared type with specific Command and EmmaConfig types
+ */
+export interface DeploymentProviderDefinition
+  extends SharedDeploymentProviderDefinition<Command, EmmaConfig> {
+  register(parent: Command, config: EmmaConfig): void;
   execute(
     config: EmmaConfig,
     formId: string,
     options: GenericProviderOptions
   ): Promise<void>;
-  /**
-   * Interactive provider setup for emma init
-   * Should prompt for resource creation or config, validate, and save config
-   * Returns an object indicating success status and any messages
-   */
   init?: (config: EmmaConfig) => Promise<{
     success: boolean;
     message?: string;
   }>;
-  /**
-   * Check if the provider is fully ready for use
-   * Should verify that all required setup and capabilities are working
-   * Returns readiness status and any issues found
-   */
   checkReadiness?: (config: EmmaConfig) => Promise<{
     ready: boolean;
     issues?: string[];

@@ -240,22 +240,48 @@ export interface ProviderManifest {
 }
 
 /**
+ * Generic config interface that providers can use
+ * This avoids circular dependencies while providing type safety
+ */
+export interface ProviderConfigInterface {
+  isInitialized(): boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get(key: string): any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set(key: string, value: any): void;
+  save(): Promise<void>;
+}
+
+/**
+ * Generic provider options from CLI
+ */
+export interface ProviderOptions {
+  [key: string]: string | boolean | number | undefined;
+}
+
+/**
  * Deployment provider definition
  * Used by providers that can deploy forms
+ * 
+ * @template TCommand - The CLI command type (e.g., Commander's Command)
+ * @template TConfig - The config type (e.g., EmmaConfig)
  */
-export interface DeploymentProviderDefinition {
+export interface DeploymentProviderDefinition<
+  TCommand = unknown,
+  TConfig extends ProviderConfigInterface = ProviderConfigInterface
+> {
   name: string;
   description: string;
   capabilities?: ProviderCapability[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register?: (parent: any, config: any) => void; // Register CLI command
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  execute?: (config: any, formId: string, options: any) => Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  init?: (config: any) => Promise<{ success: boolean; message?: string }>; // Interactive setup
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  register?: (parent: TCommand, config: TConfig) => void;
+  execute?: (
+    config: TConfig,
+    formId: string,
+    options: ProviderOptions
+  ) => Promise<void>;
+  init?: (config: TConfig) => Promise<{ success: boolean; message?: string }>;
   checkReadiness?: (
-    config: any
+    config: TConfig
   ) => Promise<{ ready: boolean; issues?: string[] }>;
 }
 
