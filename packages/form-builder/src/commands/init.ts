@@ -180,8 +180,8 @@ export function initCommand(config: EmmaConfig): Command {
         shouldRunProviderInit = true;
       } else if (selectedProvider?.init) {
         // Check if provider is already configured and ready
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        const providerConfig = (config as any).get(selectedProviderName) as
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        const providerConfig = (config as any).get(selectedProviderName) as  // eslint-disable-next-line @typescript-eslint/no-explicit-any
           | Record<string, any>
           | undefined;
         const isConfigured =

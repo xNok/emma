@@ -365,6 +365,7 @@ export function createCloudflareProvider(
       }
     },
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     async checkReadiness(config: EmmaConfigInterface) {
       const cfConfig = config.get('cloudflare');
       if (!cfConfig) {

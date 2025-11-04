@@ -348,8 +348,4 @@ export interface SubmissionQueryOptions {
  * ] as const;
  * ```
  */
-export const BUILT_IN_PROVIDERS = [
-  '@xnok/emma-provider-cloudflare',
-] as const;
-
-
+export const BUILT_IN_PROVIDERS = ['@xnok/emma-provider-cloudflare'] as const;

@@ -11,28 +11,21 @@ import { localProvider } from './local.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { FormManager } from '../form-manager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Type for dynamically imported provider modules
 type ProviderModule = {
-  createCloudflareProvider?: (
-    formManager: typeof FormManager
-  ) => DeploymentProviderDefinition;
-  cloudflareProvider?: DeploymentProviderDefinition;
-  default?:
-    | DeploymentProviderDefinition
-    | ((formManager: typeof FormManager) => DeploymentProviderDefinition);
-} & Record<string, unknown>;
+  [key: string]: unknown;
+};
 
 /**
  * Load a provider dynamically by its identifier
  *
  * This function supports multiple provider export patterns:
- * 1. Named export: `createCloudflareProvider` function
- * 2. Named export: `cloudflareProvider` object
+ * 1. Named export: provider object with register/execute methods
+ * 2. Named export: factory function (createProvider)
  * 3. Default export: factory function
  * 4. Default export: provider object
  *
@@ -45,20 +38,40 @@ async function loadProviderByIdentifier(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const providerModule: ProviderModule = await import(pluginIdentifier);
 
-    // Check for named exports first
-    if (
-      providerModule.createCloudflareProvider &&
-      typeof providerModule.createCloudflareProvider === 'function'
-    ) {
-      const { FormManager } = await import('../form-manager.js');
-      return providerModule.createCloudflareProvider(FormManager);
+    // Check for named exports first - look for any provider object
+    for (const [key, value] of Object.entries(providerModule)) {
+      if (
+        key.endsWith('Provider') &&
+        typeof value === 'object' &&
+        value !== null &&
+        'register' in value &&
+        'execute' in value &&
+        'name' in value &&
+        'description' in value
+      ) {
+        return value as DeploymentProviderDefinition;
+      }
     }
 
-    if (
-      providerModule.cloudflareProvider &&
-      typeof providerModule.cloudflareProvider.register === 'function'
-    ) {
-      return providerModule.cloudflareProvider;
+    // Check for factory functions (create*Provider)
+    for (const [key, value] of Object.entries(providerModule)) {
+      if (
+        key.startsWith('create') &&
+        key.endsWith('Provider') &&
+        typeof value === 'function'
+      ) {
+        try {
+          const { FormManager } = await import('../form-manager.js');
+          return (
+            value as (
+              formManager: typeof FormManager
+            ) => DeploymentProviderDefinition
+          )(FormManager);
+        } catch {
+          // If FormManager import fails, try without it
+          return (value as () => DeploymentProviderDefinition)();
+        }
+      }
     }
 
     // Handle both ESM and CJS module formats
@@ -68,14 +81,15 @@ async function loadProviderByIdentifier(
     // If it's a factory function, call it with FormManager
     if (typeof provider === 'function') {
       const { FormManager } = await import('../form-manager.js');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return provider(FormManager);
     }
 
     // If it's already a provider definition, return it
     if (
       provider &&
-      typeof (provider as any).name === 'string' &&
-      typeof (provider as any).register === 'function'
+      typeof (provider as Record<string, unknown>).name === 'string' &&
+      typeof (provider as Record<string, unknown>).register === 'function'
     ) {
       return provider as DeploymentProviderDefinition;
     }
@@ -243,14 +257,16 @@ async function loadProvider(
         typeof value === 'object' &&
         value !== null &&
         'name' in value &&
-        'description' in value
+        'description' in value &&
+        'register' in value &&
+        'execute' in value
       ) {
         provider = value as DeploymentProviderDefinition;
         break;
       }
     }
 
-    // Pattern 2: Look for factory functions starting with 'create' (e.g., createCloudflareProvider)
+    // Pattern 2: Look for factory functions starting with 'create' (e.g., createCloudflareProvider, createS3Provider)
     if (!provider) {
       for (const [key, value] of Object.entries(providerModule)) {
         if (key.startsWith('create') && typeof value === 'function') {

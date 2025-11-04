@@ -9,7 +9,7 @@ import ora from 'ora';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { BUILT_IN_PROVIDERS } from '../deployment/index.js';
+import { BUILT_IN_PROVIDERS } from '@xnok/emma-shared';
 import type { EmmaConfig } from '../config.js';
 import type { ProviderManifest } from '@xnok/emma-shared/types';
 

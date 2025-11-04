@@ -23,6 +23,7 @@ class MockEmmaConfig {
     // Mock save
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async loadFormSchema(_formId: string) {
     return mockSchema;
   }
