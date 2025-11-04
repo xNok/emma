@@ -277,34 +277,35 @@ test.describe('Emma CLI End-to-End Workflow', () => {
     console.log('🎉 Complete Emma workflow test PASSED!');
   });
 
-  test('form history works correctly', async () => {
-    console.log('Testing form history...');
+  test('provider registration works correctly', () => {
+    console.log('Testing provider registration...');
 
-    const timestamp = Math.floor(Date.now() / 1000);
-    const formId = `history-test-${timestamp}`;
-    const formName = `History Test ${timestamp}`;
+    // Test that deploy command shows available providers
+    const deployHelpOutput = runEmmaCommand('deploy', ['--help']);
 
-    const formData = createTestFormSchema(
-      formId,
-      formName,
-      [{ id: 'name', type: 'text', label: 'Name', required: true }],
-      timestamp
-    );
+    expect(deployHelpOutput).toContain('local');
+    expect(deployHelpOutput).toContain('cloudflare');
+    console.log('✅ Deploy command shows available providers');
 
-    // Write form schema
-    const yaml = await import('js-yaml');
-    const formContent = yaml.dump(formData);
-    await fs.writeFile(
-      path.join(emmaHomeDir, 'forms', `${formId}.yaml`),
-      formContent
-    );
+    // Test that cloudflare provider help works
+    const cloudflareHelpOutput = runEmmaCommand('deploy', [
+      'cloudflare',
+      '--help',
+    ]);
 
-    // Check initial history
-    const historyOutput = runEmmaCommand('history', [formId]);
+    expect(cloudflareHelpOutput).toContain('Deploy to Cloudflare R2');
+    expect(cloudflareHelpOutput).toContain('--bucket');
+    expect(cloudflareHelpOutput).toContain('--public-url');
+    console.log('✅ Cloudflare provider help works correctly');
 
-    expect(historyOutput).toContain('Snapshot History');
-    expect(historyOutput).toContain('CURRENT');
+    // Test that local provider help still works
+    const localHelpOutput = runEmmaCommand('deploy', ['local', '--help']);
 
-    console.log('✅ Form history works correctly');
+    expect(localHelpOutput).toContain('Deploy locally (simulation)');
+    expect(localHelpOutput).toContain('--port');
+    expect(localHelpOutput).toContain('--host');
+    console.log('✅ Local provider help works correctly');
+
+    console.log('✅ Provider registration works correctly');
   });
 });

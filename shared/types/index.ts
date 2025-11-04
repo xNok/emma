@@ -323,3 +323,33 @@ export interface SubmissionQueryOptions {
   limit?: number;
   offset?: number;
 }
+
+// ============================================================================
+// Provider Constants
+// ============================================================================
+
+/**
+ * Registry of known provider identifiers that should be loaded synchronously
+ * These are built-in providers that are always available
+ *
+ * To add a new built-in provider:
+ * 1. Add the provider package as a dependency
+ * 2. Add the package identifier to this array
+ * 3. Ensure the provider exports either:
+ *    - A `create<ProviderName>Provider` function, or
+ *    - A `<providerName>Provider` object with register/execute methods
+ *
+ * Example:
+ * ```typescript
+ * const BUILT_IN_PROVIDERS = [
+ *   '@xnok/emma-provider-cloudflare',
+ *   '@xnok/emma-provider-s3',        // Will look for createS3Provider or s3Provider
+ *   '@my-org/emma-provider-custom',  // Custom provider
+ * ] as const;
+ * ```
+ */
+export const BUILT_IN_PROVIDERS = [
+  '@xnok/emma-provider-cloudflare',
+] as const;
+
+

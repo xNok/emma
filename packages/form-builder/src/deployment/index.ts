@@ -6,13 +6,103 @@
 import type { Command } from 'commander';
 import type { EmmaConfig } from '../config.js';
 import type { DeploymentProviderDefinition as SharedDeploymentProviderDefinition } from '@xnok/emma-shared/types';
+import { BUILT_IN_PROVIDERS } from '@xnok/emma-shared';
 import { localProvider } from './local.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { FormManager } from '../form-manager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Type for dynamically imported provider modules
+type ProviderModule = {
+  createCloudflareProvider?: (
+    formManager: typeof FormManager
+  ) => DeploymentProviderDefinition;
+  cloudflareProvider?: DeploymentProviderDefinition;
+  default?:
+    | DeploymentProviderDefinition
+    | ((formManager: typeof FormManager) => DeploymentProviderDefinition);
+} & Record<string, unknown>;
+
+/**
+ * Load a provider dynamically by its identifier
+ *
+ * This function supports multiple provider export patterns:
+ * 1. Named export: `createCloudflareProvider` function
+ * 2. Named export: `cloudflareProvider` object
+ * 3. Default export: factory function
+ * 4. Default export: provider object
+ *
+ * The function automatically handles both ESM and CJS module formats.
+ */
+async function loadProviderByIdentifier(
+  pluginIdentifier: string
+): Promise<DeploymentProviderDefinition | null> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const providerModule: ProviderModule = await import(pluginIdentifier);
+
+    // Check for named exports first
+    if (
+      providerModule.createCloudflareProvider &&
+      typeof providerModule.createCloudflareProvider === 'function'
+    ) {
+      const { FormManager } = await import('../form-manager.js');
+      return providerModule.createCloudflareProvider(FormManager);
+    }
+
+    if (
+      providerModule.cloudflareProvider &&
+      typeof providerModule.cloudflareProvider.register === 'function'
+    ) {
+      return providerModule.cloudflareProvider;
+    }
+
+    // Handle both ESM and CJS module formats
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const provider = providerModule.default || providerModule;
+
+    // If it's a factory function, call it with FormManager
+    if (typeof provider === 'function') {
+      const { FormManager } = await import('../form-manager.js');
+      return provider(FormManager);
+    }
+
+    // If it's already a provider definition, return it
+    if (
+      provider &&
+      typeof (provider as any).name === 'string' &&
+      typeof (provider as any).register === 'function'
+    ) {
+      return provider as DeploymentProviderDefinition;
+    }
+
+    console.warn(`Invalid provider format from ${pluginIdentifier}`);
+    return null;
+  } catch (e) {
+    console.debug(`Failed to load provider: ${pluginIdentifier}`, e);
+    return null;
+  }
+}
+
+/**
+ * Load all built-in providers synchronously at startup
+ */
+const builtInProviders = await (async () => {
+  const providers: DeploymentProviderDefinition[] = [];
+
+  for (const identifier of BUILT_IN_PROVIDERS) {
+    const provider = await loadProviderByIdentifier(identifier);
+    if (provider) {
+      providers.push(provider);
+    }
+  }
+
+  return providers;
+})();
 
 export interface GenericProviderOptions {
   // Allow arbitrary flags from CLI; providers perform validation
@@ -209,13 +299,20 @@ export async function getDeploymentProviders(): Promise<
 
 /**
  * Synchronous version for backward compatibility
- * Only returns local provider if dynamic discovery hasn't been done yet
+ * Returns local provider and built-in providers
  */
 export function getDeploymentProvidersSync(): DeploymentProviderDefinition[] {
-  return providersCache || [localProvider];
+  if (providersCache) {
+    return providersCache;
+  }
+
+  const providers = [localProvider, ...builtInProviders];
+  return providers;
 }
 
 export const defaultProviderName = 'local';
+
+export { loadProviderByIdentifier };
 
 export async function getDefaultProvider(): Promise<DeploymentProviderDefinition> {
   const providers = await getDeploymentProviders();
