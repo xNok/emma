@@ -9,6 +9,7 @@ import ora from 'ora';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { BUILT_IN_PROVIDERS } from '@xnok/emma-shared';
 import type { EmmaConfig } from '../config.js';
 import type { ProviderManifest } from '@xnok/emma-shared/types';
 
@@ -158,18 +159,25 @@ async function loadProviderManifest(
 
 /**
  * Get list of known/recommended providers (could be from a registry)
+ * Excludes built-in providers since they're always available
  */
 function getKnownProviders(): Array<{
   name: string;
   packageName: string;
   description: string;
 }> {
-  return [
-    {
-      name: 'cloudflare',
-      packageName: '@xnok/emma-provider-cloudflare',
-      description: 'Deploy to Cloudflare R2 and query submissions from D1',
-    },
+  const builtInNames = (BUILT_IN_PROVIDERS as readonly string[]).map((id) => {
+    // Extract provider name from package identifier
+    // @xnok/emma-provider-cloudflare -> cloudflare
+    const match = id.match(/emma-provider-(\w+)/);
+    return match ? match[1] : id;
+  });
+
+  const allKnownProviders: Array<{
+    name: string;
+    packageName: string;
+    description: string;
+  }> = [
     // Future providers could be added here
     // {
     //   name: 'digitalocean',
@@ -177,6 +185,10 @@ function getKnownProviders(): Array<{
     //   description: 'Deploy to DigitalOcean Spaces',
     // },
   ];
+
+  return allKnownProviders.filter(
+    (provider) => !builtInNames.includes(provider.name)
+  );
 }
 
 /**
@@ -189,16 +201,44 @@ function listProvidersCommand(_config: EmmaConfig): Command {
     .action(async (options: { available?: boolean }) => {
       console.log(chalk.cyan('\n📦 Emma Form Providers\n'));
 
-      // List installed providers
+      // Show built-in providers
+      console.log(chalk.bold('Built-in Providers:'));
+      console.log('');
+
+      for (const providerId of BUILT_IN_PROVIDERS) {
+        // Extract provider name from package identifier
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const match = providerId.match(/emma-provider-(\w+)/);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        const providerName = match?.[1] ?? providerId;
+
+        console.log(`  ${chalk.bold(providerName)} ${chalk.dim('(built-in)')}`);
+        console.log(`    Available as part of Emma CLI`);
+        console.log('');
+      }
+
+      // List installed providers (discovered dynamically)
       const spinner = ora('Discovering installed providers...').start();
       const installed = await discoverInstalledProviders();
       spinner.stop();
 
-      if (installed.length > 0) {
-        console.log(chalk.bold('Installed Providers:'));
+      // Filter out built-in providers from installed list
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const builtInNames = (BUILT_IN_PROVIDERS as readonly string[]).map(
+        (id) => {
+          const match = id.match(/emma-provider-(\w+)/);
+          return match?.[1] ?? id;
+        }
+      );
+      const additionalInstalled = installed.filter(
+        (p) => !builtInNames.includes(p.name)
+      );
+
+      if (additionalInstalled.length > 0) {
+        console.log(chalk.bold('Additional Installed Providers:'));
         console.log('');
 
-        for (const provider of installed) {
+        for (const provider of additionalInstalled) {
           const available = provider.isAvailable
             ? await provider.isAvailable()
             : true;
@@ -214,9 +254,6 @@ function listProvidersCommand(_config: EmmaConfig): Command {
           console.log(`    Capabilities: ${provider.capabilities.join(', ')}`);
           console.log('');
         }
-      } else {
-        console.log(chalk.yellow('No providers installed.'));
-        console.log('');
       }
 
       // List available providers if requested

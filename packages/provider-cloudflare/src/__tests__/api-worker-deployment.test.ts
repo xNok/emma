@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ApiWorkerDeployment } from '../deployment/api-worker';
+import { ApiWorkerDeployment } from '../api-worker.js';
 import * as child_process from 'child_process';
 
 // Mock child_process

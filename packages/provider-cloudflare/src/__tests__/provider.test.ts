@@ -1,30 +1,187 @@
-/**
- * Basic tests for Cloudflare Provider
- */
+import { describe, it, beforeEach, expect, vi, type Mock } from 'vitest';
+import { cloudflareProvider } from '../provider.js';
+import { CloudflareR2Deployment } from '../deploy.js';
+import type { EmmaConfigInterface, CloudflareConfig } from '../deploy.js';
+import inquirer from 'inquirer';
 
-import { describe, it, expect } from 'vitest';
-import { cloudflareProviderManifest } from '../index.js';
+// Mock config implementation
+class MockEmmaConfig implements EmmaConfigInterface {
+  private data: Record<string, unknown> = {};
 
-describe('Cloudflare Provider', () => {
-  it('should have correct manifest properties', () => {
-    expect(cloudflareProviderManifest.name).toBe('cloudflare');
-    expect(cloudflareProviderManifest.packageName).toBe(
-      '@xnok/emma-provider-cloudflare'
-    );
-    expect(cloudflareProviderManifest.capabilities).toContain('deploy');
-    expect(cloudflareProviderManifest.capabilities).toContain(
-      'submission-query'
-    );
+  isInitialized() {
+    return true;
+  }
+
+  get(key: 'cloudflare'): CloudflareConfig | undefined;
+  get(key: string): unknown {
+    return this.data[key];
+  }
+
+  set(key: 'cloudflare', value: CloudflareConfig): void;
+  set(key: string, value: unknown): void {
+    this.data[key] = value;
+  }
+
+  async save() {
+    // Mock save
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async loadFormSchema(_formId: string) {
+    return mockSchema;
+  }
+
+  async saveFormSchema(_formId: string, _schema: unknown) {
+    // Mock save schema
+  }
+
+  getBuildPath(formId: string) {
+    return `/tmp/emma-test-config/builds/${formId}`;
+  }
+}
+
+vi.mock('inquirer');
+
+const realConfig = new MockEmmaConfig();
+const saveSpy = vi.spyOn(realConfig, 'save').mockImplementation(async () => {});
+
+const mockSchema = {
+  formId: 'form-id',
+  name: 'Test Form',
+  version: '1.0',
+  apiEndpoint: '/api/test',
+  fields: [],
+  theme: 'default',
+  createdAt: 1760743545,
+  lastModified: 1760743545,
+  currentSnapshot: 1760743545,
+  snapshots: [
+    {
+      timestamp: 1760743545,
+      r2Key: 'form-id-1760743545.js',
+      changes: 'Initial version',
+      deployed: false,
+    },
+  ],
+};
+
+describe('cloudflareProvider', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+  // No afterEach needed
+
+  it('should register provider correctly', () => {
+    expect(cloudflareProvider.name).toBe('cloudflare');
+    expect(typeof cloudflareProvider.init).toBe('function');
+    expect(typeof cloudflareProvider.execute).toBe('function');
   });
 
-  it('should export deployment functionality', async () => {
-    const { CloudflareR2Deployment } = await import('../deploy.js');
-    expect(CloudflareR2Deployment).toBeDefined();
+  it('should run init and save config (S3-only)', async () => {
+    // Set up environment variable to pass validation
+    process.env.CLOUDFLARE_API_TOKEN = 'test-token';
+
+    // Mock the prompts in order
+    (inquirer.prompt as unknown as Mock).mockResolvedValueOnce({
+      // First prompt: account ID, bucket, publicUrl, databaseName, deployWorker
+      accountId: 'test-account',
+      bucket: 'test-bucket',
+      publicUrl: 'https://test-bucket.r2.cloudflarestorage.com',
+      databaseName: 'emma-submissions',
+      deployWorker: false, // Don't deploy in test
+    });
+
+    if (typeof cloudflareProvider.init === 'function') {
+      await cloudflareProvider.init(realConfig);
+    }
+
+    const cloudflareConfig = realConfig.get('cloudflare') as
+      | { bucket?: string; publicUrl?: string; accountId?: string }
+      | undefined;
+    expect(cloudflareConfig).toBeDefined();
+    expect(cloudflareConfig?.bucket).toBe('test-bucket');
+    expect(cloudflareConfig?.publicUrl).toBe(
+      'https://test-bucket.r2.cloudflarestorage.com'
+    );
+    expect(cloudflareConfig?.accountId).toBe('test-account');
+    expect(saveSpy).toHaveBeenCalled();
+
+    // Clean up
+    delete process.env.CLOUDFLARE_API_TOKEN;
   });
 
-  it('should export submission provider', async () => {
-    const { cloudflareD1Provider } = await import('../submission.js');
-    expect(cloudflareD1Provider).toBeDefined();
-    expect(cloudflareD1Provider.name).toBe('cloudflare-d1');
+  // S3-only: no bucket creation test needed
+
+  it('should upload all form assets to R2', async () => {
+    const fs = await import('fs-extra');
+
+    // Create the required bundle file
+    const buildDir = '/tmp/emma-test-config/builds/form-id';
+    await fs.ensureDir(buildDir);
+    await fs.ensureDir(`${buildDir}/themes`);
+    await fs.writeFile(`${buildDir}/form-id-1760743545.js`, 'bundle content');
+    await fs.writeFile(`${buildDir}/themes/default.css`, 'theme css');
+    await fs.writeFile(`${buildDir}/index.html`, 'index html');
+    await fs.writeFile(`${buildDir}/emma-forms.esm.js`, 'renderer js');
+
+    const options = {
+      bucket: 'test-bucket',
+      publicUrl: 'https://forms.example.com',
+      accessKeyId: 'fake-key',
+      secretAccessKey: 'fake-secret',
+      accountId: 'test-account',
+      overwrite: true,
+    };
+
+    const mockSend = vi.fn().mockResolvedValue({});
+    (
+      CloudflareR2Deployment.prototype as unknown as {
+        getS3Client: () => { send: Mock };
+      }
+    ).getS3Client = () => ({ send: mockSend });
+
+    if (cloudflareProvider.execute) {
+      await cloudflareProvider.execute(realConfig, 'form-id', options);
+    }
+
+    // Should upload 6 things: bundle, theme, index, renderer, schema, registry
+    // Plus 1 GET to check for existing registry
+    expect(mockSend.mock.calls.length).toBeGreaterThanOrEqual(6);
+
+    const findCall = (key: string) => {
+      const call = (
+        mockSend.mock.calls as [
+          {
+            input: {
+              Key: string;
+              Body: string | Buffer;
+            };
+          },
+        ][]
+      ).find((c) => c[0].input.Key === key);
+      return call?.[0].input;
+    };
+
+    // Check for timestamp-based bundle key
+    expect(findCall('form-id-1760743545.js')).toBeDefined();
+    expect(findCall('form-id/themes/default.css')).toBeDefined();
+    expect(findCall('form-id/index.html')).toBeDefined();
+    expect(findCall('form-id/emma-forms.esm.js')).toBeDefined();
+    const schemaCall = findCall('form-id/form-id.json');
+    expect(schemaCall).toBeDefined();
+    // Check for registry
+    const registryCall = findCall('registry.json');
+    expect(registryCall).toBeDefined();
+    if (registryCall && registryCall.Body) {
+      const registry = JSON.parse(registryCall.Body.toString()) as {
+        forms: Array<{ formId: string; currentSnapshot: number }>;
+      };
+      expect(registry.forms).toHaveLength(1);
+      expect(registry.forms[0].formId).toBe('form-id');
+      expect(registry.forms[0].currentSnapshot).toBe(1760743545);
+    }
+
+    // Clean up
+    await fs.remove('/tmp/emma-test-config/builds');
   });
 });

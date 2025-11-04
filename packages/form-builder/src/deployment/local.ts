@@ -14,15 +14,15 @@ export const localProvider: DeploymentProviderDefinition = {
   name: 'local',
   description: 'Deploy locally (simulation)',
 
-  register(parent: Command, config: EmmaConfig) {
+  register: (parent: Command, config: EmmaConfig) => {
     parent
       .command('local')
-      .description(this.description)
+      .description(localProvider.description)
       .argument('<form-id>', 'Form ID to deploy')
       .option('-p, --port <port>', 'Override default local port')
       .option('-h, --host <host>', 'Override default local host')
       .action(async (formId: string, options: GenericProviderOptions) => {
-        await this.execute(config, formId, options);
+        await localProvider.execute(config, formId, options);
       });
   },
 

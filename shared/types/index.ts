@@ -240,19 +240,63 @@ export interface ProviderManifest {
 }
 
 /**
+ * Generic config interface that providers can use
+ * This avoids circular dependencies while providing type safety
+ *
+ * Providers should extend this interface with their specific config structure
+ * to get proper type safety for get/set operations.
+ */
+export interface ProviderConfigInterface {
+  isInitialized(): boolean;
+  /**
+   * Get a configuration value by key
+   * @param key - The configuration key
+   * @returns The configuration value (type depends on the key)
+   */
+  get(key: string): unknown;
+  /**
+   * Set a configuration value by key
+   * @param key - The configuration key
+   * @param value - The configuration value
+   */
+  set(key: string, value: unknown): void;
+  /**
+   * Save the configuration to persistent storage
+   */
+  save(): Promise<void>;
+}
+
+/**
+ * Generic provider options from CLI
+ */
+export interface ProviderOptions {
+  [key: string]: string | boolean | number | undefined;
+}
+
+/**
  * Deployment provider definition
  * Used by providers that can deploy forms
+ *
+ * @template TCommand - The CLI command type (e.g., Commander's Command)
+ * @template TConfig - The config type (e.g., EmmaConfig)
  */
-export interface DeploymentProviderDefinition {
+export interface DeploymentProviderDefinition<
+  TCommand = unknown,
+  TConfig extends ProviderConfigInterface = ProviderConfigInterface,
+> {
   name: string;
   description: string;
   capabilities?: ProviderCapability[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register?: (parent: any, config: any) => void; // Register CLI command
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  execute?: (config: any, formId: string, options: any) => Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  init?: (config: any) => Promise<void>; // Interactive setup
+  register?: (parent: TCommand, config: TConfig) => void;
+  execute?: (
+    config: TConfig,
+    formId: string,
+    options: ProviderOptions
+  ) => Promise<void>;
+  init?: (config: TConfig) => Promise<{ success: boolean; message?: string }>;
+  checkReadiness?: (
+    config: TConfig
+  ) => Promise<{ ready: boolean; issues?: string[] }>;
 }
 
 /**
@@ -279,3 +323,29 @@ export interface SubmissionQueryOptions {
   limit?: number;
   offset?: number;
 }
+
+// ============================================================================
+// Provider Constants
+// ============================================================================
+
+/**
+ * Registry of known provider identifiers that should be loaded synchronously
+ * These are built-in providers that are always available
+ *
+ * To add a new built-in provider:
+ * 1. Add the provider package as a dependency
+ * 2. Add the package identifier to this array
+ * 3. Ensure the provider exports either:
+ *    - A `create<ProviderName>Provider` function, or
+ *    - A `<providerName>Provider` object with register/execute methods
+ *
+ * Example:
+ * ```typescript
+ * const BUILT_IN_PROVIDERS = [
+ *   '@xnok/emma-provider-cloudflare',
+ *   '@xnok/emma-provider-s3',        // Will look for createS3Provider or s3Provider
+ *   '@my-org/emma-provider-custom',  // Custom provider
+ * ] as const;
+ * ```
+ */
+export const BUILT_IN_PROVIDERS = ['@xnok/emma-provider-cloudflare'] as const;

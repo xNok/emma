@@ -45,13 +45,45 @@ export interface CloudflareDeploymentResult {
 }
 
 /**
+ * Cloudflare-specific config structure
+ */
+export interface CloudflareConfig {
+  bucket?: string;
+  publicUrl?: string;
+  accountId?: string;
+  databaseName?: string;
+  databaseId?: string;
+  workerUrl?: string;
+}
+
+/**
  * EmmaConfig interface - defines the required config methods
  * This allows the provider to work with any config implementation
  */
 export interface EmmaConfigInterface {
+  // Form schema operations
   loadFormSchema(formId: string): Promise<FormSchema | null>;
   saveFormSchema(formId: string, schema: FormSchema): Promise<void>;
   getBuildPath(formId: string): string;
+
+  // Config state operations
+  isInitialized(): boolean;
+
+  // Config get/set operations with better typing
+  /**
+   * Get a configuration value by key
+   * For cloudflare config, use: get('cloudflare') returns CloudflareConfig | undefined
+   */
+  get(key: 'cloudflare'): CloudflareConfig | undefined;
+  get(key: string): unknown;
+
+  /**
+   * Set a configuration value by key
+   */
+  set(key: 'cloudflare', value: CloudflareConfig): void;
+  set(key: string, value: unknown): void;
+
+  save(): Promise<void>;
 }
 
 export class CloudflareR2Deployment {
