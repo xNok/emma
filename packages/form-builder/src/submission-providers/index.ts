@@ -3,31 +3,23 @@
  * Abstracts database access for viewing and exporting submissions
  */
 
-import type { SubmissionRecord } from '@xnok/emma-shared/types';
+import type {
+  SubmissionRecord,
+  SubmissionProviderDefinition,
+  SubmissionQueryOptions,
+} from '@xnok/emma-shared/types';
 
-export interface SubmissionQueryOptions {
-  formId: string;
-  snapshot?: number;
-  status?: string;
-  limit?: number;
-  offset?: number;
-}
+// Re-export types for backward compatibility
+export type { SubmissionQueryOptions };
 
-export interface SubmissionProvider {
-  name: string;
-  description: string;
-
-  /**
-   * Query submissions from the database
-   */
+/**
+ * Legacy interface for backward compatibility
+ * @deprecated Use SubmissionProviderDefinition from @xnok/emma-shared/types
+ */
+export interface SubmissionProvider extends SubmissionProviderDefinition {
   querySubmissions(
     options: SubmissionQueryOptions
   ): Promise<SubmissionRecord[]>;
-
-  /**
-   * Check if provider is configured and available
-   */
-  isAvailable(): Promise<boolean>;
 }
 
 /**
@@ -38,8 +30,8 @@ export async function getSubmissionProvider(): Promise<SubmissionProvider | null
   // In the future, this could check config and return the appropriate provider
   const { cloudflareD1Provider } = await import('./cloudflare.js');
 
-  if (await cloudflareD1Provider.isAvailable()) {
-    return cloudflareD1Provider;
+  if (await cloudflareD1Provider.isAvailable?.()) {
+    return cloudflareD1Provider as SubmissionProvider;
   }
 
   return null;

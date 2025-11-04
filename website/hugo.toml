@@ -1,8 +1,49 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://xnok.github.io/emma/'
 languageCode = 'en-us'
-title = 'My New Hugo Site'
-theme = 'ananke'
+title = 'Emma Forms'
+theme = 'emma-docs'
 
+# Site description
+[params]
+  description = 'Embeddable Forms for Hugo - Create, deploy, and embed forms with ease'
+  github = 'https://github.com/xNok/emma'
+  license = 'MIT'
+  
+  [params.author]
+    name = 'xNok'
+    url = 'https://github.com/xNok'
+
+# Main menu (top navigation)
+[[menu.main]]
+  name = 'Getting Started'
+  url = '/docs/getting-started/'
+  weight = 1
+
+[[menu.main]]
+  name = 'Developer Guide'
+  url = '/docs/developer-guide/'
+  weight = 2
+
+[[menu.main]]
+  name = 'References'
+  url = '/docs/references/'
+  weight = 3
+
+[[menu.main]]
+  name = 'Blog'
+  url = '/blog/'
+  weight = 4
+
+[[menu.main]]
+  name = 'GitHub'
+  url = 'https://github.com/xNok/emma'
+  weight = 5
+
+# Caching configuration
 [caches]
   [caches.images]
     dir = ':cacheDir/images'
+
+# Search configuration
+[outputs]
+  home = ["HTML", "JSON"]

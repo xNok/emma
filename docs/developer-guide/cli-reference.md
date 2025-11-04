@@ -730,3 +730,143 @@ Set `DEBUG=emma:*` environment variable for verbose logging:
 ```bash
 DEBUG=emma:* emma deploy my-form-001
 ```
+
+## Provider Management Commands
+
+Emma uses a pluggable provider system to support multiple deployment targets (Cloudflare, DigitalOcean, custom, etc.). Providers can be installed as separate packages and discovered automatically.
+
+### `emma providers list`
+
+List installed and available providers.
+
+```bash
+emma providers list [--available]
+```
+
+**Options:**
+
+- `--available` - Show all known/available providers, not just installed ones
+
+**Example Output:**
+
+```bash
+$ emma providers list
+
+📦 Emma Form Providers
+
+Installed Providers:
+
+  cloudflare (v0.1.0)
+    Deploy forms to Cloudflare R2 and query submissions from D1
+    Status: ✓ Ready
+    Capabilities: deploy, submission-query, migrations
+
+💡 Run with --available to see more providers
+```
+
+**With `--available` flag:**
+
+```bash
+$ emma providers list --available
+
+📦 Emma Form Providers
+
+Installed Providers:
+  cloudflare (v0.1.0) - Deploy to Cloudflare R2 and D1 ✓
+
+Available Providers:
+  digitalocean
+    Deploy to DigitalOcean Spaces
+    Install: npm install @emma/provider-digitalocean
+```
+
+### `emma providers info <provider-name>`
+
+Show detailed information about a specific provider.
+
+```bash
+emma providers info cloudflare
+```
+
+**Example Output:**
+
+```bash
+$ emma providers info cloudflare
+
+📦 Cloudflare R2 + D1
+
+Package: @xnok/emma-provider-cloudflare
+Version: 0.1.0
+Description: Deploy forms to Cloudflare R2 and query submissions from D1
+Capabilities: deploy, submission-query, migrations
+Status: ✓ Ready
+```
+
+If the provider is not configured:
+
+```bash
+Status: ⚠ Not configured
+
+This provider needs configuration.
+Run "emma init --provider cloudflare" to configure it.
+```
+
+### `emma providers install <provider-name>`
+
+Install a provider package.
+
+```bash
+emma providers install <provider-name> [--npm]
+```
+
+**Options:**
+
+- `--npm` - Use npm instead of yarn for installation
+
+**Example:**
+
+```bash
+$ emma providers install cloudflare
+
+📦 Installing @xnok/emma-provider-cloudflare...
+
+Running: yarn add @xnok/emma-provider-cloudflare
+
+✅ Provider cloudflare installed successfully!
+
+Run "emma init --provider cloudflare" to configure it.
+```
+
+### Provider Capabilities
+
+Providers can have different capabilities:
+
+- **`deploy`** - Can deploy forms to a hosting service
+- **`submission-query`** - Can query form submissions from a database
+- **`migrations`** - Can run database migrations
+- **`preview`** - Can provide preview functionality
+
+### Creating Custom Providers
+
+You can create custom providers by implementing the `ProviderManifest` interface:
+
+```typescript
+import type { ProviderManifest } from '@xnok/emma-shared/types';
+
+export const myProviderManifest: ProviderManifest = {
+  name: 'my-provider',
+  displayName: 'My Custom Provider',
+  description: 'Deploy to my custom service',
+  packageName: '@my-org/emma-provider-custom',
+  version: '1.0.0',
+  capabilities: ['deploy'],
+  async isAvailable() {
+    // Check if provider is configured
+    return !!process.env.MY_API_KEY;
+  },
+};
+
+export default myProviderManifest;
+```
+
+See the [@xnok/emma-provider-cloudflare](../../packages/provider-cloudflare) package for a complete example.

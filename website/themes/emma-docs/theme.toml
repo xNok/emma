@@ -1,0 +1,12 @@
+name = "Emma Docs"
+license = "MIT"
+licenselink = "https://github.com/xNok/emma/blob/main/LICENSE"
+description = "A clean, modern documentation theme for Emma Forms"
+homepage = "https://github.com/xNok/emma"
+tags = ["documentation", "clean", "responsive", "minimal"]
+features = ["responsive", "sidebar navigation", "syntax highlighting"]
+min_version = "0.120.0"
+
+[author]
+  name = "xNok"
+  homepage = "https://github.com/xNok"

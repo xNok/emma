@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang | default "en" }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ .Description | default .Site.Params.description }}">
+  <title>{{ block "title" . }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ "css/main.css" | relURL }}">
+  
+  <!-- Favicon -->
+  {{ with .Site.Params.favicon }}
+  <link rel="icon" href="{{ . | relURL }}">
+  {{ end }}
+  
+  <!-- RSS Feed -->
+  {{ with .OutputFormats.Get "RSS" }}
+  <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .Permalink }}">
+  {{ end }}
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+  
+  <div class="site-container">
+    {{ partial "header.html" . }}
+    
+    <div class="main-content">
+      {{ block "sidebar" . }}{{ end }}
+      
+      <main id="main-content" class="content-area">
+        {{ block "main" . }}{{ end }}
+      </main>
+    </div>
+    
+    {{ partial "footer.html" . }}
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="{{ "js/main.js" | relURL }}"></script>
+</body>
+</html>
