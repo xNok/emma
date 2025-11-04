@@ -1,5 +1,51 @@
 # @xnok/emma-form-builder
 
+## 0.6.0
+
+### Minor Changes
+
+- 569a105: Extract Cloudflare provider into standalone package with CLI discovery system
+
+  **New Package: @xnok/emma-provider-cloudflare**
+  - Extracted Cloudflare R2 deployment provider from form-builder
+  - Extracted Cloudflare D1 submission provider from form-builder
+  - Added provider manifest with capabilities declaration
+  - Includes deployment to R2 and submission querying via D1
+
+  **Enhanced Form Builder CLI**
+  - Added `emma providers list` command to discover installed providers
+  - Added `emma providers info <name>` command for provider details
+  - Added `emma providers install <name>` command to install providers
+  - Provider discovery supports local, global, and npx installations
+  - Automatic provider detection with install prompts
+
+  **Shared Types**
+  - Added `ProviderManifest` interface for provider metadata
+  - Added `ProviderCapability` type for capability declarations
+  - Added `DeploymentProviderDefinition` and `SubmissionProviderDefinition` interfaces
+  - Added `SubmissionQueryOptions` interface for querying submissions
+
+  This change enables a pluggable provider architecture where deployment and submission providers can be independently developed, versioned, and distributed as separate packages.
+
+### Patch Changes
+
+- 95f47a7: Fix asset loading 404 errors in local deployment
+
+  Forms deployed locally failed to load JavaScript bundles and CSS assets with 404 errors. The issue was caused by incorrect URL resolution when forms were served without trailing slashes. The browser treated `/forms/test-form-123` as a file rather than a directory, causing relative URLs to resolve incorrectly.
+
+  **Changes:**
+  - Added automatic redirect from `/forms/:formId` to `/forms/:formId/` for proper URL resolution
+  - Enhanced asset serving route to detect trailing-slash-only requests and serve `index.html`
+  - Updated form URLs in deployment results to include trailing slashes
+
+  This fix ensures all form assets (JavaScript bundles, CSS files, ESM modules) load correctly in the browser during local development.
+
+- Updated dependencies [569a105]
+  - @xnok/emma-provider-cloudflare@0.2.0
+  - @xnok/emma-shared@0.4.0
+  - @xnok/emma-api-worker@0.3.1
+  - @xnok/emma-form-renderer@0.2.2
+
 ## 0.5.0
 
 ### Minor Changes
