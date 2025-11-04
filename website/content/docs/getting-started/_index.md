@@ -1,17 +1,21 @@
 ---
-title: 'Emma User Guide'
+title: 'Getting Started'
 weight: 1
 ---
 
-Welcome to the Emma User Guide. This guide provides a comprehensive overview of how to install, configure, and use Emma to create and deploy forms.
+Welcome to Emma Forms! This guide will help you get started with creating and deploying forms.
 
-## Sections
+## Quick Start
 
-- [**Installation**](./installation/): How to install the `emma-cli` globally.
-- [**Cloudflare Setup**](./cloudflare-setup/): A step-by-step guide on configuring the required Cloudflare services (R2, D1, Workers).
-- [**CLI Configuration**](./cli-configuration/): How to configure the `emma-cli` with the necessary Cloudflare account details and API tokens.
-- [**Full Workflow Tutorial**](./workflow-tutorial/): A complete tutorial covering `emma init`, `emma create`, `emma preview`, and `emma deploy --target=cloudflare`.
-- [**Hugo Integration**](./hugo-integration/): How to correctly use the Hugo shortcode with a deployed form ID and CDN URL.
-- [**CLI Command Reference**](./cli-command-reference/): A detailed reference for all available `emma` commands and their options.
-- [**Authentication**](./authentication/): A detailed section on setting up authentication.
-- [**Form Schema Versioning**](./form-schema-versioning/): An explanation of form snapshots and how to interact with form history.
+Follow these steps to create your first form:
+
+1. **[Installation](./installation/)** - Install the Emma CLI
+2. **[Workflow Tutorial](./workflow-tutorial/)** - Complete walkthrough from creation to deployment
+
+## Additional Resources
+
+- **[CLI Command Reference](../references/cli-command-reference/)** - Detailed command documentation
+- **[Hugo Integration](../developer-guide/hugo-integration/)** - Embed forms in your Hugo site
+- **[Cloudflare Setup](../developer-guide/cloudflare-setup/)** - Configure Cloudflare for deployment
+- **[Authentication](../developer-guide/authentication/)** - Set up authentication
+- **[Form Schema Versioning](../developer-guide/form-schema-versioning/)** - Understand form snapshots

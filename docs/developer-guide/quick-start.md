@@ -163,10 +163,9 @@ In your `hugo.toml`, set your Cloudflare Worker URL:
 
 ## Next Steps
 
-- **[Customize Styling](./themes.md)** - Match your site's design
 - **[Add More Field Types](./field-types.md)** - Explore all 13 field types
-- **[Configure Notifications](./notifications.md)** - Get email alerts
-- **[Advanced Features](./hugo-integration.md#advanced-usage)** - Custom themes, validation
+- **[Form Schemas](./form-schemas.md)** - Learn about form configuration
+- **Advanced Features** - See website documentation for Hugo integration and customization
 
 ## Need Help?
 

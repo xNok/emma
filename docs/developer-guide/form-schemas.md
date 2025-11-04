@@ -174,7 +174,14 @@ settings:
 
 ## Validation Rules
 
-See [Validation](./validation.md) for detailed validation rule documentation.
+Validation is configured per field in the schema. Common validation options include:
+
+- `required`: Field must be filled
+- `minLength` / `maxLength`: For text fields
+- `min` / `max`: For numeric and date fields
+- `pattern`: Regular expression for custom validation
+
+See field-specific validation options in [Field Types](./field-types.md).
 
 ## Best Practices
 
@@ -237,6 +244,5 @@ For detailed guidance, see [Form History Guide](./form-history.md).
 
 ## Next Steps
 
-- Learn about [Field Types](./field-types.md)
-- Understand [Validation Rules](./validation.md)
+- Learn about [Field Types](./field-types.md) and their validation options
 - See [Example Forms](../../examples/)

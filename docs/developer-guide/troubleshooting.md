@@ -513,5 +513,5 @@ wrangler tail emma-api --format pretty
 ## Next Steps
 
 - Review [API Reference](./api-reference.md)
-- Check [Hugo Integration](./hugo-integration.md)
+- Check Hugo Integration guide in website documentation
 - See [Example Forms](../../examples/)
