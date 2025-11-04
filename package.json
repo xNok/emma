@@ -5,23 +5,14 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "shared",
-    "website"
+    "shared"
   ],
   "scripts": {
-    "emma": "node packages/form-builder/dist/cli.js",
     "dev": "yarn workspaces foreach -pt run dev",
     "build": "yarn workspaces foreach -Apt run build",
-    "test": "yarn workspaces foreach -Aipt --exclude emma-website run test",
-    "test:website": "yarn workspace emma-website run test",
-    "test:all": "yarn test && yarn test:website",
+    "test": "yarn workspaces foreach -Aipt run test",
+    "test:ci": "yarn workspaces foreach -Aipt run test -- --reporter=junit --coverage",
     "test:manual": "yarn workspace @emma/form-renderer exec yarn --cwd test-server dev",
-    "test:e2e": "yarn workspace @xnok/emma-form-builder run test:e2e",
-    "test:e2e:ci": "yarn workspace @xnok/emma-form-builder run test:e2e:ci",
-    "test:e2e:report": "yarn workspace @xnok/emma-form-builder run test:e2e:report",
-    "test:e2e:ui": "yarn workspace @xnok/emma-form-builder run test:e2e:ui",
-    "test:e2e:headed": "yarn workspace @xnok/emma-form-builder run test:e2e:headed",
-    "test:e2e:debug": "yarn workspace @xnok/emma-form-builder run test:e2e:debug",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",

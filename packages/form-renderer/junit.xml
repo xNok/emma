@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="19" failures="0" errors="0" time="3.403">
+    <testsuite name="src/__tests__/FormRenderer.test.ts" timestamp="2025-11-04T00:46:04.171Z" hostname="devbox" tests="10" failures="0" errors="0" skipped="0" time="0.077">
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should create a form renderer instance" time="0.012">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should throw error if container not found" time="0.002">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render a text input field" time="0.025">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render a textarea field" time="0.003">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render a select dropdown" time="0.009">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render radio buttons" time="0.007">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render checkboxes" time="0.002">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render hidden field" time="0.001">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render honeypot when enabled" time="0.013">
+        </testcase>
+        <testcase classname="src/__tests__/FormRenderer.test.ts" name="FormRenderer - Core Rendering &gt; should render submit button with custom text" time="0.001">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/accessibility.test.ts" timestamp="2025-11-04T00:46:04.178Z" hostname="devbox" tests="4" failures="0" errors="0" skipped="0" time="0.061">
+        <testcase classname="src/__tests__/accessibility.test.ts" name="FormRenderer - Accessibility &gt; should add aria-describedby for help text" time="0.02">
+        </testcase>
+        <testcase classname="src/__tests__/accessibility.test.ts" name="FormRenderer - Accessibility &gt; should add aria-invalid on error" time="0.031">
+        </testcase>
+        <testcase classname="src/__tests__/accessibility.test.ts" name="FormRenderer - Accessibility &gt; should add role=&quot;alert&quot; to message container" time="0.001">
+        </testcase>
+        <testcase classname="src/__tests__/accessibility.test.ts" name="FormRenderer - Accessibility &gt; should add role=&quot;radiogroup&quot; to radio buttons" time="0.007">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/submission.test.ts" timestamp="2025-11-04T00:46:04.179Z" hostname="devbox" tests="2" failures="0" errors="0" skipped="0" time="0.054">
+        <testcase classname="src/__tests__/submission.test.ts" name="FormRenderer - Submission &gt; should call onSubmit with form data" time="0.035">
+        </testcase>
+        <testcase classname="src/__tests__/submission.test.ts" name="FormRenderer - Submission &gt; should block bot submissions with honeypot" time="0.016">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/validation.test.ts" timestamp="2025-11-04T00:46:04.180Z" hostname="devbox" tests="3" failures="0" errors="0" skipped="0" time="0.091">
+        <testcase classname="src/__tests__/validation.test.ts" name="FormRenderer - Validation &gt; should show error for empty required field on submit" time="0.042">
+        </testcase>
+        <testcase classname="src/__tests__/validation.test.ts" name="FormRenderer - Validation &gt; should validate minLength" time="0.018">
+        </testcase>
+        <testcase classname="src/__tests__/validation.test.ts" name="FormRenderer - Validation &gt; should clear error on input" time="0.03">
+        </testcase>
+    </testsuite>
+</testsuites>
+>

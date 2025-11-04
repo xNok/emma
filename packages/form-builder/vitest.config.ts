@@ -3,16 +3,12 @@ import path from 'path';
 
 export default defineConfig({
   test: {
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: './junit.xml',
+    },
     globals: true,
     environment: 'node',
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/*.e2e.*',
-      '**/e2e/**',
-      '**/playwright-report/**',
-      '**/test-results/**',
-    ],
   },
   resolve: {
     alias: {

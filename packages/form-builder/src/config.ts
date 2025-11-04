@@ -21,9 +21,6 @@ export interface EmmaConfigData {
     bucket?: string;
     publicUrl?: string;
     accountId?: string;
-    databaseName?: string;
-    databaseId?: string;
-    workerUrl?: string;
   };
 }
 

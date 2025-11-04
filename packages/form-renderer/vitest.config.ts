@@ -3,6 +3,10 @@ import path from 'path';
 
 export default defineConfig({
   test: {
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: './junit.xml',
+    },
     environment: 'happy-dom',
     globals: true,
     coverage: {

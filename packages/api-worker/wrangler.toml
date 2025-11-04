@@ -6,7 +6,7 @@ compatibility_date = "2025-10-07"
 [[d1_databases]]
 binding = "DB"
 database_name = "emma-submissions"
-database_id = "test-db-id" # Replace with actual D1 database ID
+database_id = "YOUR_DATABASE_ID_HERE" # Replace with actual D1 database ID
 
 # Environment variables
 [vars]

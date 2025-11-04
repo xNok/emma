@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="6" failures="0" errors="0" time="2.16">
+    <testsuite name="src/__tests__/cloudflare-index.test.ts" timestamp="2025-11-04T00:46:02.114Z" hostname="devbox" tests="1" failures="0" errors="0" skipped="0" time="0.07">
+        <testcase classname="src/__tests__/cloudflare-index.test.ts" name="Cloudflare Index &gt; should create and inject repositories" time="0.069">
+            <system-out>
+&lt;-- GET /
+--&gt; GET / [33m404[0m 8ms
+
+            </system-out>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/server.test.ts" timestamp="2025-11-04T00:46:02.126Z" hostname="devbox" tests="5" failures="0" errors="0" skipped="0" time="0.066">
+        <testcase classname="src/__tests__/server.test.ts" name="API Worker &gt; should return health check status" time="0.044">
+            <system-out>
+&lt;-- GET /health
+--&gt; GET /health [32m200[0m 15ms
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/server.test.ts" name="API Worker &gt; should handle form submission successfully" time="0.011">
+            <system-out>
+&lt;-- POST /submit/test-form
+--&gt; POST /submit/test-form [32m200[0m 4ms
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/server.test.ts" name="API Worker &gt; should return 404 if form not found" time="0.003">
+            <system-out>
+&lt;-- POST /submit/non-existent-form
+--&gt; POST /submit/non-existent-form [33m404[0m 2ms
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/server.test.ts" name="API Worker &gt; should return 400 for invalid submission data" time="0.003">
+            <system-out>
+&lt;-- POST /submit/test-form
+--&gt; POST /submit/test-form [33m400[0m 1ms
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/server.test.ts" name="API Worker &gt; should handle form submission without snapshot metadata" time="0.004">
+            <system-out>
+&lt;-- POST /submit/legacy-form
+--&gt; POST /submit/legacy-form [32m200[0m 1ms
+
+            </system-out>
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -140,7 +140,7 @@ describe('FormManager', () => {
       const result = await manager.deployForm('manager-test-001', options);
 
       expect(result.formUrl).toBe(
-        'http://localhost:3341/forms/manager-test-001/'
+        'http://localhost:3341/forms/manager-test-001'
       );
       expect(result.apiUrl).toBe(
         'http://localhost:3341/api/submit/manager-test-001'

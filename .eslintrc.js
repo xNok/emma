@@ -25,13 +25,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-non-null-assertion': 'warn',
   },
-  ignorePatterns: [
-    '*.config.ts',
-    'dist/',
-    'node_modules/',
-    'website/tests/',
-    'website/playwright.config.ts',
-  ],
+  ignorePatterns: ['*.config.ts', 'dist/', 'node_modules/'],
   env: {
     node: true,
     es6: true,

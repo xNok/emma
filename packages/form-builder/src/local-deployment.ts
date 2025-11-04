@@ -45,9 +45,7 @@ export class LocalDeployment {
     // Deployment assumes form is already built
     // Use FormManager.ensureBuilt() before calling this if needed
     const buildPath = this.config.getBuildPath(formId);
-    const timestamp = schema.currentSnapshot;
-    const bundleName = timestamp ? `${formId}-${timestamp}.js` : `${formId}.js`;
-    const bundlePath = path.join(buildPath, bundleName);
+    const bundlePath = path.join(buildPath, `${schema.formId}.js`);
 
     if (!(await fs.pathExists(bundlePath))) {
       throw new Error(
@@ -59,7 +57,7 @@ export class LocalDeployment {
     await this.ensureServer(options);
 
     const serverUrl = `http://${options.host}:${options.port}`;
-    const formUrl = `${serverUrl}/forms/${formId}/`;
+    const formUrl = `${serverUrl}/forms/${formId}`;
     const apiUrl = `${serverUrl}/api/submit/${formId}`;
 
     return {
@@ -118,22 +116,6 @@ export class LocalDeployment {
       // Extract the asset path from the full URL
       const fullPath = req.path;
       const assetPath = fullPath.replace(`/forms/${formId}/`, '');
-
-      // If no asset path (just trailing slash), serve index.html
-      if (!assetPath) {
-        const indexPath = path.join(buildsDir, formId, 'index.html');
-        if (await fs.pathExists(indexPath)) {
-          res.sendFile(indexPath);
-        } else {
-          res.status(404).send(`
-            <h1>Form Not Found</h1>
-            <p>Form "${formId}" has not been built.</p>
-            <p>Run: <code>emma build ${formId}</code></p>
-          `);
-        }
-        return;
-      }
-
       const formDir = path.join(buildsDir, formId);
       const fullAssetPath = path.join(formDir, assetPath);
 
@@ -150,10 +132,21 @@ export class LocalDeployment {
       }
     });
 
-    // Form preview pages - redirect to trailing slash for proper relative URL resolution
-    this.app.get('/forms/:formId', (req, res) => {
+    // Form preview pages (must come after the asset route)
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this.app.get('/forms/:formId', async (req, res) => {
       const formId = req.params.formId;
-      res.redirect(`/forms/${formId}/`);
+      const indexPath = path.join(buildsDir, formId, 'index.html');
+
+      if (await fs.pathExists(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send(`
+          <h1>Form Not Found</h1>
+          <p>Form "${formId}" has not been built.</p>
+          <p>Run: <code>emma build ${formId}</code></p>
+        `);
+      }
     });
 
     // API submission endpoint
@@ -209,19 +202,15 @@ export class LocalDeployment {
 
       let formsList = '';
       if (formIds.length > 0) {
-        // Load all schemas concurrently for better performance
-        const schemas = await Promise.all(
-          formIds.map((id) => this.config.loadFormSchema(id))
-        );
-
-        const formLinks: string[] = formIds.map((id, index) => {
-          const schema = schemas[index];
-          const timestamp = schema?.currentSnapshot;
-          const bundleName = timestamp ? `${id}-${timestamp}.js` : `${id}.js`;
-          return `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${bundleName}">Bundle</a></li>`;
-        });
-
-        formsList = '<ul>' + formLinks.join('') + '</ul>';
+        formsList =
+          '<ul>' +
+          formIds
+            .map(
+              (id) =>
+                `<li><a href="/forms/${id}">${id}</a> - <a href="/forms/${id}/${id}.js">Bundle</a></li>`
+            )
+            .join('') +
+          '</ul>';
       } else {
         formsList =
           '<p><em>No forms available. Create one with <code>emma create my-form</code></em></p>';
