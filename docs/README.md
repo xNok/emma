@@ -14,7 +14,7 @@ Numbered documents (00-06) represent the architectural evolution and key design 
 - **[03-deployment-architecture.md](./03-deployment-architecture.md)** - Deployment strategy
 - **[04-api-worker-architecture.md](./04-api-worker-architecture.md)** - API Worker design
 - **[05-architectural-decisions.md](./05-architectural-decisions.md)** - Key architectural decisions and rationale
-- **[06-provider-system-architecture.md](./06-provider-system-architecture.md)** - Provider system design *(Latest)*
+- **[06-provider-system-architecture.md](./06-provider-system-architecture.md)** - Provider system design _(Latest)_
 
 **Start here**: Read the highest-numbered document first (currently 06), as it will link back to relevant previous documents.
 
@@ -90,11 +90,11 @@ See [.github/copilot-instructions.md](../.github/copilot-instructions.md) for co
 
 ## Quick Navigation
 
-| I want to... | Go to... |
-|--------------|----------|
+| I want to...                        | Go to...                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------- |
 | Understand the project architecture | [06-provider-system-architecture.md](./06-provider-system-architecture.md) |
-| Get started developing | [developer-guide/quick-start.md](./developer-guide/quick-start.md) |
-| Learn about CLI commands | [developer-guide/cli-reference.md](./developer-guide/cli-reference.md) |
-| Deploy to Cloudflare | [infrastructure/cloudflare.md](./infrastructure/cloudflare.md) |
-| Run tests | [testing/README.md](./testing/README.md) |
-| See recent changes | [agents-summaries/](./agents-summaries/) |
+| Get started developing              | [developer-guide/quick-start.md](./developer-guide/quick-start.md)         |
+| Learn about CLI commands            | [developer-guide/cli-reference.md](./developer-guide/cli-reference.md)     |
+| Deploy to Cloudflare                | [infrastructure/cloudflare.md](./infrastructure/cloudflare.md)             |
+| Run tests                           | [testing/README.md](./testing/README.md)                                   |
+| See recent changes                  | [agents-summaries/](./agents-summaries/)                                   |

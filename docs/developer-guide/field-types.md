@@ -324,7 +324,7 @@ Each field type supports different validation rules:
 | date, time, datetime-local | required, min, max                      |
 | hidden                     | (none)                                  |
 
-See [Validation](./validation.md) for detailed rules.
+See [Form Schemas](./form-schemas.md) for validation rules.
 
 ## Autocomplete
 
@@ -396,6 +396,5 @@ See complete field examples in:
 
 ## Next Steps
 
-- Learn about [Validation](./validation.md)
-- Understand [Form Schemas](./form-schemas.md)
+- Understand [Form Schemas](./form-schemas.md) for validation rules
 - Review [API Reference](./api-reference.md)

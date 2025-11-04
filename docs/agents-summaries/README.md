@@ -1,6 +1,7 @@
 # Agent Task Summaries
 
 This directory contains summaries of completed agent tasks. Each file documents:
+
 - What was accomplished
 - What changes were made
 - Key decisions and context
@@ -15,6 +16,7 @@ This directory contains summaries of completed agent tasks. Each file documents:
 ## Purpose
 
 These summaries provide a historical record of:
+
 - Implementation decisions
 - Feature development progress
 - Bug fixes and refactoring

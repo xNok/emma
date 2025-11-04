@@ -316,7 +316,7 @@ MAX_SUBMISSION_SIZE = "10000"
 ALLOWED_ORIGINS = "*"
 ```
 
-See [Configuration](./configuration.md) for details.
+See [Environment Setup](./environment-setup.md) for details.
 
 ---
 
@@ -341,6 +341,5 @@ Common error messages and meanings:
 
 ## Next Steps
 
-- Learn about [Database Schema](./database.md)
 - Review [Form Schemas](./form-schemas.md)
 - See [Troubleshooting](./troubleshooting.md)

@@ -13,29 +13,23 @@ Welcome to the Emma Forms developer documentation. This guide is split into focu
 
 - **[Form Schemas](./form-schemas.md)** - How to define forms
 - **[Field Types](./field-types.md)** - All supported input types and options
-- **[Validation](./validation.md)** - Validation rules and error handling
 
 ### API Reference
 
 - **[API Endpoints](./api-reference.md)** - REST API documentation
-- **[Database Schema](./database.md)** - D1 database structure
 
 ### Integration
 
 - **Hugo Integration** - See website documentation for embedding forms in Hugo sites
-- **[Themes & Styling](./themes.md)** - Customizing form appearance
 
 ### Deployment
 
 - **[Deployment Providers](./deployment-providers.md)** - Provider contract and Cloudflare R2
 - **[Cloudflare Quick Start](./cloudflare-quickstart.md)** - Fast path to R2 setup and deploy
-- **[Cloudflare Setup](./cloudflare-deployment.md)** - Deploying to Cloudflare
-- **[Environment Configuration](./configuration.md)** - Environment variables and settings
+- **[Environment Setup](./environment-setup.md)** - Environment variables and configuration
 
 ### Development
 
-- **[Local Development](./local-development.md)** - Running locally
-- **[Building & Testing](./building-testing.md)** - Build and test workflows
 - **[Troubleshooting](./troubleshooting.md)** - Common issues and solutions
 
 ## Project Structure
