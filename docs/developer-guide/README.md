@@ -22,7 +22,7 @@ Welcome to the Emma Forms developer documentation. This guide is split into focu
 
 ### Integration
 
-- **[Hugo Integration](./hugo-integration.md)** - Embedding forms in Hugo sites
+- **Hugo Integration** - See website documentation for embedding forms in Hugo sites
 - **[Themes & Styling](./themes.md)** - Customizing form appearance
 
 ### Deployment

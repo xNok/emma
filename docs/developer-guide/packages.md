@@ -241,4 +241,4 @@ yarn typecheck
 
 - Learn about [Form Schemas](./form-schemas.md)
 - Understand [Field Types](./field-types.md)
-- Read about [Hugo Integration](./hugo-integration.md)
+- Read about Hugo Integration in website documentation

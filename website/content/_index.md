@@ -18,6 +18,6 @@ title: 'Emma Forms'
 
 Choose your starting point:
 
-- **[Installation](/docs/user-guide/installation/)** - Install the Emma CLI
-- **[Quick Tutorial](/docs/user-guide/workflow-tutorial/)** - Complete workflow from start to finish
-- **[Hugo Integration](/docs/user-guide/hugo-integration/)** - Embed forms in your Hugo site
+- **[Installation](/docs/getting-started/installation/)** - Install the Emma CLI
+- **[Quick Tutorial](/docs/getting-started/workflow-tutorial/)** - Complete workflow from start to finish
+- **[Hugo Integration](/docs/developer-guide/hugo-integration/)** - Embed forms in your Hugo site

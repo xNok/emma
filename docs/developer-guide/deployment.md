@@ -752,7 +752,7 @@ Now that you understand deployment:
 - [Environment Setup](./environment-setup.md) - Configure credentials
 - [Form History Guide](./form-history.md) - Understanding snapshots
 - [Cloudflare Infrastructure](../infrastructure/cloudflare.md) - Infrastructure details
-- [Hugo Integration](./hugo-integration.md) - Embed forms in Hugo
+- Hugo Integration - See website documentation for embedding forms in Hugo
 
 ## Support
 
