@@ -1,21 +1,24 @@
 import { describe, it, beforeEach, expect, vi, type Mock } from 'vitest';
 import { cloudflareProvider } from '../provider.js';
 import { CloudflareR2Deployment } from '../deploy.js';
+import type { EmmaConfigInterface, CloudflareConfig } from '../deploy.js';
 import inquirer from 'inquirer';
 
 // Mock config implementation
-class MockEmmaConfig {
+class MockEmmaConfig implements EmmaConfigInterface {
   private data: Record<string, unknown> = {};
 
   isInitialized() {
     return true;
   }
 
-  get(key: string) {
+  get(key: 'cloudflare'): CloudflareConfig | undefined;
+  get(key: string): unknown {
     return this.data[key];
   }
 
-  set(key: string, value: unknown) {
+  set(key: 'cloudflare', value: CloudflareConfig): void;
+  set(key: string, value: unknown): void {
     this.data[key] = value;
   }
 
