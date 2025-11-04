@@ -1,8 +1,10 @@
 import { describe, it, beforeEach, expect, vi, type Mock } from 'vitest';
-import { cloudflareProvider } from '../../deployment/cloudflare.js';
-import { CloudflareR2Deployment } from '@xnok/emma-provider-cloudflare';
+import {
+  cloudflareProvider,
+  CloudflareR2Deployment,
+} from '../../deployment/cloudflare';
 import inquirer from 'inquirer';
-import { EmmaConfig } from '../../config.js';
+import { EmmaConfig } from '../../config';
 
 vi.mock('inquirer');
 
@@ -46,34 +48,20 @@ describe('cloudflareProvider', () => {
   });
 
   it('should run init and save config (S3-only)', async () => {
-    // Set up environment variable to pass validation
-    process.env.CLOUDFLARE_API_TOKEN = 'test-token';
-
-    // Mock the prompts in order
     (inquirer.prompt as unknown as Mock).mockResolvedValueOnce({
-      // First prompt: account ID, bucket, publicUrl, databaseName, deployWorker
-      accountId: 'test-account',
       bucket: 'test-bucket',
       publicUrl: 'https://test-bucket.r2.cloudflarestorage.com',
-      databaseName: 'emma-submissions',
-      deployWorker: false, // Don't deploy in test
+      accountId: 'test-account',
     });
-
     if (typeof cloudflareProvider.init === 'function') {
       await cloudflareProvider.init(realConfig);
     }
-
-    const cloudflareConfig = realConfig.get('cloudflare');
-    expect(cloudflareConfig).toBeDefined();
-    expect(cloudflareConfig?.bucket).toBe('test-bucket');
-    expect(cloudflareConfig?.publicUrl).toBe(
-      'https://test-bucket.r2.cloudflarestorage.com'
-    );
-    expect(cloudflareConfig?.accountId).toBe('test-account');
+    expect(realConfig.get('cloudflare')).toEqual({
+      bucket: 'test-bucket',
+      publicUrl: 'https://test-bucket.r2.cloudflarestorage.com',
+      accountId: 'test-account',
+    });
     expect(saveSpy).toHaveBeenCalled();
-
-    // Clean up
-    delete process.env.CLOUDFLARE_API_TOKEN;
   });
 
   // S3-only: no bucket creation test needed

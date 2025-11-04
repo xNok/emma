@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="88" failures="0" errors="0" time="3.312">
+    <testsuite name="src/__tests__/cloudflare-deployment.test.ts" timestamp="2025-11-04T00:36:22.928Z" hostname="devbox" tests="1" failures="0" errors="0" skipped="0" time="0.009">
+        <testcase classname="src/__tests__/cloudflare-deployment.test.ts" name="CloudflareR2Deployment &gt; throws when required options are missing" time="0.007">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/commands.test.ts" timestamp="2025-11-04T00:36:22.929Z" hostname="devbox" tests="8" failures="0" errors="0" skipped="0" time="0.038">
+        <testcase classname="src/__tests__/commands.test.ts" name="Edit Command &gt; should create command with correct name and description" time="0.013">
+        </testcase>
+        <testcase classname="src/__tests__/commands.test.ts" name="History Command &gt; should create command with correct name and description" time="0.002">
+        </testcase>
+        <testcase classname="src/__tests__/commands.test.ts" name="Snapshot Workflow &gt; should load form with snapshot history" time="0.01">
+        </testcase>
+        <testcase classname="src/__tests__/commands.test.ts" name="Snapshot Workflow &gt; should handle form without snapshots" time="0.003">
+        </testcase>
+        <testcase classname="src/__tests__/commands.test.ts" name="Constants &gt; should export FIELD_TYPES constant" time="0">
+        </testcase>
+        <testcase classname="src/__tests__/commands.test.ts" name="Constants &gt; should have all expected field types" time="0.002">
+        </testcase>
+        <testcase classname="src/__tests__/commands.test.ts" name="Constants &gt; should have descriptions for all field types" time="0.001">
+        </testcase>
+        <testcase classname="src/__tests__/commands.test.ts" name="Constants &gt; should export THEMES constant" time="0">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/config.test.ts" timestamp="2025-11-04T00:36:22.935Z" hostname="devbox" tests="13" failures="0" errors="0" skipped="0" time="0.077">
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; constructor &gt; should create config with default values" time="0.003">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; constructor &gt; should set correct directory paths" time="0.002">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; load and save &gt; should load default config when file does not exist" time="0.005">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; load and save &gt; should save and load configuration" time="0.012">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; load and save &gt; should handle corrupted config file gracefully" time="0.004">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; initialize &gt; should create directories and mark as initialized" time="0.004">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; form schema management &gt; should save and load form schema" time="0.015">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; form schema management &gt; should return null for non-existent form" time="0.007">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; form schema management &gt; should list form schemas" time="0.01">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; form schema management &gt; should delete form schema and builds" time="0.004">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; form schema management &gt; should handle YAML parsing errors" time="0.005">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; path methods &gt; should return correct form path" time="0.001">
+        </testcase>
+        <testcase classname="src/__tests__/config.test.ts" name="EmmaConfig &gt; path methods &gt; should return correct build path" time="0">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/form-builder.test.ts" timestamp="2025-11-04T00:36:22.941Z" hostname="devbox" tests="12" failures="0" errors="0" skipped="0" time="0.118">
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should generate form bundle with correct structure" time="0.014">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should create test HTML files" time="0.011">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should embed schema in bundle" time="0.01">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should generate valid JavaScript (ESM module)" time="0.009">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should initialize renderer runtime" time="0.008">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should embed schema with different field types" time="0.008">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should include honeypot configuration in schema" time="0.01">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should handle form without honeypot settings" time="0.009">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should include validation attributes in schema" time="0.009">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; build &gt; should include API endpoint in schema" time="0.01">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; error handling &gt; should handle missing output directory creation" time="0.008">
+        </testcase>
+        <testcase classname="src/__tests__/form-builder.test.ts" name="FormBuilder &gt; error handling &gt; should handle schema serialization" time="0.009">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/form-manager.test.ts" timestamp="2025-11-04T00:36:22.944Z" hostname="devbox" tests="10" failures="0" errors="0" skipped="0" time="0.116">
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form management &gt; should create form" time="0.015">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form management &gt; should get form" time="0.006">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form management &gt; should return null for non-existent form" time="0.003">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form management &gt; should list forms" time="0.007">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form management &gt; should delete form" time="0.006">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form building &gt; should build form" time="0.013">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form building &gt; should throw error for non-existent form" time="0.005">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form deployment &gt; should deploy form" time="0.027">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; form deployment &gt; should report deployment status" time="0.012">
+        </testcase>
+        <testcase classname="src/__tests__/form-manager.test.ts" name="FormManager &gt; integration workflow &gt; should support complete form lifecycle" time="0.018">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/integration.test.ts" timestamp="2025-11-04T00:36:22.946Z" hostname="devbox" tests="12" failures="0" errors="0" skipped="0" time="0.106">
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should generate a valid ESM bundle" time="0.021">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should include the runtime module in output" time="0.006">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should generate bundle with correct ESM import" time="0.007">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should embed the form schema correctly" time="0.005">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should include auto-initialization code" time="0.006">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should export schema and renderer for manual init" time="0.005">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should generate a preview HTML file" time="0.006">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should generate a landing page HTML file" time="0.005">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should follow the bundle specification" time="0.019">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should replace all template placeholders" time="0.008">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should handle theme assets" time="0.003">
+        </testcase>
+        <testcase classname="src/__tests__/integration.test.ts" name="Form Builder &amp; Renderer Integration &gt; should produce a valid bundle size" time="0.004">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/local-deployment.integration.test.ts" timestamp="2025-11-04T00:36:22.948Z" hostname="devbox" tests="9" failures="0" errors="0" skipped="0" time="1.332">
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; Asset Serving &gt; should build and serve form assets correctly" time="0.077">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; Asset Serving &gt; should handle 404 for non-existent assets" time="0.018">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; Asset Serving &gt; should serve correct MIME types for different assets" time="0.031">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; API Endpoints &gt; should handle form submissions" time="0.572">
+            <system-out>
+📨 Form submission received for test-form-001:
+Data: { name: [32m&apos;John Doe&apos;[39m, email: [32m&apos;john@example.com&apos;[39m }
+Meta: {
+  timestamp: [32m&apos;2025-11-04T00:36:20.502Z&apos;[39m,
+  userAgent: [32m&apos;test-agent&apos;[39m,
+  referrer: [32m&apos;test-referrer&apos;[39m
+}
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; API Endpoints &gt; should detect honeypot spam" time="0.53">
+            <system-out>
+📨 Form submission received for test-form-001:
+Data: {
+  name: [32m&apos;Spam Bot&apos;[39m,
+  email: [32m&apos;spam@example.com&apos;[39m,
+  website: [32m&apos;http://spam.com&apos;[39m
+}
+Meta: {
+  timestamp: [32m&apos;2025-11-04T00:36:21.044Z&apos;[39m,
+  userAgent: [32m&apos;spam-bot&apos;[39m,
+  referrer: [32m&apos;&apos;[39m
+}
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; Debug Links &gt; should include debug links in HTML output" time="0.033">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; Route Ordering &gt; should prioritize asset routes over form ID routes" time="0.023">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; Server Management &gt; should start and stop server correctly" time="0.022">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.integration.test.ts" name="LocalDeployment Integration Tests &gt; Server Management &gt; should handle port conflicts gracefully" time="0.019">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/local-deployment.test.ts" timestamp="2025-11-04T00:36:22.951Z" hostname="devbox" tests="15" failures="0" errors="0" skipped="0" time="1.406">
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; deploy &gt; should deploy form and start server" time="0.042">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; deploy &gt; should throw error if form is not built" time="0.011">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; deploy &gt; should handle form not found" time="0.009">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; deploy &gt; should reuse server if same port" time="0.019">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; ensureDeployed &gt; should deploy if not already deployed" time="0.016">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should serve form preview pages" time="0.075">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should serve form JavaScript bundles" time="0.037">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should handle form submission API" time="0.544">
+            <system-out>
+📨 Form submission received for test-form-001:
+Data: { name: [32m&apos;Test User&apos;[39m }
+Meta: { timestamp: [32m&apos;2025-11-04T00:36:20.539Z&apos;[39m }
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should detect honeypot spam" time="0.524">
+            <system-out>
+📨 Form submission received for test-form-001:
+Data: { name: [32m&apos;Test User&apos;[39m, website: [32m&apos;spam-value&apos;[39m }
+Meta: { timestamp: [32m&apos;2025-11-04T00:36:21.076Z&apos;[39m }
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should serve server info" time="0.022">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should serve root page with form listing" time="0.03">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should handle 404 for non-existent forms" time="0.026">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server functionality &gt; should handle 404 for non-existent bundles" time="0.027">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server management &gt; should report not running initially" time="0.01">
+        </testcase>
+        <testcase classname="src/__tests__/local-deployment.test.ts" name="LocalDeployment &gt; server management &gt; should report running after deployment" time="0.01">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/snapshot-workflow.test.ts" timestamp="2025-11-04T00:36:22.954Z" hostname="devbox" tests="5" failures="0" errors="0" skipped="0" time="0.066">
+        <testcase classname="src/__tests__/snapshot-workflow.test.ts" name="Snapshot Workflow Integration &gt; Form Creation with Snapshots &gt; should create a form with initial snapshot" time="0.017">
+        </testcase>
+        <testcase classname="src/__tests__/snapshot-workflow.test.ts" name="Snapshot Workflow Integration &gt; Form Editing and Snapshot Creation &gt; should create new snapshot when form is edited" time="0.01">
+        </testcase>
+        <testcase classname="src/__tests__/snapshot-workflow.test.ts" name="Snapshot Workflow Integration &gt; Building Specific Snapshots &gt; should build bundle with timestamp-based filename" time="0.014">
+        </testcase>
+        <testcase classname="src/__tests__/snapshot-workflow.test.ts" name="Snapshot Workflow Integration &gt; Building Specific Snapshots &gt; should build specific historical snapshot" time="0.014">
+        </testcase>
+        <testcase classname="src/__tests__/snapshot-workflow.test.ts" name="Snapshot Workflow Integration &gt; Snapshot Metadata &gt; should track when fields are added" time="0.007">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/__tests__/deployment/cloudflare.test.ts" timestamp="2025-11-04T00:36:22.956Z" hostname="devbox" tests="3" failures="0" errors="0" skipped="0" time="0.048">
+        <testcase classname="src/__tests__/deployment/cloudflare.test.ts" name="cloudflareProvider &gt; should register provider correctly" time="0.002">
+        </testcase>
+        <testcase classname="src/__tests__/deployment/cloudflare.test.ts" name="cloudflareProvider &gt; should run init and save config (S3-only)" time="0.003">
+            <system-out>
+
+Cloudflare R2 Setup:
+
+Cloudflare R2 configuration saved!
+Note: Ensure R2 S3 credentials are set via env (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY).
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/__tests__/deployment/cloudflare.test.ts" name="cloudflareProvider &gt; should upload all form assets to R2" time="0.041">
+            <system-out>
+
+🚀 Cloudflare deployment complete!
+
+Form Landing Page:
+  https://forms.example.com/form-id/index.html
+
+Assets:
+  - Form Bundle:    https://forms.example.com/form-id-1760743545.js
+  - Theme CSS:      https://forms.example.com/form-id/themes/default.css
+  - Form Renderer:  https://forms.example.com/form-id/emma-forms.esm.js
+  - Form Schema:    https://forms.example.com/form-id/form-id.json
+
+Hugo Shortcode:
+  {{&lt; embed-form &quot;form-id&quot; &gt;}}
+
+Ensure your Hugo cdnUrl is set to:
+  https://forms.example.com
+
+            </system-out>
+        </testcase>
+    </testsuite>
+</testsuites>

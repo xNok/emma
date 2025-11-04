@@ -24,21 +24,8 @@ export interface DeploymentProviderDefinition {
   /**
    * Interactive provider setup for emma init
    * Should prompt for resource creation or config, validate, and save config
-   * Returns an object indicating success status and any messages
    */
-  init?: (config: EmmaConfig) => Promise<{
-    success: boolean;
-    message?: string;
-  }>;
-  /**
-   * Check if the provider is fully ready for use
-   * Should verify that all required setup and capabilities are working
-   * Returns readiness status and any issues found
-   */
-  checkReadiness?: (config: EmmaConfig) => Promise<{
-    ready: boolean;
-    issues?: string[];
-  }>;
+  init?: (config: EmmaConfig) => Promise<void>;
 }
 
 export function getDeploymentProviders(): DeploymentProviderDefinition[] {

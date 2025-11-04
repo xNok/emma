@@ -147,7 +147,7 @@ describe('LocalDeployment Integration Tests', () => {
       });
 
       expect(deployResult.formUrl).toBe(
-        `http://localhost:${testPort}/forms/${mockFormSchema.formId}/`
+        `http://localhost:${testPort}/forms/${mockFormSchema.formId}`
       );
       expect(deployResult.apiUrl).toBe(
         `http://localhost:${testPort}/api/submit/${mockFormSchema.formId}`

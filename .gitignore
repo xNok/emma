@@ -48,8 +48,6 @@ Thumbs.db
 # Test coverage
 coverage/
 .nyc_output/
-website/playwright-report/
-website/test-results/
 
 # Cloudflare
 .wrangler/
@@ -66,5 +64,3 @@ forms/*.js
 forms/*.json
 .emma-test*/
 /packages/form-builder/.tmp-emma-test/
-packages/form-builder/playwright-report/
-packages/form-builder/test-results/

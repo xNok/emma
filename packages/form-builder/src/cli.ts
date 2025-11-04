@@ -18,15 +18,13 @@ import { deleteCommand } from './commands/delete.js';
 import { editCommand } from './commands/edit.js';
 import { historyCommand } from './commands/history.js';
 import { submissionsCommand } from './commands/submissions.js';
-import { providersCommand } from './commands/providers.js';
 
 const program = new Command();
 
 async function main() {
   try {
-    // Load configuration - allow override via EMMA_HOME environment variable
-    const customConfigDir = process.env.EMMA_HOME;
-    const config = new EmmaConfig(customConfigDir);
+    // Load configuration
+    const config = new EmmaConfig();
     await config.load();
 
     program
@@ -45,7 +43,6 @@ async function main() {
     program.addCommand(historyCommand(config));
     program.addCommand(deleteCommand(config));
     program.addCommand(submissionsCommand(config));
-    program.addCommand(providersCommand(config));
 
     // Enhanced help
     program.on('--help', () => {

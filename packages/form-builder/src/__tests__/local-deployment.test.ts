@@ -93,7 +93,7 @@ describe('LocalDeployment', () => {
           const result = await deployment.deploy('test-form-001', options);
 
           expect(result.formUrl).toBe(
-            'http://localhost:3334/forms/test-form-001/'
+            'http://localhost:3334/forms/test-form-001'
           );
           expect(result.apiUrl).toBe(
             'http://localhost:3334/api/submit/test-form-001'
@@ -139,9 +139,11 @@ describe('LocalDeployment', () => {
         async () => {
           const options = { host: 'localhost', port: 3337 };
 
+          await builder.build('test-form-001', mockSchema);
           await deployment.deploy('test-form-001', options);
           const firstPort = deployment.getCurrentPort();
 
+          await builder.build('test-form-001', mockSchema);
           await deployment.deploy('test-form-001', options);
           const secondPort = deployment.getCurrentPort();
 
