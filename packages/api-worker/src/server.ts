@@ -1,23 +1,30 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import handleSubmit from './handlers/submit';
-import { Env } from './env';
+import { createApp, defineEventHandler, setResponseHeader, getMethod, setResponseStatus } from 'h3'
+import handleSubmit from './handlers/submit'
 
-const app = new Hono<{ Bindings: Env }>();
+const app = createApp()
 
-// Middleware
-app.use('*', logger());
-app.use('*', cors());
+// CORS middleware
+app.use('/**', defineEventHandler((event) => {
+  setResponseHeader(event, 'Access-Control-Allow-Origin', '*')
+  setResponseHeader(event, 'Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  setResponseHeader(event, 'Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+  if (getMethod(event) === 'OPTIONS') {
+    setResponseStatus(event, 200)
+    return { status: 'ok' }
+  }
+}))
 
 // Routes
-app.post('/submit/:formId', handleSubmit);
+app.use('/submit/:formId', defineEventHandler(async (event) => {
+  return handleSubmit(event)
+}))
 
-app.get('/health', (c) => {
-  return c.json({
+app.use('/health', defineEventHandler(() => {
+  return {
     status: 'ok',
-    environment: c.env.ENVIRONMENT,
-  });
-});
+    environment: process.env.NODE_ENV || 'development',
+  }
+}))
 
-export default app;
+export default app

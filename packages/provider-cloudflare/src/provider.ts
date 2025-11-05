@@ -10,6 +10,7 @@ import type {
   DeploymentProviderDefinition,
   ProviderOptions,
 } from '@xnok/emma-shared/types';
+import type { EmmaConfigData } from '@xnok/emma-form-builder/src/config.js';
 import {
   CloudflareR2Deployment,
   type CloudflareDeploymentOptions,
@@ -224,11 +225,18 @@ export function createCloudflareProvider(
         // Step 2: Cloudflare configuration prompts
         console.log(chalk.cyan('Cloudflare Configuration:'));
         console.log('');
+
+        // Get existing config values to use as defaults
+        const existingConfig = config.get(
+          'cloudflare'
+        ) as EmmaConfigData['cloudflare'];
+
         const answers = (await inquirer.prompt([
           {
             type: 'input',
             name: 'accountId',
             message: 'Cloudflare Account ID:',
+            default: existingConfig?.accountId,
             validate: (input: string) =>
               input.trim().length > 0 || 'Account ID is required',
           },
@@ -236,13 +244,14 @@ export function createCloudflareProvider(
             type: 'input',
             name: 'bucket',
             message: 'R2 bucket name:',
-            default: 'emma-forms',
+            default: existingConfig?.bucket || 'emma-forms',
           },
           {
             type: 'input',
             name: 'publicUrl',
             message:
               'Public base URL for forms (e.g., https://forms.example.com):',
+            default: existingConfig?.publicUrl,
             validate: (input: string) =>
               input.trim().length > 0 || 'Public URL is required',
           },
@@ -250,7 +259,7 @@ export function createCloudflareProvider(
             type: 'input',
             name: 'databaseName',
             message: 'D1 database name:',
-            default: 'emma-submissions',
+            default: existingConfig?.databaseName || 'emma-submissions',
           },
           {
             type: 'confirm',
@@ -334,7 +343,7 @@ export function createCloudflareProvider(
               )
             );
             return {
-              success: true,
+              success: false,
               message:
                 'Configuration saved but API worker deployment failed. You can deploy manually later.',
             };

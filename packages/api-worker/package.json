@@ -5,7 +5,10 @@
   "type": "module",
   "main": "./src/cloudflare-index.ts",
   "scripts": {
-    "start": "node --watch src/index.ts",
+    "build": "esbuild src/cloudflare-index.ts --bundle --format=iife --global-name=worker --outfile=dist/index.js --platform=browser",
+    "build:cloudflare": "esbuild src/cloudflare-index.ts --bundle --format=iife --global-name=worker --outfile=dist/index.js --platform=browser",
+    "build:node": "esbuild src/index.ts --bundle --format=cjs --outfile=dist/index.js --platform=node",
+    "start": "tsx --watch src/index.ts",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "deploy:staging": "wrangler deploy --env staging",
@@ -15,14 +18,16 @@
     "generate:types": "openapi-typescript openapi.yaml --output src/types.ts"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.5",
     "@xnok/emma-shared": "workspace:*",
-    "hono": "^4.9.12"
+    "h3": "^2.0.1-rc.5",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20231218.0",
+    "@cloudflare/workers-types": "^4.20231016.0",
     "@types/node": "^20.10.0",
+    "esbuild": "^0.19.5",
     "openapi-typescript": "^7.10.1",
+    "tsx": "^4.20.6",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0",
     "wrangler": "^3.22.1"

@@ -1,43 +1,59 @@
-import { Context } from 'hono';
-import { SubmissionData, SubmissionResponse } from '@xnok/emma-shared/types';
+import { H3Event, readBody, getRouterParam, createError, getHeader } from 'h3'
+import { SubmissionResponse } from '@xnok/emma-shared/types';
 import { validateSubmissionData } from '@xnok/emma-shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@xnok/emma-shared/utils';
 import { Env } from '../env';
+import { SubmissionRequestSchema } from '../validation';
+
 /**
  * Handles form submission
  */
-export default async function handleSubmit(
-  c: Context<{ Bindings: Env }>
-): Promise<Response> {
+export default async function handleSubmit(event: H3Event): Promise<SubmissionResponse | { success: false; error: string; field?: string }> {
   try {
-    const formId = c.req.param('formId');
+    const formId = getRouterParam(event, 'formId');
     if (!formId) {
-      return c.json({ success: false, error: 'Form ID required' }, 400);
+      throw createError({ statusCode: 400, statusMessage: 'Form ID required' });
     }
 
-    const submissionData = await c.req.json<SubmissionData>();
-    const clientIP = c.req.header('CF-Connecting-IP') || 'unknown';
-    const submissionRepository = c.env.submissionRepository;
-    const schemaRepository = c.env.schemaRepository;
+    const body = await readBody(event);
+    if (!body) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid request body' });
+    }
+
+    // Validate request with Zod
+    const validationResult = SubmissionRequestSchema.safeParse(body);
+    if (!validationResult.success) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Invalid request format',
+        data: { errors: validationResult.error.issues }
+      });
+    }
+
+    const submissionData = validationResult.data;
+
+    const clientIP = 'unknown'; // TODO: Get client IP from headers or event
+
+    // Get repositories from event context (set up in cloudflare-index.ts)
+    const env = event.context.env as Env;
+    const submissionRepository = env.submissionRepository;
+    const schemaRepository = env.schemaRepository;
 
     // Get form schema
     const formSchema = await schemaRepository.getSchema(formId);
     if (!formSchema) {
-      return c.json({ success: false, error: 'Form not found' }, 404);
+      throw createError({ statusCode: 404, statusMessage: 'Form not found' });
     }
 
     // Validate submission data
     const validation = validateSubmissionData(submissionData.data, formSchema);
     if (!validation.valid) {
       const firstError = validation.errors[0];
-      return c.json(
-        {
-          success: false,
-          error: firstError.message,
-          field: firstError.field,
-        },
-        400
-      );
+      throw createError({
+        statusCode: 400,
+        statusMessage: firstError.message,
+        data: { field: firstError.field }
+      });
     }
 
     // Sanitize data
@@ -55,8 +71,8 @@ export default async function handleSubmit(
 
     const meta = {
       timestamp: submissionData.meta?.timestamp || new Date().toISOString(),
-      userAgent: submissionData.meta?.userAgent || c.req.header('User-Agent'),
-      referrer: submissionData.meta?.referrer || c.req.header('Referer'),
+      userAgent: submissionData.meta?.userAgent || getHeader(event, 'User-Agent'),
+      referrer: submissionData.meta?.referrer || getHeader(event, 'Referer'),
       ip: clientIP,
     };
 
@@ -82,15 +98,17 @@ export default async function handleSubmit(
       submissionId,
     };
 
-    return c.json(response, 200);
-  } catch (error) {
+    return response;
+  } catch (error: any) {
     console.error('Submission error:', error);
-    return c.json(
-      {
-        success: false,
-        error: 'Internal server error',
-      },
-      500
-    );
+
+    if (error.statusCode) {
+      throw error; // Re-throw H3 errors
+    }
+
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Internal server error'
+    });
   }
 }

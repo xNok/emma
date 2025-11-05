@@ -1,9 +1,12 @@
-import { serve } from '@hono/node-server';
-import app from './server';
+import { createServer } from "node:http"
+import { toNodeHandler } from "h3"
+import app from "./server"
 
-console.log('Server is running on http://localhost:3000');
+const handler = toNodeHandler(app)
 
-serve({
-  fetch: app.fetch,
-  port: 3000,
-});
+const server = createServer(handler)
+
+const port = process.env.PORT || 3000
+server.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`)
+})
