@@ -255,10 +255,13 @@ export class ApiWorkerDeployment {
         ? `emma-api-${environment}`
         : 'emma-api';
 
-    // Read the worker script
-    const scriptPath = path.join(this.apiWorkerPath, 'dist', 'index.js');
+    // Read the worker script from Nitro's output
+    const scriptPath = path.join(this.apiWorkerPath, '.output', 'server', 'index.mjs');
     if (!(await fs.pathExists(scriptPath))) {
-      throw new Error(`Worker script not found at ${scriptPath}`);
+      throw new Error(
+        `Worker script not found at ${scriptPath}. ` +
+        'Please run "yarn build:cloudflare" in the api-worker package first.'
+      );
     }
     const script = await fs.readFile(scriptPath, 'utf-8');
 

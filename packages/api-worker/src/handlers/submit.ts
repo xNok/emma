@@ -32,7 +32,8 @@ export default async function handleSubmit(event: H3Event): Promise<SubmissionRe
 
     const submissionData = validationResult.data;
 
-    const clientIP = 'unknown'; // TODO: Get client IP from headers or event
+    // Get client IP from Cloudflare headers
+    const clientIP = getHeader(event, 'CF-Connecting-IP') || 'unknown';
 
     // Get repositories from event context (set up in cloudflare-index.ts)
     const env = event.context.env as Env;
