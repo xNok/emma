@@ -11,11 +11,13 @@ Successfully refactored the `api-worker` package from Hono to H3 framework with 
 ## Changes Made
 
 ### 1. Framework Migration
+
 - **Replaced Hono with H3**: Migrated from Hono (Cloudflare-specific) to H3 (runtime-agnostic HTTP framework)
 - **Updated dependencies**: Removed `hono` and `@hono/node-server`, added `h3`, `zod`
 - **Maintained OpenAPI compatibility**: Kept `openapi-typescript` for type generation
 
 ### 2. Code Architecture
+
 - **Server implementation** (`src/server.ts`): Converted to H3 app with universal middleware and routing
 - **Handler updates** (`src/handlers/submit.ts`): Adapted to H3 event system instead of Hono context
 - **Entry points**:
@@ -23,10 +25,12 @@ Successfully refactored the `api-worker` package from Hono to H3 framework with 
   - `src/index.ts`: Uses `toNodeHandler` for Node.js development
 
 ### 3. Validation Enhancement
+
 - **Added Zod schemas** (`src/validation.ts`): Created type-safe validation schemas based on OpenAPI spec
 - **Request validation**: Integrated Zod validation in submit handler for runtime type checking
 
 ### 4. Build System
+
 - **Multi-target builds**: Configured esbuild for different deployment targets
   - `yarn build:cloudflare`: Browser-compatible bundle for Cloudflare Workers
   - `yarn build:node`: Node.js compatible bundle
@@ -35,16 +39,19 @@ Successfully refactored the `api-worker` package from Hono to H3 framework with 
 ## Technical Decisions
 
 ### Why H3 over Hono?
+
 - **Runtime agnostic**: H3 works across Node.js, Cloudflare, Deno, etc.
 - **Better multi-provider support**: Enables the automatic bundling approach recommended
 - **Unified API**: Single codebase deployable to multiple platforms
 
 ### Build Tool Choice
+
 - **Nitro attempted but failed**: Initial attempt to use Nitro encountered build issues with native dependencies
 - **Fallback to esbuild**: Maintained reliable builds with manual multi-target configuration
 - **Future-ready**: Architecture supports easy migration to Nitro once stable
 
 ### Validation Strategy
+
 - **Dual validation**: Maintained existing schema validation + added Zod for request structure
 - **Type safety**: OpenAPI-generated types + runtime Zod validation
 - **Error handling**: Structured error responses with field-level validation feedback
@@ -52,6 +59,7 @@ Successfully refactored the `api-worker` package from Hono to H3 framework with 
 ## Current Status
 
 ✅ **Working functionality**:
+
 - Cloudflare Workers deployment (esbuild bundle)
 - Node.js development server
 - Form submission with validation
@@ -59,11 +67,13 @@ Successfully refactored the `api-worker` package from Hono to H3 framework with 
 - CORS middleware
 
 ✅ **Build system**:
+
 - Successful builds for Cloudflare target
 - TypeScript compilation passes
 - Development server runs correctly
 
 ⚠️ **Known issues**:
+
 - Test suite needs updates for H3 API changes
 - Some TypeScript strict mode warnings in middleware
 

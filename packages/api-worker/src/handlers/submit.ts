@@ -1,4 +1,4 @@
-import { H3Event, readBody, getRouterParam, createError, getHeader } from 'h3'
+import { H3Event, readBody, getRouterParam, createError, getHeader } from 'h3';
 import { SubmissionResponse } from '@xnok/emma-shared/types';
 import { validateSubmissionData } from '@xnok/emma-shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@xnok/emma-shared/utils';
@@ -8,7 +8,11 @@ import { SubmissionRequestSchema } from '../validation';
 /**
  * Handles form submission
  */
-export default async function handleSubmit(event: H3Event): Promise<SubmissionResponse | { success: false; error: string; field?: string }> {
+export default async function handleSubmit(
+  event: H3Event
+): Promise<
+  SubmissionResponse | { success: false; error: string; field?: string }
+> {
   try {
     const formId = getRouterParam(event, 'formId');
     if (!formId) {
@@ -17,7 +21,10 @@ export default async function handleSubmit(event: H3Event): Promise<SubmissionRe
 
     const body = await readBody(event);
     if (!body) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid request body' });
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Invalid request body',
+      });
     }
 
     // Validate request with Zod
@@ -26,7 +33,7 @@ export default async function handleSubmit(event: H3Event): Promise<SubmissionRe
       throw createError({
         statusCode: 400,
         statusMessage: 'Invalid request format',
-        data: { errors: validationResult.error.issues }
+        data: { errors: validationResult.error.issues },
       });
     }
 
@@ -53,7 +60,7 @@ export default async function handleSubmit(event: H3Event): Promise<SubmissionRe
       throw createError({
         statusCode: 400,
         statusMessage: firstError.message,
-        data: { field: firstError.field }
+        data: { field: firstError.field },
       });
     }
 
@@ -72,7 +79,8 @@ export default async function handleSubmit(event: H3Event): Promise<SubmissionRe
 
     const meta = {
       timestamp: submissionData.meta?.timestamp || new Date().toISOString(),
-      userAgent: submissionData.meta?.userAgent || getHeader(event, 'User-Agent'),
+      userAgent:
+        submissionData.meta?.userAgent || getHeader(event, 'User-Agent'),
       referrer: submissionData.meta?.referrer || getHeader(event, 'Referer'),
       ip: clientIP,
     };
@@ -109,7 +117,7 @@ export default async function handleSubmit(event: H3Event): Promise<SubmissionRe
 
     throw createError({
       statusCode: 500,
-      statusMessage: 'Internal server error'
+      statusMessage: 'Internal server error',
     });
   }
 }

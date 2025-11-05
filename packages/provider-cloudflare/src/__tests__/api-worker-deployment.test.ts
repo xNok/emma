@@ -5,7 +5,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ApiWorkerDeployment } from '../api-worker.js';
 import fs from 'fs-extra';
-import path from 'path';
 
 // Mock fs-extra
 vi.mock('fs-extra');
@@ -22,7 +21,7 @@ describe('ApiWorkerDeployment', () => {
     deployment = new ApiWorkerDeployment();
     // Set up environment
     process.env.CLOUDFLARE_API_TOKEN = mockApiToken;
-    
+
     // Reset mocks
     vi.clearAllMocks();
   });
@@ -95,15 +94,15 @@ describe('ApiWorkerDeployment', () => {
 
     it('should check for Nitro build output at .output/server/index.mjs', async () => {
       // Mock fs.pathExists to return false for the worker path
-      vi.mocked(fs.pathExists).mockResolvedValueOnce(true); // api-worker package exists
-      vi.mocked(fs.pathExists).mockResolvedValueOnce(false); // migrations dir exists
-      
+      vi.mocked(fs.pathExists).mockResolvedValueOnce(true as never); // api-worker package exists
+      vi.mocked(fs.pathExists).mockResolvedValueOnce(false as never); // migrations dir doesn't exist
+
       // Mock D1 API calls
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ result: [] }),
       });
-      
+
       // Mock database creation
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
@@ -124,68 +123,80 @@ describe('ApiWorkerDeployment', () => {
 
     it('should handle D1 database creation and migration', async () => {
       const databaseName = 'emma-submissions';
-      
+
       // Mock successful API calls
-      vi.mocked(fs.pathExists).mockResolvedValue(true);
-      vi.mocked(fs.readdir).mockResolvedValue(['0001_initial_schema.sql'] as any);
-      vi.mocked(fs.readFile).mockResolvedValue('CREATE TABLE submissions (id TEXT PRIMARY KEY);');
-      
+      vi.mocked(fs.pathExists).mockResolvedValue(true as never);
+      vi.mocked(fs.readdir).mockResolvedValue([
+        '0001_initial_schema.sql',
+      ] as any);
+      vi.mocked(fs.readFile).mockResolvedValue(
+        'CREATE TABLE submissions (id TEXT PRIMARY KEY);' as never
+      );
+
       // Mock D1 list (database doesn't exist)
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ result: [] }),
       });
-      
+
       // Mock D1 database creation
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ result: { uuid: 'new-db-id' } }),
       });
-      
+
       // Mock migration execution
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ result: [] }),
       });
-      
+
       // Mock wrangler config update
-      vi.mocked(fs.readFile).mockResolvedValueOnce('database_id = "old-id"');
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined);
-      
+      vi.mocked(fs.readFile).mockResolvedValueOnce(
+        'database_id = "old-id"' as never
+      );
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
+
       // Mock worker script read
-      vi.mocked(fs.readFile).mockResolvedValueOnce('export default { fetch() {} }');
-      
+      vi.mocked(fs.readFile).mockResolvedValueOnce(
+        'export default { fetch() {} }' as never
+      );
+
       // Mock worker deployment
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
         text: async () => 'Success',
       });
-      
+
       const result = await deployment.deploy({
         accountId: mockAccountId,
         apiToken: mockApiToken,
         databaseName,
       });
-      
+
       expect(result.success).toBe(true);
       expect(result.databaseId).toBe('new-db-id');
       expect(result.databaseName).toBe(databaseName);
     });
 
     it('should handle idempotent migrations with duplicate column errors', async () => {
-      vi.mocked(fs.pathExists).mockResolvedValue(true);
-      vi.mocked(fs.readdir).mockResolvedValue(['0002_add_submission_snapshot_fields.sql'] as any);
+      vi.mocked(fs.pathExists).mockResolvedValue(true as never);
+      vi.mocked(fs.readdir).mockResolvedValue([
+        '0002_add_submission_snapshot_fields.sql',
+      ] as any);
       vi.mocked(fs.readFile).mockResolvedValue(
-        'ALTER TABLE submissions ADD COLUMN form_snapshot INTEGER;' +
-        'ALTER TABLE submissions ADD COLUMN form_bundle TEXT;'
+        ('ALTER TABLE submissions ADD COLUMN form_snapshot INTEGER;' +
+          'ALTER TABLE submissions ADD COLUMN form_bundle TEXT;') as never
       );
-      
+
       // Mock D1 list (database exists)
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ result: [{ name: 'emma-submissions', uuid: 'existing-db-id' }] }),
+        json: async () => ({
+          result: [{ name: 'emma-submissions', uuid: 'existing-db-id' }],
+        }),
       });
-      
+
       // Mock migration execution - first statement succeeds, second fails with duplicate column
       vi.mocked(global.fetch as any)
         .mockResolvedValueOnce({
@@ -200,7 +211,7 @@ describe('ApiWorkerDeployment', () => {
           ok: true,
           json: async () => ({ result: [] }),
         });
-      
+
       // The deployment should continue despite duplicate column errors
       // This tests the idempotency handling in the migration runner
     });

@@ -21,6 +21,7 @@ Emma needs to deploy to multiple hosting providers with different runtime requir
 - **Self-hosted**: Standard Node.js server
 
 Traditional approaches require either:
+
 1. Maintaining separate codebases for each provider
 2. Complex bundler configurations for each target
 3. Limiting deployment options to a single provider
@@ -83,8 +84,9 @@ While frameworks like Hono and Express work well, they don't solve the build/dep
 ### 3.2 Component Responsibilities
 
 #### H3 - Universal HTTP Framework
+
 - **Purpose**: Runtime-agnostic HTTP handling
-- **Features**: 
+- **Features**:
   - Works in Node.js, Deno, Cloudflare Workers, Bun
   - Minimal API surface (similar to Express/Hono)
   - Native Web API support (Request/Response)
@@ -92,6 +94,7 @@ While frameworks like Hono and Express work well, they don't solve the build/dep
 - **File**: `src/server.ts`
 
 #### Nitro - Universal Build Tool
+
 - **Purpose**: Automatic bundling for any provider
 - **Features**:
   - Pre-configured presets for 20+ providers
@@ -101,6 +104,7 @@ While frameworks like Hono and Express work well, they don't solve the build/dep
 - **File**: `nitro.config.ts`
 
 #### Provider-Specific Entry Points
+
 - **Cloudflare**: `src/cloudflare-index.ts` - Sets up D1/KV bindings
 - **Node.js**: `src/index.ts` - Standard HTTP server
 - **Future**: Can add AWS, Vercel, etc. as needed
@@ -160,7 +164,7 @@ export default defineNitroConfig({
   preset: 'cloudflare-worker',
   compatibilityDate: '2025-11-05',
   entry: './cloudflare-index.ts',
-  
+
   cloudflare: {
     d1Databases: { DB: process.env.D1_DATABASE_ID },
     kvNamespaces: { SCHEMA_CACHE: process.env.KV_NAMESPACE_ID },
@@ -172,30 +176,33 @@ export default defineNitroConfig({
 
 ```typescript
 // src/server.ts
-import { createApp, defineEventHandler } from 'h3'
-import handleSubmit from './handlers/submit'
+import { createApp, defineEventHandler } from 'h3';
+import handleSubmit from './handlers/submit';
 
-const app = createApp()
+const app = createApp();
 
 // Universal middleware (works everywhere)
-app.use('/**', defineEventHandler((event) => {
-  // CORS, logging, etc.
-}))
+app.use(
+  '/**',
+  defineEventHandler((event) => {
+    // CORS, logging, etc.
+  })
+);
 
 // Routes
-app.use('/submit/:formId', defineEventHandler(handleSubmit))
+app.use('/submit/:formId', defineEventHandler(handleSubmit));
 
-export default app
+export default app;
 ```
 
 ### 4.5 Provider-Specific Setup
 
 ```typescript
 // src/cloudflare-index.ts
-import { toWebHandler } from 'h3'
-import app from './server'
+import { toWebHandler } from 'h3';
+import app from './server';
 
-const handler = toWebHandler(app)
+const handler = toWebHandler(app);
 
 export default {
   async fetch(request, env, ctx) {
@@ -206,9 +213,9 @@ export default {
       submissionRepository: new D1SubmissionRepository(env.DB),
       schemaRepository: new KvCacheSchemaRepository(env.SCHEMA_CACHE),
     };
-    
+
     return handler(request);
-  }
+  },
 };
 ```
 
@@ -224,7 +231,7 @@ if (allowedOriginsEnv === '*') {
   allowOrigin = '*'; // Development only
 } else {
   // Production: validate against whitelist
-  const allowedOrigins = allowedOriginsEnv.split(',').map(o => o.trim());
+  const allowedOrigins = allowedOriginsEnv.split(',').map((o) => o.trim());
   if (allowedOrigins.includes(requestOrigin)) {
     allowOrigin = requestOrigin;
   }
@@ -246,7 +253,7 @@ const validationResult = SubmissionRequestSchema.safeParse(body);
 if (!validationResult.success) {
   throw createError({
     statusCode: 400,
-    data: { errors: validationResult.error.issues }
+    data: { errors: validationResult.error.issues },
   });
 }
 ```
@@ -254,21 +261,25 @@ if (!validationResult.success) {
 ## 6. Testing Strategy
 
 ### 6.1 Unit Tests
+
 - Handler-level tests (submit, health)
 - Repository tests (D1, KV)
 - Validation tests (Zod schemas)
 
 ### 6.2 Integration Tests
+
 - H3 app tests with mocked environment
 - Cloudflare Worker simulation
 - End-to-end request/response tests
 
 ### 6.3 Provider Tests
+
 - Cloudflare provider deployment tests
 - API worker deployment verification
 - Migration idempotency tests
 
 ### 6.4 Test Files
+
 ```
 src/__tests__/
 ├── server.test.ts           # H3 app tests
@@ -286,20 +297,23 @@ packages/provider-cloudflare/src/__tests__/
 ### 7.1 Steps to Add a New Provider
 
 1. **Create Provider Entry Point**
+
    ```typescript
    // src/digitalocean-index.ts
-   import { toNodeListener } from 'h3'
-   import app from './server'
-   
-   export default toNodeListener(app)
+   import { toNodeListener } from 'h3';
+   import app from './server';
+
+   export default toNodeListener(app);
    ```
 
 2. **Add Nitro Preset**
+
    ```bash
    nitro build --preset digitalocean
    ```
 
 3. **Configure Provider-Specific Resources**
+
    ```typescript
    // src/digitalocean-index.ts
    event.context.env = {
@@ -309,6 +323,7 @@ packages/provider-cloudflare/src/__tests__/
    ```
 
 4. **Add Build Script**
+
    ```json
    {
      "scripts": {
@@ -357,6 +372,7 @@ yarn deploy
 ### 8.2 Provider Package Integration
 
 The `provider-cloudflare` package:
+
 1. Builds the api-worker using Nitro
 2. Creates/configures D1 database
 3. Runs migrations
@@ -367,13 +383,13 @@ The `provider-cloudflare` package:
 // packages/provider-cloudflare/src/api-worker.ts
 const scriptPath = path.join(
   this.apiWorkerPath,
-  '.output/server/index.mjs'  // Nitro output
+  '.output/server/index.mjs' // Nitro output
 );
 
-await fetch(
-  `https://api.cloudflare.com/.../workers/scripts/${workerName}`,
-  { method: 'PUT', body: await fs.readFile(scriptPath) }
-);
+await fetch(`https://api.cloudflare.com/.../workers/scripts/${workerName}`, {
+  method: 'PUT',
+  body: await fs.readFile(scriptPath),
+});
 ```
 
 ## 9. Migration Path
@@ -381,12 +397,14 @@ await fetch(
 ### 9.1 From Previous Architecture
 
 **Before** (esbuild manual bundling):
+
 - Separate build configs for each target
 - Manual Worker binding setup
 - Custom bundler configuration
 - Hono-specific adapters
 
 **After** (Nitro + H3):
+
 - Single `nitro.config.ts`
 - Automatic Worker binding detection
 - Zero-config builds for most providers
@@ -427,21 +445,23 @@ await fetch(
 
 ### 11.2 Trade-offs Made
 
-| Aspect | Trade-off | Rationale |
-|--------|-----------|-----------|
-| Bundle size | +10-20 KB | Worth it for multi-provider support |
-| Build complexity | More abstraction | Simplifies long-term maintenance |
-| Flexibility | Opinionated presets | Reduces configuration burden |
+| Aspect           | Trade-off           | Rationale                           |
+| ---------------- | ------------------- | ----------------------------------- |
+| Bundle size      | +10-20 KB           | Worth it for multi-provider support |
+| Build complexity | More abstraction    | Simplifies long-term maintenance    |
+| Flexibility      | Opinionated presets | Reduces configuration burden        |
 
 ## 12. Future Enhancements
 
 ### 12.1 Short Term
+
 - [ ] Add source maps for debugging
 - [ ] Implement Nitro dev mode with hot reload
 - [ ] Add performance monitoring
 - [ ] Create provider templates
 
 ### 12.2 Long Term
+
 - [ ] Add AWS Lambda support
 - [ ] Add DigitalOcean Functions support
 - [ ] Add Vercel Edge support

@@ -41,7 +41,7 @@ describe('API Worker', () => {
     const req = createRequestWithEnv('http://localhost/health', {
       method: 'GET',
     });
-    
+
     const handler = toWebHandler(app);
     const res = await handler(req);
     expect(res.status).toBe(200);
