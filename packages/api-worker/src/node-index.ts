@@ -5,16 +5,18 @@
 
 import { createServer } from 'node:http';
 import { toNodeHandler } from 'h3';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import type { FormSchema } from '@xnok/emma-shared/types';
 import app from './server.js';
 import type { Env } from './env.js';
 
 // Mock repositories for local development
 class MockSubmissionRepository {
-  async saveSubmission(
+  saveSubmission(
     submissionId: string,
     formId: string,
     data: Record<string, string | string[]>,
-    meta: any,
+    meta: Record<string, unknown>,
     formSnapshot?: number,
     formBundle?: string
   ): Promise<void> {
@@ -25,14 +27,15 @@ class MockSubmissionRepository {
     console.log(`  Bundle: ${formBundle || 'N/A'}`);
     console.log(`  Data:`, data);
     console.log(`  Meta:`, meta);
+    return Promise.resolve();
   }
 }
 
 class MockSchemaRepository {
-  async getSchema(formId: string): Promise<any> {
+  getSchema(formId: string): Promise<FormSchema | null> {
     // Return a permissive schema for local testing
     console.log(`📋 Loading schema for form: ${formId} (mock)`);
-    return {
+    return Promise.resolve({
       formId,
       name: `Test Form ${formId}`,
       fields: [], // Accept any fields for testing
@@ -40,7 +43,7 @@ class MockSchemaRepository {
       version: '1.0.0',
       apiEndpoint: `/api/submit/${formId}`,
       currentSnapshot: Date.now(),
-    };
+    });
   }
 }
 
@@ -48,14 +51,15 @@ class MockSchemaRepository {
 const handler = toNodeHandler(app);
 
 // Wrap handler to inject mock env
-const wrappedHandler = (req: any, res: any) => {
+const wrappedHandler = (req: IncomingMessage, res: ServerResponse) => {
   // Inject mock env into request
-  req.__env = {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  (req as IncomingMessage & { __env?: Partial<Env> }).__env = {
     submissionRepository: new MockSubmissionRepository(),
     schemaRepository: new MockSchemaRepository(),
     ALLOWED_ORIGINS: '*', // Allow all origins for local development
   } as Partial<Env>;
-  
+
   return handler(req, res);
 };
 

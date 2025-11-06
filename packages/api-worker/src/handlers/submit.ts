@@ -108,9 +108,11 @@ export default async function handleSubmit(
     };
 
     return response;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Submission error:', error);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (error.statusCode) {
       throw error; // Re-throw H3 errors
     }

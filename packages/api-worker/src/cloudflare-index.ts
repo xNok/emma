@@ -29,6 +29,7 @@ export default {
     const modifiedRequest = new Request(request);
 
     // Store env on the request object so we can access it in middleware
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (modifiedRequest as any).__env = {
       ...env,
       submissionRepository,
