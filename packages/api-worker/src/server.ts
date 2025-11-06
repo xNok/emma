@@ -7,7 +7,9 @@ import {
   setResponseStatus,
   getHeader,
 } from 'h3';
+import type { H3Event } from 'h3';
 import handleSubmit from './handlers/submit';
+import type { Env, RequestWithEnv } from './env';
 
 const app = createApp();
 const router = createRouter();
@@ -17,11 +19,8 @@ app.use(
   '/**',
   defineEventHandler((event) => {
     // Get env from request if available
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    const request = event.node?.req as any;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const request = event.node?.req as RequestWithEnv | undefined;
     if (request?.__env) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       event.context.env = request.__env;
     }
     // Continue to next middleware
@@ -32,13 +31,10 @@ app.use(
 // CORS middleware with configurable origins
 app.use(
   '/**',
-  defineEventHandler((event) => {
+  defineEventHandler((event: H3Event) => {
     // Read allowed origins from environment variable
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    const env = event.context.env as any;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const env = event.context.env as Env | undefined;
     const allowedOriginsEnv: string =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       process.env.ALLOWED_ORIGINS || env?.ALLOWED_ORIGINS || '';
 
     let allowOrigin = '';
@@ -104,7 +100,6 @@ router.get(
 );
 
 // Mount router
-// eslint-disable-next-line @typescript-eslint/unbound-method
-app.use(router.handler);
+app.use((event) => router.handler(event));
 
 export default app;

@@ -8,7 +8,7 @@ import { toNodeHandler } from 'h3';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { FormSchema } from '@xnok/emma-shared/types';
 import app from './server.js';
-import type { Env } from './env.js';
+import type { Env, RequestWithEnv } from './env.js';
 
 // Mock repositories for local development
 class MockSubmissionRepository {
@@ -32,7 +32,7 @@ class MockSubmissionRepository {
 }
 
 class MockSchemaRepository {
-  getSchema(formId: string): Promise<FormSchema | null> {
+  getSchema(formId: string): Promise<FormSchema> {
     // Return a permissive schema for local testing
     console.log(`📋 Loading schema for form: ${formId} (mock)`);
     return Promise.resolve({
@@ -53,12 +53,12 @@ const handler = toNodeHandler(app);
 // Wrap handler to inject mock env
 const wrappedHandler = (req: IncomingMessage, res: ServerResponse) => {
   // Inject mock env into request
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  (req as IncomingMessage & { __env?: Partial<Env> }).__env = {
+  const reqWithEnv = req as IncomingMessage & RequestWithEnv;
+  reqWithEnv.__env = {
     submissionRepository: new MockSubmissionRepository(),
     schemaRepository: new MockSchemaRepository(),
     ALLOWED_ORIGINS: '*', // Allow all origins for local development
-  } as Partial<Env>;
+  } as Env;
 
   return handler(req, res);
 };

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import app from '../server';
 import { FormSchema } from '@xnok/emma-shared/types';
-import { Env } from '../env';
+import { Env, RequestWithEnv } from '../env';
 import { D1Database } from '@cloudflare/workers-types';
 import { KVNamespace } from '@cloudflare/workers-types';
 import { toWebHandler } from 'h3';
@@ -30,10 +30,12 @@ const mockEnv: Env = {
 };
 
 // Helper to create request with env
-function createRequestWithEnv(url: string, options: RequestInit = {}) {
-  const req = new Request(url, options);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  (req as any).__env = mockEnv;
+function createRequestWithEnv(
+  url: string,
+  options: RequestInit = {}
+): RequestWithEnv {
+  const req = new Request(url, options) as RequestWithEnv;
+  req.__env = mockEnv;
   return req;
 }
 

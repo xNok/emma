@@ -4,7 +4,7 @@ import {
   CdnSchemaRepository,
   KvCacheSchemaRepository,
 } from './data/schema-repository';
-import { Env } from './env';
+import { Env, RequestWithEnv } from './env';
 import app from './server';
 import type { ExecutionContext } from '@cloudflare/workers-types';
 
@@ -26,11 +26,10 @@ export default {
     );
 
     // Create a new request with env attached for H3 to access
-    const modifiedRequest = new Request(request);
+    const modifiedRequest = new Request(request) as RequestWithEnv;
 
     // Store env on the request object so we can access it in middleware
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    (modifiedRequest as any).__env = {
+    modifiedRequest.__env = {
       ...env,
       submissionRepository,
       schemaRepository,

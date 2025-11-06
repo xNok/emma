@@ -14,3 +14,8 @@ export interface Env {
   MAX_SUBMISSION_SIZE: string;
   ALLOWED_ORIGINS: string;
 }
+
+// Extended Request type with __env property for passing env through H3
+export interface RequestWithEnv extends Request {
+  __env?: Env;
+}
