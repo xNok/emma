@@ -38,6 +38,7 @@ app.use(
     const env = event.context.env as any;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const allowedOriginsEnv: string =
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       process.env.ALLOWED_ORIGINS || env?.ALLOWED_ORIGINS || '';
 
     let allowOrigin = '';

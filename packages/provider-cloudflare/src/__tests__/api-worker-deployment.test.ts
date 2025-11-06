@@ -98,14 +98,18 @@ describe('ApiWorkerDeployment', () => {
       vi.mocked(fs.pathExists).mockResolvedValueOnce(false as never); // migrations dir doesn't exist
 
       // Mock D1 API calls
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
         json: async () => ({ result: [] }),
       });
 
       // Mock database creation
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
         json: async () => ({ result: { uuid: 'test-db-id' } }),
       });
 
@@ -114,9 +118,12 @@ describe('ApiWorkerDeployment', () => {
           accountId: mockAccountId,
           apiToken: mockApiToken,
         });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         // Expect specific error about worker script not found
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(error.message).toContain('.output/server/index.mjs');
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(error.message).toContain('yarn build:cloudflare');
       }
     });
@@ -126,28 +133,36 @@ describe('ApiWorkerDeployment', () => {
 
       // Mock successful API calls
       vi.mocked(fs.pathExists).mockResolvedValue(true as never);
-      vi.mocked(fs.readdir).mockResolvedValue([
-        '0001_initial_schema.sql',
-      ] as any);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      vi.mocked(fs.readdir).mockResolvedValue(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        ['0001_initial_schema.sql'] as any
+      );
       vi.mocked(fs.readFile).mockResolvedValue(
         'CREATE TABLE submissions (id TEXT PRIMARY KEY);' as never
       );
 
       // Mock D1 list (database doesn't exist)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
         json: async () => ({ result: [] }),
       });
 
       // Mock D1 database creation
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
         json: async () => ({ result: { uuid: 'new-db-id' } }),
       });
 
       // Mock migration execution
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
         json: async () => ({ result: [] }),
       });
 
@@ -163,8 +178,10 @@ describe('ApiWorkerDeployment', () => {
       );
 
       // Mock worker deployment
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
         text: async () => 'Success',
       });
 
@@ -179,36 +196,60 @@ describe('ApiWorkerDeployment', () => {
       expect(result.databaseName).toBe(databaseName);
     });
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     it('should handle idempotent migrations with duplicate column errors', async () => {
       vi.mocked(fs.pathExists).mockResolvedValue(true as never);
-      vi.mocked(fs.readdir).mockResolvedValue([
-        '0002_add_submission_snapshot_fields.sql',
-      ] as any);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      vi.mocked(fs.readdir).mockResolvedValue(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        ['0002_add_submission_snapshot_fields.sql'] as any
+      );
       vi.mocked(fs.readFile).mockResolvedValue(
         ('ALTER TABLE submissions ADD COLUMN form_snapshot INTEGER;' +
           'ALTER TABLE submissions ADD COLUMN form_bundle TEXT;') as never
       );
 
       // Mock D1 list (database exists)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       vi.mocked(global.fetch as any).mockResolvedValueOnce({
         ok: true,
+        // eslint-disable-next-line @typescript-eslint/require-await
         json: async () => ({
           result: [{ name: 'emma-submissions', uuid: 'existing-db-id' }],
         }),
       });
 
       // Mock migration execution - first statement succeeds, second fails with duplicate column
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
       vi.mocked(global.fetch as any)
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .mockResolvedValueOnce({
           ok: true,
+          // eslint-disable-next-line @typescript-eslint/require-await
           json: async () => ({ result: [] }),
         })
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .mockResolvedValueOnce({
           ok: false,
+          // eslint-disable-next-line @typescript-eslint/require-await
           text: async () => 'duplicate column name: form_snapshot',
         })
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .mockResolvedValueOnce({
           ok: true,
+          // eslint-disable-next-line @typescript-eslint/require-await
+          json: async () => ({ result: [] }),
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .mockResolvedValueOnce({
+          ok: false,
+          // eslint-disable-next-line @typescript-eslint/require-await
+          text: async () => 'duplicate column name: form_snapshot',
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .mockResolvedValueOnce({
+          ok: true,
+          // eslint-disable-next-line @typescript-eslint/require-await
           json: async () => ({ result: [] }),
         });
 

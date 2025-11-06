@@ -32,6 +32,7 @@ const mockEnv: Env = {
 // Helper to create request with env
 function createRequestWithEnv(url: string, options: RequestInit = {}) {
   const req = new Request(url, options);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   (req as any).__env = mockEnv;
   return req;
 }
