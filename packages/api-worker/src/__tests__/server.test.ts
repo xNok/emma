@@ -1,10 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import app from '../server';
+import { toWebHandler } from '../server';
 import { FormSchema } from '@xnok/emma-shared/types';
 import { Env, RequestWithEnv } from '../env';
 import { D1Database } from '@cloudflare/workers-types';
 import { KVNamespace } from '@cloudflare/workers-types';
-import { toWebHandler } from 'h3';
 
 const mockEnv: Env = {
   DB: {
@@ -45,7 +44,7 @@ describe('API Worker', () => {
       method: 'GET',
     });
 
-    const handler = toWebHandler(app);
+    const handler = toWebHandler();
     const res = await handler(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
@@ -91,7 +90,7 @@ describe('API Worker', () => {
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler(app);
+    const handler = toWebHandler();
     const res = await handler(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
@@ -135,7 +134,7 @@ describe('API Worker', () => {
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler(app);
+    const handler = toWebHandler();
     const res = await handler(req);
     expect(res.status).toBe(404);
   });
@@ -169,7 +168,7 @@ describe('API Worker', () => {
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler(app);
+    const handler = toWebHandler();
     const res = await handler(req);
     expect(res.status).toBe(400);
   });
@@ -206,7 +205,7 @@ describe('API Worker', () => {
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler(app);
+    const handler = toWebHandler();
     const res = await handler(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {

@@ -1,15 +1,14 @@
-import { toWebHandler } from 'h3';
 import { D1SubmissionRepository } from './data/submission-repository';
 import {
   CdnSchemaRepository,
   KvCacheSchemaRepository,
 } from './data/schema-repository';
 import { Env, RequestWithEnv } from './env';
-import app from './server';
+import { toWebHandler } from './server';
 import type { ExecutionContext } from '@cloudflare/workers-types';
 
 // Create the H3 web handler
-const handler = toWebHandler(app);
+const handler = toWebHandler();
 
 /**
  * Cloudflare Workers entry point

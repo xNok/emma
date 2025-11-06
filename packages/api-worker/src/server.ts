@@ -6,6 +6,7 @@ import {
   getMethod,
   setResponseStatus,
   getHeader,
+  toWebHandler as h3ToWebHandler,
 } from 'h3';
 import type { H3Event } from 'h3';
 import handleSubmit from './handlers/submit';
@@ -14,16 +15,38 @@ import type { Env, RequestWithEnv } from './env';
 const app = createApp();
 const router = createRouter();
 
-// Middleware to extract env from request (set by cloudflare-index or tests)
+// Temporary storage for current request env (used to pass env through H3's web handler)
+let currentRequestEnv: Env | undefined;
+
+// Create a web handler that properly extracts env from RequestWithEnv
+export function toWebHandler() {
+  const baseHandler = h3ToWebHandler(app);
+  
+  return async (request: Request): Promise<Response> => {
+    // Extract env from RequestWithEnv before calling the handler
+    const reqWithEnv = request as RequestWithEnv;
+    
+    // Store env in module scope temporarily so middleware can access it
+    if (reqWithEnv.__env) {
+      currentRequestEnv = reqWithEnv.__env;
+    }
+    
+    const response = await baseHandler(request);
+    
+    // Clean up
+    currentRequestEnv = undefined;
+    
+    return response;
+  };
+}
+
+// Middleware to inject env from temporary storage into event context
 app.use(
   '/**',
   defineEventHandler((event) => {
-    // Get env from request if available
-    const request = event.node?.req as RequestWithEnv | undefined;
-    if (request?.__env) {
-      event.context.env = request.__env;
+    if (currentRequestEnv) {
+      event.context.env = currentRequestEnv;
     }
-    // Continue to next middleware
     return;
   })
 );

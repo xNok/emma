@@ -98,11 +98,19 @@ describe('ApiWorkerDeployment', () => {
     });
 
     it('should check for Nitro build output at .output/server/index.mjs', async () => {
-      // Mock fs.pathExists to return false for the worker path
+      // Mock fs.pathExists - first check for api-worker package, second for migrations dir
       vi.mocked(fs.pathExists).mockResolvedValueOnce(true as never); // api-worker package exists
-      vi.mocked(fs.pathExists).mockResolvedValueOnce(false as never); // migrations dir doesn't exist
+      vi.mocked(fs.pathExists).mockResolvedValueOnce(true as never); // migrations dir exists
 
-      // Mock D1 API calls
+      // Mock readdir for migrations
+      vi.mocked(fs.readdir).mockResolvedValue([
+        '0001_initial_schema.sql',
+      ] as never);
+      vi.mocked(fs.readFile).mockResolvedValue(
+        'CREATE TABLE submissions (id TEXT PRIMARY KEY);' as never
+      );
+
+      // Mock D1 list (database doesn't exist)
       mockFetch.mockResolvedValueOnce(
         new Response(JSON.stringify({ result: [] }), {
           status: 200,
@@ -117,6 +125,39 @@ describe('ApiWorkerDeployment', () => {
           headers: { 'Content-Type': 'application/json' },
         })
       );
+
+      // Mock D1 list for executeD1Query to find the newly created database
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            result: [{ name: 'emma-submissions', uuid: 'test-db-id' }],
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
+      );
+
+      // Mock migration execution
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ result: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+
+      // Mock wrangler.toml path check
+      vi.mocked(fs.pathExists).mockResolvedValueOnce(true as never); // wrangler.toml exists
+
+      // Mock wrangler config update
+      vi.mocked(fs.readFile).mockResolvedValueOnce(
+        'database_id = "old-id"' as never
+      );
+      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
+
+      // Mock worker script path check - this should return false to trigger the error
+      vi.mocked(fs.pathExists).mockResolvedValueOnce(false as never); // worker script doesn't exist
 
       try {
         await deployment.deploy({
@@ -159,6 +200,19 @@ describe('ApiWorkerDeployment', () => {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
         })
+      );
+
+      // Mock D1 list for executeD1Query to find the newly created database
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            result: [{ name: databaseName, uuid: 'new-db-id' }],
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
       );
 
       // Mock migration execution

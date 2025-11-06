@@ -47,23 +47,21 @@ class MockSchemaRepository {
   }
 }
 
-// Create handler with mock env
-const handler = toNodeHandler(app);
+// Create mock env
+const mockEnv: Env = {
+  submissionRepository: new MockSubmissionRepository(),
+  schemaRepository: new MockSchemaRepository(),
+  ALLOWED_ORIGINS: '*', // Allow all origins for local development
+} as Env;
 
-// Wrap handler to inject mock env
-const wrappedHandler = (req: IncomingMessage, res: ServerResponse) => {
-  // Inject mock env into request
-  const reqWithEnv = req as IncomingMessage & RequestWithEnv;
-  reqWithEnv.__env = {
-    submissionRepository: new MockSubmissionRepository(),
-    schemaRepository: new MockSchemaRepository(),
-    ALLOWED_ORIGINS: '*', // Allow all origins for local development
-  } as Env;
+// Create handler with mock env injected into context
+const handler = toNodeHandler(app, {
+  context: {
+    env: mockEnv,
+  },
+});
 
-  return handler(req, res);
-};
-
-const server = createServer(wrappedHandler);
+const server = createServer(handler);
 
 const port = process.env.PORT || 3001;
 const host = process.env.HOST || 'localhost';
