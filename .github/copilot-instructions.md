@@ -49,10 +49,10 @@ This process ensures that anyone joining the project can get up to speed quickly
 - Propose improvements
 - **Update docs first** before changing architecture
 
-### Always validate code when task is done
+### !important always validate code
 
 ```bash
-# Essential commands
+# Run the following commands and address all issues
 yarn build
 yarn lint
 yarn test
