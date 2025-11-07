@@ -27,12 +27,11 @@ export interface FormSchemaOptions {
 export function buildFormSchema(options: FormSchemaOptions): FormSchema {
   const now = Math.floor(Date.now() / 1000); // Unix timestamp (seconds since epoch)
 
-  // Mark fields with creation timestamp
-  options.fields.forEach((field) => {
-    if (!field.addedAt) {
-      field.addedAt = now;
-    }
-  });
+  // Mark fields with creation timestamp (pure, non-mutating)
+  const fieldsWithTimestamps = options.fields.map((field) => ({
+    ...field,
+    addedAt: field.addedAt ?? now,
+  }));
 
   const schema: FormSchema = {
     formId: options.formId,
@@ -40,7 +39,7 @@ export function buildFormSchema(options: FormSchemaOptions): FormSchema {
     version: '1.0.0',
     theme: options.theme,
     apiEndpoint: options.apiEndpoint,
-    fields: options.fields,
+    fields: fieldsWithTimestamps,
     settings: {
       submitButtonText: options.submitButtonText || 'Submit',
       successMessage:
@@ -74,7 +73,10 @@ export function buildFormSchema(options: FormSchemaOptions): FormSchema {
  * Generate a unique form ID from a base name
  */
 export function generateFormId(baseName: string): string {
-  const baseId = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const baseId = baseName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
   const timestamp = Date.now().toString().slice(-3);
   return `${baseId}-${timestamp}`;
 }
@@ -131,14 +133,12 @@ export function addFieldToSchema(
 ): FormSchema {
   const now = Math.floor(Date.now() / 1000);
 
-  // Mark field with added timestamp if not already set
-  if (!field.addedAt) {
-    field.addedAt = now;
-  }
+  // Mark field with added timestamp if not already set, without mutating input
+  const fieldWithTimestamp = { ...field, addedAt: field.addedAt ?? now };
 
   return {
     ...schema,
-    fields: [...schema.fields, field],
+    fields: [...schema.fields, fieldWithTimestamp],
     lastModified: now,
   };
 }

@@ -48,7 +48,8 @@ export function getBaseFieldPrompts(
       message: 'Field label:',
       default: `Field ${fieldNumber}`,
       validate: (input: unknown) =>
-        (input as string).trim().length > 0 || 'Label is required',
+        (typeof input === 'string' && input.trim().length > 0) ||
+        'Label is required',
     },
     {
       type: 'input',
@@ -59,7 +60,7 @@ export function getBaseFieldPrompts(
         return label.toLowerCase().replace(/[^a-z0-9]+/g, '_');
       },
       validate: (input: unknown) =>
-        /^[a-z][a-z0-9_]*$/.test(input as string) ||
+        (typeof input === 'string' && /^[a-z][a-z0-9_]*$/.test(input)) ||
         'ID must start with letter and contain only letters, numbers, and underscores',
     },
   ];
@@ -135,7 +136,7 @@ export function getHiddenFieldPrompts(): PromptQuestion[] {
       name: 'defaultValue',
       message: 'Hidden value:',
       validate: (input: unknown) =>
-        (input as string).trim().length > 0 ||
+        (typeof input === 'string' && input.trim().length > 0) ||
         'Value is required for hidden fields',
     },
   ];

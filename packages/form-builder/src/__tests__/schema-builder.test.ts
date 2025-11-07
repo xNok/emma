@@ -23,14 +23,18 @@ describe('Schema Builder', () => {
 
     it('should normalize spaces and special characters', () => {
       const formId = generateFormId('My Contact Form!');
-      // Matches "my-contact-form-" followed by 3 digits
-      // The trailing special character creates a trailing dash before timestamp
-      expect(formId).toMatch(/^my-contact-form-+\d{3}$/);
+      // Trailing special characters are now stripped
+      expect(formId).toMatch(/^my-contact-form-\d{3}$/);
     });
 
     it('should handle multiple consecutive special characters', () => {
       const formId = generateFormId('form___with---dashes');
       expect(formId).toMatch(/^form-with-dashes-\d{3}$/);
+    });
+
+    it('should strip leading and trailing dashes', () => {
+      const formId = generateFormId('!@#contact-form$%^');
+      expect(formId).toMatch(/^contact-form-\d{3}$/);
     });
   });
 
