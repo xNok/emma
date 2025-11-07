@@ -41,6 +41,7 @@ This process ensures that anyone joining the project can get up to speed quickly
 - Focus on implementing features from docs
 - important: Write tests alongside code
 - Ensure code quality with linting and formatting
+- Create a changeset to announce the changes made which will be includd in the release note
 
 ### As an Architect
 
@@ -54,8 +55,8 @@ This process ensures that anyone joining the project can get up to speed quickly
 ```bash
 # Run the following commands and address all issues
 yarn build
-yarn lint
 yarn test
+yarn lint
 yarn format:check
 yarn typecheck
 ```
