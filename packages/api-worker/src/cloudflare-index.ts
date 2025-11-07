@@ -1,29 +1,42 @@
-import { toWebHandler } from 'h3'
 import { D1SubmissionRepository } from './data/submission-repository';
 import {
   CdnSchemaRepository,
   KvCacheSchemaRepository,
 } from './data/schema-repository';
-import { Env } from './env';
-import app from './server';
+import { Env, RequestWithEnv } from './env';
+import { toWebHandler } from './server';
+import type { ExecutionContext } from '@cloudflare/workers-types';
 
-// Set up repositories and create handler
-const handler = toWebHandler(app)
+// Create the H3 web handler
+const handler = toWebHandler();
 
+/**
+ * Cloudflare Workers entry point
+ * This handler initializes the environment and repositories for each request
+ */
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    // Initialize repositories
-    const cdnSchemaRepository = new CdnSchemaRepository(env.CDN_URL);
-    env.submissionRepository = new D1SubmissionRepository(env.DB);
-    env.schemaRepository = new KvCacheSchemaRepository(
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
+    // Initialize repositories with Cloudflare bindings
+    const cdnSchemaRepository = new CdnSchemaRepository(env.CDN_URL || '');
+    const submissionRepository = new D1SubmissionRepository(env.DB);
+    const schemaRepository = new KvCacheSchemaRepository(
       env.SCHEMA_CACHE,
       cdnSchemaRepository
     );
 
-    // Set env in global context for H3
-    (globalThis as any).env = env;
+    // Create a new request with env attached for H3 to access
+    const modifiedRequest = new Request(request) as RequestWithEnv;
+
+    // Store env on the request object so we can access it in middleware
+    modifiedRequest.__env = {
+      ...env,
+      submissionRepository,
+      schemaRepository,
+    };
 
     // Handle the request
-    return handler(request);
-  }
+    const response = await handler(modifiedRequest);
+
+    return response;
+  },
 };

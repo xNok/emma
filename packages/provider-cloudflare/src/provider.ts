@@ -343,9 +343,9 @@ export function createCloudflareProvider(
               )
             );
             return {
-              success: false,
+              success: true,
               message:
-                'Configuration saved but API worker deployment failed. You can deploy manually later.',
+                'Configuration saved, but API worker deployment failed. Please deploy the API worker manually or try again later.',
             };
           }
         } else {

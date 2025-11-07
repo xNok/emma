@@ -186,18 +186,25 @@ export class ApiWorkerDeployment {
       // This allows for better error handling and idempotency
       const statements = sql
         .split(';')
-        .map(s => s.trim())
-        .filter(s => s.length > 0 && !s.startsWith('--'));
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && !s.startsWith('--'));
 
       for (const statement of statements) {
         try {
-          await this.executeD1Query(databaseName, statement, accountId, apiToken);
+          await this.executeD1Query(
+            databaseName,
+            statement,
+            accountId,
+            apiToken
+          );
         } catch (error) {
           // For DDL statements like ALTER TABLE, ignore "already exists" errors
-          if (statement.toUpperCase().includes('ALTER TABLE') &&
-              error instanceof Error &&
-              (error.message.includes('duplicate column name') ||
-               error.message.includes('already exists'))) {
+          if (
+            statement.toUpperCase().includes('ALTER TABLE') &&
+            error instanceof Error &&
+            (error.message.includes('duplicate column name') ||
+              error.message.includes('already exists'))
+          ) {
             // Column already exists, continue
             continue;
           }
@@ -255,10 +262,18 @@ export class ApiWorkerDeployment {
         ? `emma-api-${environment}`
         : 'emma-api';
 
-    // Read the worker script
-    const scriptPath = path.join(this.apiWorkerPath, 'dist', 'index.js');
+    // Read the worker script from Nitro's output
+    const scriptPath = path.join(
+      this.apiWorkerPath,
+      '.output',
+      'server',
+      'index.mjs'
+    );
     if (!(await fs.pathExists(scriptPath))) {
-      throw new Error(`Worker script not found at ${scriptPath}`);
+      throw new Error(
+        `Worker script not found at ${scriptPath}. ` +
+          'Please run "yarn build:cloudflare" in the api-worker package first.'
+      );
     }
     const script = await fs.readFile(scriptPath, 'utf-8');
 
