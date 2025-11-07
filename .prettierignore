@@ -20,3 +20,7 @@ package-lock.json
 
 # OS files
 .DS_Store
+
+# nitro files
+.output/
+.nitro/

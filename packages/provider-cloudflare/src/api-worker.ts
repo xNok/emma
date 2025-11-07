@@ -1,18 +1,12 @@
 /**
  * API Worker Deployment Utilities
- * Handles Cloudflare Worker deployment using Wrangler
+ * Handles Cloudflare Worker deployment using Cloudflare API
  */
 
-import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import ora from 'ora';
-import { fileURLToPath } from 'url';
-
-// ES module equivalent of __filename and __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export interface ApiWorkerDeploymentOptions {
   accountId: string;
@@ -35,13 +29,20 @@ export class ApiWorkerDeployment {
   private apiWorkerPath: string;
 
   constructor() {
-    // Use bundled resources (migrations) from the form-builder package
-    // This works both in dev (src/resources) and production (dist/resources)
-    const isDev = __filename.includes('/src/');
-    const basePath = isDev
-      ? path.resolve(__dirname, '..')
-      : path.resolve(__dirname, '..');
-    this.resourcesPath = path.join(basePath, 'resources');
+    // Use migrations from the api-worker package
+    try {
+      // Try to require.resolve the api-worker package
+      const apiWorkerPackagePath = require.resolve(
+        '@xnok/emma-api-worker/package.json'
+      );
+      this.resourcesPath = path.join(path.dirname(apiWorkerPackagePath), 'src');
+    } catch (error) {
+      // Fallback to monorepo structure for development
+      this.resourcesPath = path.resolve(
+        process.cwd(),
+        'packages/api-worker/src'
+      );
+    }
 
     // Find the api-worker package installation
     // In production (npm install), it will be in node_modules
@@ -101,7 +102,7 @@ export class ApiWorkerDeployment {
 
       // Step 3: Run migrations (using bundled migrations from form-builder)
       spinner = ora('Running database migrations...').start();
-      await this.runMigrations(databaseName, apiToken);
+      await this.runMigrations(databaseName, options.accountId, apiToken);
       spinner.succeed('Database migrations completed');
 
       // Step 4: Update wrangler.toml in api-worker package with database ID
@@ -141,36 +142,20 @@ export class ApiWorkerDeployment {
     apiToken: string
   ): Promise<string> {
     // First, try to list existing databases
-    const listResult = await this.runWranglerCommand(['d1', 'list', '--json'], {
-      CLOUDFLARE_API_TOKEN: apiToken,
-      CLOUDFLARE_ACCOUNT_ID: accountId,
-    });
+    const databases = await this.listD1Databases(accountId, apiToken);
+    const existing = databases.find((db) => db.name === databaseName);
 
-    try {
-      const databases = JSON.parse(listResult.stdout) as Array<{
-        name: string;
-        uuid: string;
-      }>;
-      const existing = databases.find((db) => db.name === databaseName);
-
-      if (existing) {
-        return existing.uuid;
-      }
-    } catch (error) {
-      // If JSON parsing fails or no databases exist, continue to create
+    if (existing) {
+      return existing.uuid;
     }
 
     // Database doesn't exist, create it
-    const createResult = await this.runWranglerCommand(
-      ['d1', 'create', databaseName, '--json'],
-      { CLOUDFLARE_API_TOKEN: apiToken, CLOUDFLARE_ACCOUNT_ID: accountId }
+    const createResult = await this.createD1Database(
+      databaseName,
+      accountId,
+      apiToken
     );
-
-    const createData = JSON.parse(createResult.stdout) as {
-      uuid?: string;
-      database_id?: string;
-    };
-    return createData.uuid || createData.database_id || '';
+    return createResult.uuid;
   }
 
   /**
@@ -178,6 +163,7 @@ export class ApiWorkerDeployment {
    */
   private async runMigrations(
     databaseName: string,
+    accountId: string,
     apiToken: string
   ): Promise<void> {
     const migrationsDir = path.join(this.resourcesPath, 'migrations');
@@ -194,11 +180,38 @@ export class ApiWorkerDeployment {
     // Execute each migration
     for (const migrationFile of migrationFiles) {
       const migrationPath = path.join(migrationsDir, migrationFile);
+      const sql = await fs.readFile(migrationPath, 'utf-8');
 
-      await this.runWranglerCommand(
-        ['d1', 'execute', databaseName, '--file', migrationPath, '--remote'],
-        { CLOUDFLARE_API_TOKEN: apiToken }
-      );
+      // Split SQL into individual statements and execute them separately
+      // This allows for better error handling and idempotency
+      const statements = sql
+        .split(';')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && !s.startsWith('--'));
+
+      for (const statement of statements) {
+        try {
+          await this.executeD1Query(
+            databaseName,
+            statement,
+            accountId,
+            apiToken
+          );
+        } catch (error) {
+          // For DDL statements like ALTER TABLE, ignore "already exists" errors
+          if (
+            statement.toUpperCase().includes('ALTER TABLE') &&
+            error instanceof Error &&
+            (error.message.includes('duplicate column name') ||
+              error.message.includes('already exists'))
+          ) {
+            // Column already exists, continue
+            continue;
+          }
+          // Re-throw other errors
+          throw error;
+        }
+      }
     }
   }
 
@@ -237,91 +250,154 @@ export class ApiWorkerDeployment {
   }
 
   /**
-   * Deploy the worker using wrangler from api-worker package
+   * Deploy the worker using Cloudflare API
    */
   private async deployWorker(
     environment: string,
     apiToken: string,
     accountId: string
   ): Promise<string> {
-    const envFlag =
-      environment && environment !== 'production' ? ['--env', environment] : [];
-
-    const result = await this.runWranglerCommand(
-      ['deploy', ...envFlag],
-      {
-        CLOUDFLARE_API_TOKEN: apiToken,
-        CLOUDFLARE_ACCOUNT_ID: accountId,
-      },
-      this.apiWorkerPath
-    );
-
-    // Extract worker URL from output
-    // Wrangler typically outputs: "Published emma-api (X.X.X)"
-    // and "https://emma-api.your-subdomain.workers.dev"
-    const urlMatch =
-      result.stdout.match(/https:\/\/[^\s]+\.workers\.dev/) ||
-      result.stderr.match(/https:\/\/[^\s]+\.workers\.dev/);
-
-    if (urlMatch) {
-      return urlMatch[0];
-    }
-
-    // If we can't find the URL, construct it
     const workerName =
       environment && environment !== 'production'
         ? `emma-api-${environment}`
         : 'emma-api';
+
+    // Read the worker script from Nitro's output
+    const scriptPath = path.join(
+      this.apiWorkerPath,
+      '.output',
+      'server',
+      'index.mjs'
+    );
+    if (!(await fs.pathExists(scriptPath))) {
+      throw new Error(
+        `Worker script not found at ${scriptPath}. ` +
+          'Please run "yarn build:cloudflare" in the api-worker package first.'
+      );
+    }
+    const script = await fs.readFile(scriptPath, 'utf-8');
+
+    // Deploy using Cloudflare API
+    const response = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          'Content-Type': 'application/javascript',
+        },
+        body: script,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Worker deployment failed: ${response.status} ${error}`);
+    }
+
     return `https://${workerName}.${accountId}.workers.dev`;
   }
 
   /**
-   * Run a wrangler command and return the result
+   * List D1 databases using Cloudflare API
    */
-  private runWranglerCommand(
-    args: string[],
-    env: Record<string, string>,
-    cwd?: string
-  ): Promise<{ stdout: string; stderr: string }> {
-    return new Promise((resolve, reject) => {
-      // Try to use yarn/npx to run wrangler, which handles Yarn PnP properly
-      const useYarn = process.env.npm_config_user_agent?.includes('yarn');
-      const command = useYarn ? 'yarn' : 'npx';
-      const fullArgs = ['wrangler', ...args];
+  private async listD1Databases(
+    accountId: string,
+    apiToken: string
+  ): Promise<Array<{ name: string; uuid: string }>> {
+    const response = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database`,
+      {
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+        },
+      }
+    );
 
-      const proc = spawn(command, fullArgs, {
-        cwd: cwd || process.cwd(),
-        env: { ...process.env, ...env },
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
+    if (!response.ok) {
+      throw new Error(
+        `Failed to list D1 databases: ${response.status} ${response.statusText}`
+      );
+    }
 
-      let stdout = '';
-      let stderr = '';
+    const data = (await response.json()) as {
+      result: Array<{ name: string; uuid: string }>;
+    };
+    return data.result || [];
+  }
 
-      proc.stdout.on('data', (data: Buffer) => {
-        stdout += data.toString();
-      });
+  /**
+   * Create D1 database using Cloudflare API
+   */
+  private async createD1Database(
+    databaseName: string,
+    accountId: string,
+    apiToken: string
+  ): Promise<{ uuid: string }> {
+    const response = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: databaseName }),
+      }
+    );
 
-      proc.stderr.on('data', (data: Buffer) => {
-        stderr += data.toString();
-      });
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(
+        `Failed to create D1 database: ${response.status} ${error}`
+      );
+    }
 
-      proc.on('close', (code) => {
-        if (code !== 0) {
-          reject(
-            new Error(
-              `Wrangler command failed with code ${code}\nSTDOUT: ${stdout}\nSTDERR: ${stderr}`
-            )
-          );
-        } else {
-          resolve({ stdout, stderr });
-        }
-      });
+    const data = (await response.json()) as { result: { uuid: string } };
+    return data.result;
+  }
 
-      proc.on('error', (error) => {
-        reject(new Error(`Failed to execute wrangler: ${error.message}`));
-      });
-    });
+  /**
+   * Execute D1 query using Cloudflare API
+   */
+  private async executeD1Query(
+    databaseName: string,
+    sql: string,
+    accountId: string,
+    apiToken: string
+  ): Promise<void> {
+    // First get the database UUID
+    const databases = await this.listD1Databases(accountId, apiToken);
+    const database = databases.find((db) => db.name === databaseName);
+    if (!database) {
+      throw new Error(`Database ${databaseName} not found`);
+    }
+
+    const response = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${database.uuid}/query`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sql }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(
+        `Failed to execute D1 query: ${response.status} ${error}`
+      );
+    }
+
+    const data = (await response.json()) as {
+      result: Array<{ error?: string }>;
+    };
+    if (data.result.some((r) => r.error)) {
+      throw new Error(`D1 query error: ${JSON.stringify(data.result)}`);
+    }
   }
 
   /**

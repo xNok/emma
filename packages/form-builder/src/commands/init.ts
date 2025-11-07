@@ -69,25 +69,25 @@ export function initCommand(config: EmmaConfig): Command {
       // Core configuration prompts
       const allPrompts = [
         {
-          key: 'theme',
+          key: 'defaultTheme',
           option: options.theme,
           prompt: {
             type: 'input' as const,
             name: 'defaultTheme',
             message: 'Default theme for new forms:',
-            default: config.get('defaultTheme'),
+            default: config.get('defaultTheme') || 'default',
             validate: (input: string) =>
               input.trim().length > 0 || 'Theme name is required',
           },
         },
         {
-          key: 'port',
+          key: 'localServerPort',
           option: options.port,
           prompt: {
             type: 'input' as const,
             name: 'localServerPort',
             message: 'Local server port for previews:',
-            default: config.get('localServerPort'),
+            default: config.get('localServerPort') || 3333,
             validate: (input: string) => {
               const port = parseInt(input, 10);
               if (isNaN(port)) {
@@ -102,13 +102,13 @@ export function initCommand(config: EmmaConfig): Command {
           },
         },
         {
-          key: 'host',
+          key: 'localServerHost',
           option: options.host,
           prompt: {
             type: 'input' as const,
             name: 'localServerHost',
             message: 'Local server host:',
-            default: config.get('localServerHost'),
+            default: config.get('localServerHost') || 'localhost',
             validate: (input: string) =>
               input.trim().length > 0 || 'Host is required',
           },
@@ -116,7 +116,15 @@ export function initCommand(config: EmmaConfig): Command {
       ];
 
       const promptsToShow = allPrompts
-        .filter(({ option }) => !option)
+        .filter(({ option }) => {
+          // Skip all prompts if provider-override is used (go straight to provider setup)
+          if (options.providerOverride) return false;
+
+          // Skip prompts if option is provided via command line
+          if (option) return false;
+
+          return true;
+        })
         .map(({ prompt }) => prompt);
 
       const promptResults =
@@ -261,7 +269,8 @@ export function initCommand(config: EmmaConfig): Command {
           );
           console.log('');
           console.log(chalk.yellow('Emma CLI was not fully initialized.'));
-          return;
+          // Exit with error code instead of just returning
+          process.exit(1);
         }
       }
 
