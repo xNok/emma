@@ -57,7 +57,10 @@ describe('LocalDeployment', () => {
 
   beforeEach(async () => {
     // Create temporary directory for tests
-    testDir = path.join(os.tmpdir(), `emma-test-${Date.now()}`);
+    testDir = path.join(
+      os.tmpdir(),
+      `emma-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    );
     await fs.ensureDir(testDir);
 
     config = new EmmaConfig(testDir);
@@ -80,7 +83,7 @@ describe('LocalDeployment', () => {
     }
 
     // Clean up test directory
-    await fs.remove(testDir);
+    await fs.remove(testDir).catch(() => {});
   });
 
   describe(

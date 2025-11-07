@@ -16,13 +16,16 @@ describe('Edit Command', () => {
   let testDir: string;
 
   beforeEach(async () => {
-    testDir = path.join(os.tmpdir(), `emma-edit-test-${Date.now()}`);
+    testDir = path.join(
+      os.tmpdir(),
+      `emma-edit-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    );
     config = new EmmaConfig(testDir);
     await config.initialize();
   });
 
   afterEach(async () => {
-    await fs.remove(testDir);
+    await fs.remove(testDir).catch(() => {});
   });
 
   it('should create command with correct name and description', () => {
@@ -37,13 +40,16 @@ describe('History Command', () => {
   let testDir: string;
 
   beforeEach(async () => {
-    testDir = path.join(os.tmpdir(), `emma-history-test-${Date.now()}`);
+    testDir = path.join(
+      os.tmpdir(),
+      `emma-history-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    );
     config = new EmmaConfig(testDir);
     await config.initialize();
   });
 
   afterEach(async () => {
-    await fs.remove(testDir);
+    await fs.remove(testDir).catch(() => {});
   });
 
   it('should create command with correct name and description', () => {
@@ -58,13 +64,16 @@ describe('Snapshot Workflow', () => {
   let testDir: string;
 
   beforeEach(async () => {
-    testDir = path.join(os.tmpdir(), `emma-snapshot-test-${Date.now()}`);
+    testDir = path.join(
+      os.tmpdir(),
+      `emma-snapshot-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    );
     config = new EmmaConfig(testDir);
     await config.initialize();
   });
 
   afterEach(async () => {
-    await fs.remove(testDir);
+    await fs.remove(testDir).catch(() => {});
   });
 
   it('should load form with snapshot history', async () => {

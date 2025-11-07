@@ -14,16 +14,21 @@ describe('EmmaConfig', () => {
   let config: EmmaConfig;
 
   beforeEach(async () => {
-    // Create temporary directory for tests
-    testDir = path.join(os.tmpdir(), `emma-test-${Date.now()}`);
+    // Create temporary directory for tests with unique random component
+    testDir = path.join(
+      os.tmpdir(),
+      `emma-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    );
     await fs.ensureDir(testDir);
 
     config = new EmmaConfig(testDir);
   });
 
   afterEach(async () => {
-    // Clean up test directory
-    await fs.remove(testDir);
+    // Clean up test directory - use force to handle any issues
+    await fs.remove(testDir).catch(() => {
+      // Ignore cleanup errors in tests
+    });
   });
 
   describe('constructor', () => {
