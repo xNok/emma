@@ -1,5 +1,13 @@
 # @xnok/emma-form-builder
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [ae53c22]
+  - @xnok/emma-api-worker@0.4.0
+  - @xnok/emma-provider-cloudflare@0.3.0
+
 ## 0.6.0
 
 ### Minor Changes
