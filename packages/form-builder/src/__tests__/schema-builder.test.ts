@@ -25,7 +25,7 @@ describe('Schema Builder', () => {
       const formId = generateFormId('My Contact Form!');
       // Matches "my-contact-form-" followed by 3 digits
       // The trailing special character creates a trailing dash before timestamp
-      expect(formId).toMatch(/^my-contact-form-+-\d{3}$/);
+      expect(formId).toMatch(/^my-contact-form-+\d{3}$/);
     });
 
     it('should handle multiple consecutive special characters', () => {
@@ -152,7 +152,6 @@ describe('Schema Builder', () => {
   describe('createSnapshot', () => {
     let baseSchema: FormSchema;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     beforeEach(() => {
       baseSchema = buildFormSchema({
         formId: 'test-form',

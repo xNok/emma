@@ -25,7 +25,7 @@ export interface FormSchemaOptions {
  * Build a complete form schema with snapshot tracking
  */
 export function buildFormSchema(options: FormSchemaOptions): FormSchema {
-  const now = Math.floor(Date.now() / 1000); // Unix timestamp
+  const now = Math.floor(Date.now() / 1000); // Unix timestamp (seconds since epoch)
 
   // Mark fields with creation timestamp
   options.fields.forEach((field) => {
