@@ -135,7 +135,8 @@ export function getHiddenFieldPrompts(): PromptQuestion[] {
       name: 'defaultValue',
       message: 'Hidden value:',
       validate: (input: unknown) =>
-        (input as string).trim().length > 0 || 'Value is required for hidden fields',
+        (input as string).trim().length > 0 ||
+        'Value is required for hidden fields',
     },
   ];
 }
@@ -170,7 +171,8 @@ export function getTextValidationPrompts(): PromptQuestion[] {
       type: 'number',
       name: 'maxLength',
       message: 'Maximum length (optional):',
-      validate: (input: unknown) => !input || (input as number) > 0 || 'Must be positive',
+      validate: (input: unknown) =>
+        !input || (input as number) > 0 || 'Must be positive',
     },
   ];
 }

@@ -9,10 +9,7 @@ import type { EmmaConfig } from '../config.js';
 import type { FormField, FieldType } from '@xnok/emma-shared/types';
 import { FIELD_TYPES, THEMES } from '../constants.js';
 import { createFieldInteractive } from '../builders/field-builder.js';
-import {
-  buildFormSchema,
-  generateFormId,
-} from '../builders/schema-builder.js';
+import { buildFormSchema, generateFormId } from '../builders/schema-builder.js';
 import {
   displayNotInitializedError,
   displayCreateFormHeader,
@@ -156,4 +153,3 @@ export function createCommand(config: EmmaConfig): Command {
       }
     });
 }
-

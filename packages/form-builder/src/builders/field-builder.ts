@@ -46,9 +46,7 @@ export async function createFieldInteractive(
   // Type-specific prompts
   switch (type) {
     case 'textarea': {
-      const textareaAnswers = await inquirer.prompt(
-        getTextareaPrompts()
-      );
+      const textareaAnswers = await inquirer.prompt(getTextareaPrompts());
       field.rows = textareaAnswers.rows as number;
       break;
     }
@@ -62,9 +60,7 @@ export async function createFieldInteractive(
     }
 
     case 'hidden': {
-      const hiddenAnswers = await inquirer.prompt(
-        getHiddenFieldPrompts()
-      );
+      const hiddenAnswers = await inquirer.prompt(getHiddenFieldPrompts());
       field.defaultValue = hiddenAnswers.defaultValue as string;
       break;
     }
@@ -186,7 +182,10 @@ export function buildField(
     field.defaultValue = options.defaultValue;
   }
 
-  if (options?.options && (type === 'select' || type === 'radio' || type === 'checkbox')) {
+  if (
+    options?.options &&
+    (type === 'select' || type === 'radio' || type === 'checkbox')
+  ) {
     field.options = options.options;
   }
 
