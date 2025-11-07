@@ -21,21 +21,21 @@ let currentRequestEnv: Env | undefined;
 // Create a web handler that properly extracts env from RequestWithEnv
 export function toWebHandler() {
   const baseHandler = h3ToWebHandler(app);
-  
+
   return async (request: Request): Promise<Response> => {
     // Extract env from RequestWithEnv before calling the handler
     const reqWithEnv = request as RequestWithEnv;
-    
+
     // Store env in module scope temporarily so middleware can access it
     if (reqWithEnv.__env) {
       currentRequestEnv = reqWithEnv.__env;
     }
-    
+
     const response = await baseHandler(request);
-    
+
     // Clean up
     currentRequestEnv = undefined;
-    
+
     return response;
   };
 }

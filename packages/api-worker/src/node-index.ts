@@ -4,11 +4,10 @@
  */
 
 import { createServer } from 'node:http';
-import { toNodeHandler } from 'h3';
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import { toNodeListener, defineEventHandler } from 'h3';
 import type { FormSchema } from '@xnok/emma-shared/types';
 import app from './server.js';
-import type { Env, RequestWithEnv } from './env.js';
+import type { Env } from './env.js';
 
 // Mock repositories for local development
 class MockSubmissionRepository {
@@ -54,12 +53,17 @@ const mockEnv: Env = {
   ALLOWED_ORIGINS: '*', // Allow all origins for local development
 } as Env;
 
-// Create handler with mock env injected into context
-const handler = toNodeHandler(app, {
-  context: {
-    env: mockEnv,
-  },
-});
+// Inject mock env using middleware (must be before app is converted to handler)
+app.use(
+  '/**',
+  defineEventHandler((event) => {
+    event.context.env = mockEnv;
+    return;
+  })
+);
+
+// Create Node.js listener
+const handler = toNodeListener(app);
 
 const server = createServer(handler);
 
