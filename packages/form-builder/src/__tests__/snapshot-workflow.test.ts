@@ -16,14 +16,17 @@ describe('Snapshot Workflow Integration', () => {
 
   beforeEach(async () => {
     // Create a unique temporary directory for each test
-    testDir = path.join(os.tmpdir(), `emma-snapshot-test-${Date.now()}`);
+    testDir = path.join(
+      os.tmpdir(),
+      `emma-snapshot-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    );
     config = new EmmaConfig(testDir);
     await config.initialize();
   });
 
   afterEach(async () => {
     // Clean up test directory
-    await fs.remove(testDir);
+    await fs.remove(testDir).catch(() => {});
   });
 
   describe('Form Creation with Snapshots', () => {
