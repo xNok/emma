@@ -1,17 +1,19 @@
 /**
  * API Worker Deployment Utilities
- * Handles Cloudflare Worker deployment using Cloudflare API
+ * Handles Cloudflare Worker deployment using Cloudflare REST API
  */
 
 import path from 'path';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import ora from 'ora';
+import { resolveApiWorker, getApiWorkerVersion } from '@xnok/emma-shared';
 
 export interface ApiWorkerDeploymentOptions {
   accountId: string;
   apiToken?: string; // Optional, can use CLOUDFLARE_API_TOKEN env var
   databaseName?: string; // D1 database name (default: emma-submissions)
+  kvNamespaceName?: string; // KV namespace name (default: emma-schema-cache)
   workerName?: string; // Worker name (default: emma-api)
   environment?: 'production' | 'staging' | 'development';
 }
@@ -20,18 +22,18 @@ export interface ApiWorkerDeploymentResult {
   workerUrl: string;
   databaseId: string;
   databaseName: string;
+  kvNamespaceId: string;
+  workerVersion: string;
   success: boolean;
   message: string;
 }
 
 export class ApiWorkerDeployment {
   private resourcesPath: string;
-  private apiWorkerPath: string;
 
   constructor() {
     // Use migrations from the api-worker package
     try {
-      // Try to require.resolve the api-worker package
       const apiWorkerPackagePath = require.resolve(
         '@xnok/emma-api-worker/package.json'
       );
@@ -42,20 +44,6 @@ export class ApiWorkerDeployment {
         process.cwd(),
         'packages/api-worker/src'
       );
-    }
-
-    // Find the api-worker package installation
-    // In production (npm install), it will be in node_modules
-    // In development (monorepo), it will be a workspace dependency
-    try {
-      // Try to require.resolve the api-worker package
-      const apiWorkerPackagePath = require.resolve(
-        '@xnok/emma-api-worker/package.json'
-      );
-      this.apiWorkerPath = path.dirname(apiWorkerPackagePath);
-    } catch (error) {
-      // Fallback to monorepo structure for development
-      this.apiWorkerPath = path.resolve(process.cwd(), 'packages/api-worker');
     }
   }
 
@@ -78,51 +66,118 @@ export class ApiWorkerDeployment {
     }
 
     const databaseName = options.databaseName || 'emma-submissions';
+    const kvNamespaceName = options.kvNamespaceName || 'emma-schema-cache';
     const environment = options.environment || 'production';
+    const workerName =
+      options.workerName ||
+      (environment && environment !== 'production'
+        ? `emma-api-${environment}`
+        : 'emma-api');
 
     let spinner = ora('Setting up Cloudflare infrastructure...').start();
 
     try {
-      // Step 1: Verify api-worker package is available
-      if (!(await fs.pathExists(this.apiWorkerPath))) {
-        throw new Error(
-          `API worker package not found at ${this.apiWorkerPath}. ` +
-            'Make sure @xnok/emma-api-worker is installed.'
-        );
-      }
-
-      // Step 2: Create D1 database if it doesn't exist
+      // Step 1: Ensure D1 database exists
       spinner.text = 'Creating D1 database...';
       const databaseId = await this.ensureD1Database(
+        apiToken,
         databaseName,
-        options.accountId,
-        apiToken
+        options.accountId
       );
       spinner.succeed(`D1 database ready: ${databaseName} (${databaseId})`);
 
-      // Step 3: Run migrations (using bundled migrations from form-builder)
+      // Step 2: Run migrations
       spinner = ora('Running database migrations...').start();
-      await this.runMigrations(databaseName, options.accountId, apiToken);
+      await this.runMigrations(apiToken, databaseName, options.accountId);
       spinner.succeed('Database migrations completed');
 
-      // Step 4: Update wrangler.toml in api-worker package with database ID
-      spinner = ora('Updating worker configuration...').start();
-      await this.updateWranglerConfig(databaseId, databaseName, environment);
-      spinner.succeed('Worker configuration updated');
-
-      // Step 5: Deploy the worker from api-worker package
-      spinner = ora('Deploying API worker to Cloudflare...').start();
-      const workerUrl = await this.deployWorker(
-        environment,
+      // Step 3: Ensure KV namespace exists
+      spinner = ora('Creating KV namespace...').start();
+      const kvNamespaceId = await this.ensureKVNamespace(
         apiToken,
+        kvNamespaceName,
         options.accountId
       );
+      spinner.succeed(
+        `KV namespace ready: ${kvNamespaceName} (${kvNamespaceId})`
+      );
+
+      // Step 4: Resolve the pre-built worker script
+      spinner = ora('Resolving API worker package...').start();
+      const workerResolution = await resolveApiWorker({
+        platform: 'cloudflare',
+      });
+
+      spinner.succeed(
+        `API worker resolved: v${workerResolution.packageVersion}`
+      );
+      console.log(chalk.dim(`  Script path: ${workerResolution.scriptPath}`));
+
+      // Step 5: Deploy the worker using Cloudflare API (simplified approach)
+      spinner = ora('Deploying API worker to Cloudflare...').start();
+
+      // Upload worker script using the REST API directly
+      const uploadResponse = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${options.accountId}/workers/scripts/${workerName}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+            'Content-Type': 'application/javascript+module',
+          },
+          body: workerResolution.scriptContent,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        const error = await uploadResponse.text();
+        throw new Error(
+          `Worker upload failed: ${uploadResponse.status} ${error}`
+        );
+      }
+
+      // Configure worker bindings using REST API
+      const bindingsResponse = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${options.accountId}/workers/scripts/${workerName}/settings`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            bindings: [
+              {
+                type: 'd1',
+                name: 'DB',
+                id: databaseId,
+              },
+              {
+                type: 'kv_namespace',
+                name: 'SCHEMA_CACHE',
+                namespace_id: kvNamespaceId,
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!bindingsResponse.ok) {
+        const error = await bindingsResponse.text();
+        throw new Error(
+          `Worker bindings configuration failed: ${bindingsResponse.status} ${error}`
+        );
+      }
+
+      const workerUrl = `https://${workerName}.${options.accountId}.workers.dev`;
       spinner.succeed(`API worker deployed: ${workerUrl}`);
 
       return {
         workerUrl,
         databaseId,
         databaseName,
+        kvNamespaceId,
+        workerVersion: workerResolution.packageVersion,
         success: true,
         message: 'API worker deployed successfully',
       };
@@ -134,42 +189,159 @@ export class ApiWorkerDeployment {
 
   /**
    * Ensure D1 database exists, create if it doesn't
-   * Returns the database ID
    */
   private async ensureD1Database(
+    apiToken: string,
     databaseName: string,
-    accountId: string,
-    apiToken: string
+    accountId: string
   ): Promise<string> {
-    // First, try to list existing databases
-    const databases = await this.listD1Databases(accountId, apiToken);
-    const existing = databases.find((db) => db.name === databaseName);
+    // List existing databases using REST API
+    const listResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database`,
+      {
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+        },
+      }
+    );
 
-    if (existing) {
+    if (!listResponse.ok) {
+      throw new Error(`Failed to list D1 databases: ${listResponse.status}`);
+    }
+
+    const listData = (await listResponse.json()) as {
+      result: Array<{ name: string; uuid: string }>;
+    };
+    const existing = listData.result?.find((db) => db.name === databaseName);
+
+    if (existing && existing.uuid) {
       return existing.uuid;
     }
 
-    // Database doesn't exist, create it
-    const createResult = await this.createD1Database(
-      databaseName,
-      accountId,
-      apiToken
+    // Database doesn't exist, create it using REST API
+    const createResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: databaseName }),
+      }
     );
-    return createResult.uuid;
+
+    if (!createResponse.ok) {
+      const error = await createResponse.text();
+      throw new Error(`Failed to create D1 database: ${createResponse.status} ${error}`);
+    }
+
+    const createData = (await createResponse.json()) as {
+      result: { uuid: string };
+    };
+
+    if (!createData.result?.uuid) {
+      throw new Error('Failed to create D1 database');
+    }
+
+    return createData.result.uuid;
+  }
+
+  /**
+   * Ensure KV namespace exists, create if it doesn't
+   */
+  private async ensureKVNamespace(
+    apiToken: string,
+    namespaceName: string,
+    accountId: string
+  ): Promise<string> {
+    // List existing namespaces using REST API
+    const listResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces`,
+      {
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+        },
+      }
+    );
+
+    if (!listResponse.ok) {
+      throw new Error(`Failed to list KV namespaces: ${listResponse.status}`);
+    }
+
+    const listData = (await listResponse.json()) as {
+      result: Array<{ title: string; id: string }>;
+    };
+    const existing = listData.result?.find((ns) => ns.title === namespaceName);
+
+    if (existing && existing.id) {
+      return existing.id;
+    }
+
+    // Namespace doesn't exist, create it using REST API
+    const createResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: namespaceName }),
+      }
+    );
+
+    if (!createResponse.ok) {
+      const error = await createResponse.text();
+      throw new Error(`Failed to create KV namespace: ${createResponse.status} ${error}`);
+    }
+
+    const createData = (await createResponse.json()) as {
+      result: { id: string };
+    };
+
+    if (!createData.result?.id) {
+      throw new Error('Failed to create KV namespace');
+    }
+
+    return createData.result.id;
   }
 
   /**
    * Run database migrations
    */
   private async runMigrations(
+    apiToken: string,
     databaseName: string,
-    accountId: string,
-    apiToken: string
+    accountId: string
   ): Promise<void> {
     const migrationsDir = path.join(this.resourcesPath, 'migrations');
 
     if (!(await fs.pathExists(migrationsDir))) {
       throw new Error(`Migrations directory not found at ${migrationsDir}`);
+    }
+
+    // Get database UUID using REST API
+    const listResponse = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database`,
+      {
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+        },
+      }
+    );
+
+    if (!listResponse.ok) {
+      throw new Error(`Failed to list D1 databases: ${listResponse.status}`);
+    }
+
+    const listData = (await listResponse.json()) as {
+      result: Array<{ name: string; uuid: string }>;
+    };
+    const database = listData.result?.find((db) => db.name === databaseName);
+    
+    if (!database || !database.uuid) {
+      throw new Error(`Database ${databaseName} not found`);
     }
 
     // Get all migration files
@@ -182,8 +354,7 @@ export class ApiWorkerDeployment {
       const migrationPath = path.join(migrationsDir, migrationFile);
       const sql = await fs.readFile(migrationPath, 'utf-8');
 
-      // Split SQL into individual statements and execute them separately
-      // This allows for better error handling and idempotency
+      // Split SQL into individual statements
       const statements = sql
         .split(';')
         .map((s) => s.trim())
@@ -191,212 +362,35 @@ export class ApiWorkerDeployment {
 
       for (const statement of statements) {
         try {
-          await this.executeD1Query(
-            databaseName,
-            statement,
-            accountId,
-            apiToken
+          const queryResponse = await fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${database.uuid}/query`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${apiToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ sql: statement }),
+            }
           );
+
+          if (!queryResponse.ok) {
+            const error = await queryResponse.text();
+            throw new Error(`Failed to execute D1 query: ${queryResponse.status} ${error}`);
+          }
         } catch (error) {
-          // For DDL statements like ALTER TABLE, ignore "already exists" errors
+          // Ignore "already exists" errors for idempotency
           if (
             statement.toUpperCase().includes('ALTER TABLE') &&
             error instanceof Error &&
             (error.message.includes('duplicate column name') ||
               error.message.includes('already exists'))
           ) {
-            // Column already exists, continue
             continue;
           }
-          // Re-throw other errors
           throw error;
         }
       }
-    }
-  }
-
-  /**
-   * Update wrangler.toml in api-worker package with database configuration
-   */
-  private async updateWranglerConfig(
-    databaseId: string,
-    databaseName: string,
-    _environment: string
-  ): Promise<void> {
-    const wranglerPath = path.join(this.apiWorkerPath, 'wrangler.toml');
-
-    if (!(await fs.pathExists(wranglerPath))) {
-      throw new Error(
-        `wrangler.toml not found at ${wranglerPath}. ` +
-          'Make sure the api-worker package is properly installed.'
-      );
-    }
-
-    let content = await fs.readFile(wranglerPath, 'utf-8');
-
-    // Update database_id in the D1 database binding
-    content = content.replace(
-      /database_id\s*=\s*"[^"]*"/,
-      `database_id = "${databaseId}"`
-    );
-
-    // Ensure database_name matches
-    content = content.replace(
-      /database_name\s*=\s*"[^"]*"/,
-      `database_name = "${databaseName}"`
-    );
-
-    await fs.writeFile(wranglerPath, content, 'utf-8');
-  }
-
-  /**
-   * Deploy the worker using Cloudflare API
-   */
-  private async deployWorker(
-    environment: string,
-    apiToken: string,
-    accountId: string
-  ): Promise<string> {
-    const workerName =
-      environment && environment !== 'production'
-        ? `emma-api-${environment}`
-        : 'emma-api';
-
-    // Read the worker script from Nitro's output
-    const scriptPath = path.join(
-      this.apiWorkerPath,
-      '.output',
-      'server',
-      'index.mjs'
-    );
-    if (!(await fs.pathExists(scriptPath))) {
-      throw new Error(
-        `Worker script not found at ${scriptPath}. ` +
-          'Please run "yarn build:cloudflare" in the api-worker package first.'
-      );
-    }
-    const script = await fs.readFile(scriptPath, 'utf-8');
-
-    // Deploy using Cloudflare API
-    const response = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          'Content-Type': 'application/javascript',
-        },
-        body: script,
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Worker deployment failed: ${response.status} ${error}`);
-    }
-
-    return `https://${workerName}.${accountId}.workers.dev`;
-  }
-
-  /**
-   * List D1 databases using Cloudflare API
-   */
-  private async listD1Databases(
-    accountId: string,
-    apiToken: string
-  ): Promise<Array<{ name: string; uuid: string }>> {
-    const response = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database`,
-      {
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to list D1 databases: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const data = (await response.json()) as {
-      result: Array<{ name: string; uuid: string }>;
-    };
-    return data.result || [];
-  }
-
-  /**
-   * Create D1 database using Cloudflare API
-   */
-  private async createD1Database(
-    databaseName: string,
-    accountId: string,
-    apiToken: string
-  ): Promise<{ uuid: string }> {
-    const response = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: databaseName }),
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(
-        `Failed to create D1 database: ${response.status} ${error}`
-      );
-    }
-
-    const data = (await response.json()) as { result: { uuid: string } };
-    return data.result;
-  }
-
-  /**
-   * Execute D1 query using Cloudflare API
-   */
-  private async executeD1Query(
-    databaseName: string,
-    sql: string,
-    accountId: string,
-    apiToken: string
-  ): Promise<void> {
-    // First get the database UUID
-    const databases = await this.listD1Databases(accountId, apiToken);
-    const database = databases.find((db) => db.name === databaseName);
-    if (!database) {
-      throw new Error(`Database ${databaseName} not found`);
-    }
-
-    const response = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${database.uuid}/query`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sql }),
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(
-        `Failed to execute D1 query: ${response.status} ${error}`
-      );
-    }
-
-    const data = (await response.json()) as {
-      result: Array<{ error?: string }>;
-    };
-    if (data.result.some((r) => r.error)) {
-      throw new Error(`D1 query error: ${JSON.stringify(data.result)}`);
     }
   }
 
@@ -470,5 +464,12 @@ export class ApiWorkerDeployment {
     console.log(chalk.white('  export R2_ACCESS_KEY_ID="your-access-key-id"'));
     console.log(chalk.white('  export R2_SECRET_ACCESS_KEY="your-secret-key"'));
     console.log('');
+  }
+
+  /**
+   * Get the currently installed API worker version
+   */
+  static async getInstalledVersion(): Promise<string | null> {
+    return getApiWorkerVersion();
   }
 }

@@ -1,5 +1,3 @@
-import { D1Database } from '@cloudflare/workers-types';
-
 export interface SubmissionRepository {
   saveSubmission(
     submissionId: string,
@@ -12,9 +10,9 @@ export interface SubmissionRepository {
 }
 
 export class D1SubmissionRepository implements SubmissionRepository {
-  private db: D1Database;
+  private db: any; // Nitro binding type
 
-  constructor(db: D1Database) {
+  constructor(db: any) {
     this.db = db;
   }
 

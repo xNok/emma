@@ -1,15 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { toWebHandler } from '../server';
 import { FormSchema } from '@xnok/emma-shared/types';
-import { Env, RequestWithEnv } from '../env';
-import { D1Database } from '@cloudflare/workers-types';
-import { KVNamespace } from '@cloudflare/workers-types';
+import { Env } from '../env';
 
 const mockEnv: Env = {
   DB: {
     prepare: vi.fn(),
     batch: vi.fn(),
-  } as unknown as D1Database,
+  } as any,
   submissionRepository: {
     saveSubmission: vi.fn(),
   },
@@ -20,7 +18,7 @@ const mockEnv: Env = {
   SCHEMA_CACHE: {
     get: vi.fn(),
     put: vi.fn(),
-  } as unknown as KVNamespace,
+  } as any,
   ENVIRONMENT: 'test',
   RATE_LIMIT_REQUESTS: '100',
   RATE_LIMIT_WINDOW: '60',
@@ -28,14 +26,12 @@ const mockEnv: Env = {
   ALLOWED_ORIGINS: '*',
 };
 
-// Helper to create request with env
+// Helper to create request with cloudflare context
 function createRequestWithEnv(
   url: string,
   options: RequestInit = {}
-): RequestWithEnv {
-  const req = new Request(url, options) as RequestWithEnv;
-  req.__env = mockEnv;
-  return req;
+): Request {
+  return new Request(url, options);
 }
 
 describe('API Worker', () => {

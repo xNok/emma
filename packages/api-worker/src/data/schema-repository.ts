@@ -1,5 +1,4 @@
 import { FormSchema } from '@xnok/emma-shared/types';
-import { KVNamespace } from '@cloudflare/workers-types';
 
 export interface SchemaRepository {
   getSchema(formId: string): Promise<FormSchema | null>;
@@ -22,12 +21,12 @@ export class CdnSchemaRepository implements SchemaRepository {
 }
 
 export class KvCacheSchemaRepository implements SchemaRepository {
-  private cache: KVNamespace;
+  private cache: any; // Nitro binding type
   private primaryRepository: SchemaRepository;
   private cacheTtl: number;
 
   constructor(
-    cache: KVNamespace,
+    cache: any,
     primaryRepository: SchemaRepository,
     cacheTtl = 3600 // 1 hour
   ) {
@@ -37,9 +36,9 @@ export class KvCacheSchemaRepository implements SchemaRepository {
   }
 
   async getSchema(formId: string): Promise<FormSchema | null> {
-    const cachedSchema = await this.cache.get<FormSchema>(formId, 'json');
-    if (cachedSchema) {
-      return cachedSchema;
+    const cachedValue = await this.cache.get(formId, 'json');
+    if (cachedValue) {
+      return cachedValue as FormSchema;
     }
 
     const schema = await this.primaryRepository.getSchema(formId);
