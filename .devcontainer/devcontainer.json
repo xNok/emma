@@ -1,5 +1,5 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2.9.0",
+  "image": "mcr.microsoft.com/devcontainers/universal:4.1.1",
   "features": {
     "ghcr.io/devcontainers/features/hugo:1": {
       "version": "0.136.0",
