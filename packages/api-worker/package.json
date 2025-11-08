@@ -11,7 +11,7 @@
     "start": "tsx src/node-index.ts",
     "start:dev": "tsx --watch src/node-index.ts",
     "dev": "nitro dev",
-    "dev:cloudflare": "wrangler dev .output/server/index.mjs",
+    "dev:cloudflare": "wrangler dev .output/server/index.mjs --site .output/public --remote",
     "preview": "node .output/server/index.mjs",
     "deploy": "wrangler deploy .output/server/index.mjs",
     "deploy:staging": "wrangler deploy .output/server/index.mjs --env staging",
@@ -34,7 +34,7 @@
     "tsx": "^4.20.6",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0",
-    "wrangler": "^3.22.1"
+    "wrangler": "4"
   },
   "keywords": [
     "cloudflare",

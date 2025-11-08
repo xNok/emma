@@ -1,6 +1,7 @@
 name = "emma-api"
 main = ".output/server/index.mjs"
-compatibility_date = "2025-11-05"
+compatibility_date = "2025-07-18"
+compatibility_flags = ["nodejs_compat"]
 
 # D1 Database binding
 [[d1_databases]]
@@ -9,9 +10,9 @@ database_name = "emma-submissions"
 database_id = "f2168e2e-b2f5-4fc9-94e2-9df8a3ca95fe" # Replace with actual D1 database ID
 
 # KV namespace for schema caching
-[[kv_namespaces]]
-binding = "SCHEMA_CACHE"
-id = "" # Replace with actual KV namespace ID
+# [[kv_namespaces]]
+# binding = "SCHEMA_CACHE"
+# id = "" # Replace with actual KV namespace ID
 
 # Environment variables
 [vars]

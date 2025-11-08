@@ -5,7 +5,7 @@ export default defineNitroConfig({
   preset: 'cloudflare-worker',
 
   // Compatibility date for Cloudflare Workers
-  compatibilityDate: '2025-11-05',
+  compatibilityDate: '2025-07-18',
 
   // Entry point for the H3 app
   entry: './cloudflare-index.ts',
