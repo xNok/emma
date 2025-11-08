@@ -10,34 +10,52 @@ import {
 } from 'h3';
 import type { H3Event } from 'h3';
 import handleSubmit from './handlers/submit';
-import { D1SubmissionRepository } from './data/submission-repository';
-import {
-  CdnSchemaRepository,
-  KvCacheSchemaRepository,
-} from './data/schema-repository';
+import { DatabaseBinding, KVBinding } from './types/bindings';
+import { SubmissionRepository } from './data/submission-repository';
+import { SchemaRepository, CdnSchemaRepository, KvCacheSchemaRepository } from './data/schema-repository';
 
 const app = createApp();
 const router = createRouter();
+
+// Define the structure of Cloudflare environment bindings
+interface CloudflareEnv {
+  DB: DatabaseBinding;
+  SCHEMA_CACHE: KVBinding;
+  CDN_URL?: string;
+  ENVIRONMENT?: string;
+  RATE_LIMIT_REQUESTS?: string;
+  RATE_LIMIT_WINDOW?: string;
+  MAX_SUBMISSION_SIZE?: string;
+  ALLOWED_ORIGINS?: string;
+}
+
+// Define the structure of Nitro's cloudflare context
+interface CloudflareContext {
+  env: CloudflareEnv;
+}
 
 // Create a web handler with Nitro bindings support
 export function toWebHandler() {
   return h3ToWebHandler(app);
 }
 
+// Repository implementations
+import { D1SubmissionRepository } from './data/submission-repository';
+
 // Middleware to initialize repositories from Nitro bindings
 app.use(
   '/**',
   defineEventHandler((event) => {
     // Access Cloudflare bindings through Nitro's event.context.cloudflare
-    const cloudflare = event.context.cloudflare as any;
+    const cloudflare = event.context.cloudflare as CloudflareContext | undefined;
     
     if (cloudflare?.env) {
       const env = cloudflare.env;
       
       // Initialize repositories with Nitro bindings
       const cdnSchemaRepository = new CdnSchemaRepository(env.CDN_URL || '');
-      const submissionRepository = new D1SubmissionRepository(env.DB);
-      const schemaRepository = new KvCacheSchemaRepository(
+      const submissionRepository: SubmissionRepository = new D1SubmissionRepository(env.DB);
+      const schemaRepository: SchemaRepository = new KvCacheSchemaRepository(
         env.SCHEMA_CACHE,
         cdnSchemaRepository
       );
@@ -59,7 +77,10 @@ app.use(
   '/**',
   defineEventHandler((event: H3Event) => {
     // Read allowed origins from environment variable
-    const env = event.context.env as any;
+    const env = event.context.env as CloudflareEnv & {
+      submissionRepository?: SubmissionRepository;
+      schemaRepository?: SchemaRepository;
+    } | undefined;
     const allowedOriginsEnv: string =
       process.env.ALLOWED_ORIGINS || env?.ALLOWED_ORIGINS || '';
 

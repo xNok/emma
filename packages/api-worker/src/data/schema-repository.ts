@@ -1,4 +1,5 @@
 import { FormSchema } from '@xnok/emma-shared/types';
+import { KVBinding } from '../types/bindings';
 
 export interface SchemaRepository {
   getSchema(formId: string): Promise<FormSchema | null>;
@@ -21,12 +22,12 @@ export class CdnSchemaRepository implements SchemaRepository {
 }
 
 export class KvCacheSchemaRepository implements SchemaRepository {
-  private cache: any; // Nitro binding type
+  private cache: KVBinding;
   private primaryRepository: SchemaRepository;
   private cacheTtl: number;
 
   constructor(
-    cache: any,
+    cache: KVBinding,
     primaryRepository: SchemaRepository,
     cacheTtl = 3600 // 1 hour
   ) {

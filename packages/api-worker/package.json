@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./src/cloudflare-index.ts",
   "scripts": {
-    "build": "nitro build --preset cloudflare",
+    "build": "yarn build:cloudflare && yarn build:node",
     "build:cloudflare": "nitro build --preset cloudflare",
     "build:node": "nitro build --preset node-server",
     "dev": "nitro dev",

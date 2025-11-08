@@ -1,3 +1,5 @@
+import { DatabaseBinding } from '../types/bindings';
+
 export interface SubmissionRepository {
   saveSubmission(
     submissionId: string,
@@ -10,9 +12,9 @@ export interface SubmissionRepository {
 }
 
 export class D1SubmissionRepository implements SubmissionRepository {
-  private db: any; // Nitro binding type
+  private db: DatabaseBinding;
 
-  constructor(db: any) {
+  constructor(db: DatabaseBinding) {
     this.db = db;
   }
 

@@ -1,12 +1,13 @@
 import { SubmissionRepository } from './data/submission-repository';
 import { SchemaRepository } from './data/schema-repository';
+import { DatabaseBinding, KVBinding } from './types/bindings';
 
 export interface Env {
-  DB: any; // Nitro binding
+  DB: DatabaseBinding;
   submissionRepository: SubmissionRepository;
   schemaRepository: SchemaRepository;
   CDN_URL: string;
-  SCHEMA_CACHE: any; // Nitro binding
+  SCHEMA_CACHE: KVBinding;
   ENVIRONMENT: string;
   RATE_LIMIT_REQUESTS: string;
   RATE_LIMIT_WINDOW: string;
