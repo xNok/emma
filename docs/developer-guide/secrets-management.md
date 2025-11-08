@@ -5,10 +5,11 @@ This project uses 1Password for secure secrets management. Instead of storing se
 ## Prerequisites
 
 1. **1Password Service Account Token**: You must set this in EVERY new terminal session
+
    ```bash
    export OP_SERVICE_ACCOUNT_TOKEN=your_service_account_token
    ```
-   
+
    💡 **Tip**: To avoid setting this every time, add it to your Codespace secrets:
    - Go to your Codespace settings
    - Add `OP_SERVICE_ACCOUNT_TOKEN` as a secret
@@ -55,6 +56,7 @@ yarn dev:cloudflare:1p
 1. **Add the secret to 1Password** in the `xnok/emma` vault
 
 2. **Update `bin/load-secrets.sh`** to load the new secret:
+
    ```bash
    # Add this line in the bin/load-secrets.sh script
    load_secret "MY_SECRET_NAME" "op://xnok/emma/item-name/field-name" true
@@ -110,10 +112,12 @@ load_secret "DATABASE_URL" "op://xnok/emma/database-prod/url" true
 ## Troubleshooting
 
 **"Failed to load required secret"**
+
 - Verify the secret exists in 1Password: `op item list --vault xnok/emma`
 - Check the item details: `op item get "ITEM_NAME" --vault xnok/emma`
 - Ensure `OP_SERVICE_ACCOUNT_TOKEN` is set
 
 **"1Password CLI (op) is not installed"**
+
 - The CLI should be pre-installed in the dev container
 - Check with: `which op`

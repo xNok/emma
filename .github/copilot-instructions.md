@@ -1,19 +1,21 @@
 # Copilot & Contributor Instructions
 
-This document outlines the workflow and responsibilities for contributors. We follow a documentation-driven development approach.
+This repository follows a documentation-driven development workflow and a Yarn v4 monorepo layout. Keep docs in sync with code and prefer small, verifiable changes.
 
-## 1. Your Role
+## Quick mental model (big picture)
 
-As a contributor, you may wear different hats depending on the task at hand:
+- Monorepo: packages live under `packages/`, shared utilities in `shared/`, and the example Hugo site in `website/`.
+- Major components:
+  - `@xnok/emma-api-worker` (Cloudflare Worker via Nitro/wrangler) — handles submissions. See `packages/api-worker/`.
+  - `form-builder` (CLI) — build-time tool used by `yarn emma` and E2E test helpers.
+  - `form-renderer` — client JS used by the Hugo module and website.
+  - `hugo-module` / `website` — Hugo integration and example deployment.
 
-- `Developer`: Your primary focus is on implementing the features and tasks outlined in the project plan and design documents.
-- `Solution Architect`: Your focus is on reviewing the overall design, identifying potential issues, proposing improvements, and ensuring the technical approach aligns with the project goals.
+Shared types, Zod validators, and helpers are in `shared/` (import as `@emma/shared`). If you change schemas, update consumers and run the full type/test suite.
 
-You will often switch between these roles. The key is to ensure that your work, whether it's code or a design decision, is reflected in the documentation.
+## Core Workflow: Docs First
 
-## 2. Core Workflow: Docs First
-
-Your main responsibility is to keep the project documentation in sync with the project's state. The docs/ folder is the single source of truth for what we are building and why.
+Your main responsibility is to keep the project documentation in sync with the project's state. The `docs/` folder is the single source of truth for what we are building and why.
 
 ### How to Get Started
 
@@ -34,29 +36,45 @@ Read the latest document thoroughly. It will link to other relevant documents (l
 
 This process ensures that anyone joining the project can get up to speed quickly by following the numbered trail of documents.
 
-## 3. General Guidelines
+## Developer workflows & commands
 
-### As a Developer
+- Use Node >=18 and Yarn v4 (project `package.json` pins `yarn@4.10.3`).
+- Common scripts (run from repo root):
+  - `yarn dev:core` — start all package dev servers (excludes api-worker & website when scripted)
+  - `yarn dev:api` — run `nitro dev` for the API worker
+  - `yarn dev:website` — run the example Hugo site dev server
+  - `yarn build` — builds all packages (`workspaces foreach`)
+  - `yarn test` — runs package tests (website excluded by default)
+  - `yarn test:e2e*` — E2E flows run under `form-builder` / `website` (see root scripts)
+  - `yarn lint`, `yarn format:check`, `yarn typecheck`
 
-- Focus on implementing features from docs
-- important: Write tests alongside code
-- Ensure code quality with linting and formatting
-- Create a changeset to announce the changes made which will be includd in the release note
+Notes: many commands use `yarn workspaces foreach`. Prefer the root scripts unless you need to scope work to a single package.
 
-### As an Architect
+## Conventions you must follow
 
-- Review designs against project goals
-- Identify potential issues early
-- Propose improvements
-- **Update docs first** before changing architecture
+- Docs-first: update `docs/` and add an entry in `docs/agents-summaries/` for any substantive change. The highest-numbered doc is the current design.
+- Changesets: include a changeset when making public API changes; release flow uses `changeset`.
+- Tests & validation: run `yarn build && yarn test && yarn lint && yarn format:check && yarn typecheck` locally before opening PRs.
+- Small PRs: prefer small, focused PRs that include tests and a doc update when behavior changes.
 
-### !important always validate code
+## Integration points & notes for runtime edits
 
-```bash
-# Run the following commands and address all issues
-yarn build
-yarn test
-yarn lint
-yarn format:check
-yarn typecheck
-```
+- API Worker: built with Nitro. Cloudflare target artifacts are in `.output/` (e.g. `.output/nitro.json`). Use `nitro build --preset cloudflare` or `yarn workspace @xnok/emma-api-worker run build:cloudflare`.
+- Wrangler: `packages/api-worker` includes `dev:cloudflare` that invokes `wrangler dev` for remote testing.
+- Hugo: `hugo-module` exposes shortcodes that wire into `form-renderer`. Check `examples/` for sample YAML form configs.
+- Providers: provider implementations and the provider spec live under `packages/` (e.g., `provider-cloudflare`). Built-in providers are exported from `shared` (see `shared/index.ts`).
+
+## Minimal contract for AI/code agents
+
+- Inputs: edits must preserve repo scripts and pass root validation commands.
+- Outputs: update docs first, add/modify tests for behavior changes, and run the full root checks before finalizing.
+
+## Key files to inspect when you start
+
+- `package.json` (root) — workspace scripts & dev tooling
+- `packages/api-worker/package.json` — Nitro/Wrangler build targets
+- `shared/` — types, validators, utilities
+- `docs/` — architecture & developer guide (start with highest-numbered doc)
+- `examples/` — real configs used in tests
+
+If anything above is unclear or you want more detail (e.g., CI steps, Nitro config, or Cloudflare deployment examples), tell me what to expand and I will iterate.
