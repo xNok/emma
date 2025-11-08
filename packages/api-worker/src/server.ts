@@ -12,7 +12,11 @@ import type { H3Event } from 'h3';
 import handleSubmit from './handlers/submit';
 import { DatabaseBinding, KVBinding } from './types/bindings';
 import { SubmissionRepository } from './data/submission-repository';
-import { SchemaRepository, CdnSchemaRepository, KvCacheSchemaRepository } from './data/schema-repository';
+import {
+  SchemaRepository,
+  CdnSchemaRepository,
+  KvCacheSchemaRepository,
+} from './data/schema-repository';
 
 const app = createApp();
 const router = createRouter();
@@ -47,14 +51,17 @@ app.use(
   '/**',
   defineEventHandler((event) => {
     // Access Cloudflare bindings through Nitro's event.context.cloudflare
-    const cloudflare = event.context.cloudflare as CloudflareContext | undefined;
-    
+    const cloudflare = event.context.cloudflare as
+      | CloudflareContext
+      | undefined;
+
     if (cloudflare?.env) {
       const env = cloudflare.env;
-      
+
       // Initialize repositories with Nitro bindings
       const cdnSchemaRepository = new CdnSchemaRepository(env.CDN_URL || '');
-      const submissionRepository: SubmissionRepository = new D1SubmissionRepository(env.DB);
+      const submissionRepository: SubmissionRepository =
+        new D1SubmissionRepository(env.DB);
       const schemaRepository: SchemaRepository = new KvCacheSchemaRepository(
         env.SCHEMA_CACHE,
         cdnSchemaRepository
@@ -67,7 +74,7 @@ app.use(
         schemaRepository,
       };
     }
-    
+
     return;
   })
 );
@@ -77,10 +84,12 @@ app.use(
   '/**',
   defineEventHandler((event: H3Event) => {
     // Read allowed origins from environment variable
-    const env = event.context.env as CloudflareEnv & {
-      submissionRepository?: SubmissionRepository;
-      schemaRepository?: SchemaRepository;
-    } | undefined;
+    const env = event.context.env as
+      | (CloudflareEnv & {
+          submissionRepository?: SubmissionRepository;
+          schemaRepository?: SchemaRepository;
+        })
+      | undefined;
     const allowedOriginsEnv: string =
       process.env.ALLOWED_ORIGINS || env?.ALLOWED_ORIGINS || '';
 

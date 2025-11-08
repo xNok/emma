@@ -25,8 +25,15 @@ export interface PreparedStatement {
  * Compatible with Cloudflare KV, Redis, and other KV stores
  */
 export interface KVBinding {
-  get(key: string, type?: 'text' | 'json' | 'arrayBuffer' | 'stream'): Promise<unknown>;
-  put(key: string, value: string | ArrayBuffer | ReadableStream, options?: KVPutOptions): Promise<void>;
+  get(
+    key: string,
+    type?: 'text' | 'json' | 'arrayBuffer' | 'stream'
+  ): Promise<unknown>;
+  put(
+    key: string,
+    value: string | ArrayBuffer | ReadableStream,
+    options?: KVPutOptions
+  ): Promise<void>;
   delete(key: string): Promise<void>;
   list(options?: KVListOptions): Promise<KVListResult>;
 }

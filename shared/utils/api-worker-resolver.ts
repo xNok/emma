@@ -21,7 +21,7 @@ export interface WorkerResolutionOptions {
 
 /**
  * Resolve the API worker package and load its pre-built script
- * 
+ *
  * @param options - Resolution options
  * @returns Worker resolution result with script content and metadata
  * @throws Error if the worker package or script cannot be found
@@ -30,15 +30,18 @@ export async function resolveApiWorker(
   options: WorkerResolutionOptions
 ): Promise<WorkerResolutionResult> {
   const packageName = options.packageName || '@xnok/emma-api-worker';
-  
+
   // 1. Find the root directory of the installed worker package
   let workerPackageDir: string;
-  let packageJson: any;
-  
+  let packageJson: { name: string; version: string };
+
   try {
     const packageJsonPath = require.resolve(`${packageName}/package.json`);
     workerPackageDir = path.dirname(packageJsonPath);
-    packageJson = await fs.readJSON(packageJsonPath);
+    packageJson = (await fs.readJSON(packageJsonPath)) as {
+      name: string;
+      version: string;
+    };
   } catch (e) {
     throw new Error(
       `Fatal: '${packageName}' not found. Make sure the package is installed.`
@@ -82,7 +85,7 @@ export async function resolveApiWorker(
 
 /**
  * Get the installed version of the API worker package
- * 
+ *
  * @param packageName - Optional package name (defaults to @xnok/emma-api-worker)
  * @returns Package version or null if not found
  */
@@ -91,7 +94,9 @@ export async function getApiWorkerVersion(
 ): Promise<string | null> {
   try {
     const packageJsonPath = require.resolve(`${packageName}/package.json`);
-    const packageJson = await fs.readJSON(packageJsonPath);
+    const packageJson = (await fs.readJSON(packageJsonPath)) as {
+      version: string;
+    };
     return packageJson.version;
   } catch (e) {
     return null;

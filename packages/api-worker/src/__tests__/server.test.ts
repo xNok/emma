@@ -38,10 +38,7 @@ const mockEnv: Env = {
 };
 
 // Helper to create request with cloudflare context
-function createRequestWithEnv(
-  url: string,
-  options: RequestInit = {}
-): Request {
+function createRequestWithEnv(url: string, options: RequestInit = {}): Request {
   return new Request(url, options);
 }
 

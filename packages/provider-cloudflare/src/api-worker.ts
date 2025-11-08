@@ -233,7 +233,9 @@ export class ApiWorkerDeployment {
 
     if (!createResponse.ok) {
       const error = await createResponse.text();
-      throw new Error(`Failed to create D1 database: ${createResponse.status} ${error}`);
+      throw new Error(
+        `Failed to create D1 database: ${createResponse.status} ${error}`
+      );
     }
 
     const createData = (await createResponse.json()) as {
@@ -293,7 +295,9 @@ export class ApiWorkerDeployment {
 
     if (!createResponse.ok) {
       const error = await createResponse.text();
-      throw new Error(`Failed to create KV namespace: ${createResponse.status} ${error}`);
+      throw new Error(
+        `Failed to create KV namespace: ${createResponse.status} ${error}`
+      );
     }
 
     const createData = (await createResponse.json()) as {
@@ -339,7 +343,7 @@ export class ApiWorkerDeployment {
       result: Array<{ name: string; uuid: string }>;
     };
     const database = listData.result?.find((db) => db.name === databaseName);
-    
+
     if (!database || !database.uuid) {
       throw new Error(`Database ${databaseName} not found`);
     }
@@ -376,7 +380,9 @@ export class ApiWorkerDeployment {
 
           if (!queryResponse.ok) {
             const error = await queryResponse.text();
-            throw new Error(`Failed to execute D1 query: ${queryResponse.status} ${error}`);
+            throw new Error(
+              `Failed to execute D1 query: ${queryResponse.status} ${error}`
+            );
           }
         } catch (error) {
           // Ignore "already exists" errors for idempotency

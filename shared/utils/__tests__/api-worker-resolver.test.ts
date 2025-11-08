@@ -11,19 +11,26 @@ describe('API Worker Resolver', () => {
   beforeEach(async () => {
     // Create a temporary directory for testing
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'api-worker-test-'));
-    mockPackageDir = path.join(tempDir, 'node_modules', '@xnok', 'emma-api-worker');
-    
+    mockPackageDir = path.join(
+      tempDir,
+      'node_modules',
+      '@xnok',
+      'emma-api-worker'
+    );
+
     // Create mock package structure
     await fs.ensureDir(mockPackageDir);
-    await fs.ensureDir(path.join(mockPackageDir, 'dist', 'cloudflare', 'server'));
+    await fs.ensureDir(
+      path.join(mockPackageDir, 'dist', 'cloudflare', 'server')
+    );
     await fs.ensureDir(path.join(mockPackageDir, 'dist', 'node', 'server'));
-    
+
     // Create mock package.json
     await fs.writeJSON(path.join(mockPackageDir, 'package.json'), {
       name: '@xnok/emma-api-worker',
       version: '1.0.0',
     });
-    
+
     // Create mock worker scripts
     await fs.writeFile(
       path.join(mockPackageDir, 'dist', 'cloudflare', 'server', 'index.mjs'),
@@ -119,8 +126,10 @@ describe('API Worker Resolver', () => {
 
     it('should warn if version mismatch', async () => {
       const originalResolve = require.resolve;
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+
       require.resolve = ((id: string) => {
         if (id === '@xnok/emma-api-worker/package.json') {
           return path.join(mockPackageDir, 'package.json');
@@ -128,9 +137,9 @@ describe('API Worker Resolver', () => {
         return originalResolve(id);
       }) as typeof require.resolve;
 
-      await resolveApiWorker({ 
+      await resolveApiWorker({
         platform: 'cloudflare',
-        version: '2.0.0' // Different from actual version
+        version: '2.0.0', // Different from actual version
       });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
