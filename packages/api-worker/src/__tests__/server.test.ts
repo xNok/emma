@@ -3,11 +3,22 @@ import { toWebHandler } from '../server';
 import { FormSchema } from '@xnok/emma-shared/types';
 import { Env } from '../env';
 
+// Mock types for Nitro bindings
+interface MockD1Database {
+  prepare: ReturnType<typeof vi.fn>;
+  batch: ReturnType<typeof vi.fn>;
+}
+
+interface MockKVNamespace {
+  get: ReturnType<typeof vi.fn>;
+  put: ReturnType<typeof vi.fn>;
+}
+
 const mockEnv: Env = {
   DB: {
     prepare: vi.fn(),
     batch: vi.fn(),
-  } as any,
+  } satisfies MockD1Database,
   submissionRepository: {
     saveSubmission: vi.fn(),
   },
@@ -18,7 +29,7 @@ const mockEnv: Env = {
   SCHEMA_CACHE: {
     get: vi.fn(),
     put: vi.fn(),
-  } as any,
+  } satisfies MockKVNamespace,
   ENVIRONMENT: 'test',
   RATE_LIMIT_REQUESTS: '100',
   RATE_LIMIT_WINDOW: '60',
