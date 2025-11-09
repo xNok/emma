@@ -113,8 +113,8 @@ load_secret "DATABASE_URL" "op://xnok/emma/database-prod/url" true
 
 **"Failed to load required secret"**
 
-- Verify the secret exists in 1Password: `op item list --vault emma`
-- Check the item details: `op item get "ITEM_NAME" --vault emma`
+- Verify the secret exists in 1Password: `op item list --vault xnok/emma`
+- Check the item details: `op item get "ITEM_NAME" --vault xnok/emma`
 - Ensure `OP_SERVICE_ACCOUNT_TOKEN` is set
 
 **"1Password CLI (op) is not installed"**
