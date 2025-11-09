@@ -1,15 +1,20 @@
-import { describe, it, expect, vi } from 'vitest';
-import { toWebHandler } from '../server';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  createApp,
+  toWebHandler as h3ToWebHandler,
+  defineEventHandler,
+} from 'h3';
 import { FormSchema } from '@xnok/emma-shared/types';
-import { Env, RequestWithEnv } from '../env';
-import { D1Database } from '@cloudflare/workers-types';
-import { KVNamespace } from '@cloudflare/workers-types';
+import { Env } from '../env';
+import { DatabaseBinding, KVBinding } from '../types/bindings';
+import app from '../server';
 
 const mockEnv: Env = {
   DB: {
     prepare: vi.fn(),
     batch: vi.fn(),
-  } as unknown as D1Database,
+    exec: vi.fn(),
+  } as unknown as DatabaseBinding,
   submissionRepository: {
     saveSubmission: vi.fn(),
   },
@@ -20,7 +25,9 @@ const mockEnv: Env = {
   SCHEMA_CACHE: {
     get: vi.fn(),
     put: vi.fn(),
-  } as unknown as KVNamespace,
+    delete: vi.fn(),
+    list: vi.fn(),
+  } as unknown as KVBinding,
   ENVIRONMENT: 'test',
   RATE_LIMIT_REQUESTS: '100',
   RATE_LIMIT_WINDOW: '60',
@@ -28,23 +35,42 @@ const mockEnv: Env = {
   ALLOWED_ORIGINS: '*',
 };
 
-// Helper to create request with env
-function createRequestWithEnv(
-  url: string,
-  options: RequestInit = {}
-): RequestWithEnv {
-  const req = new Request(url, options) as RequestWithEnv;
-  req.__env = mockEnv;
-  return req;
+// Create a test app that injects mockEnv
+function createTestHandler() {
+  const testApp = createApp();
+
+  // Inject mock environment into event context
+  testApp.use(
+    '/**',
+    defineEventHandler((event) => {
+      event.context.env = mockEnv;
+      return;
+    })
+  );
+
+  // Use the main app handlers
+  testApp.use((event) => app.handler(event));
+
+  return h3ToWebHandler(testApp);
 }
+
+// Helper to create request
+function createRequest(url: string, options: RequestInit = {}): Request {
+  return new Request(url, options);
+}
+
+// Reset mocks before each test
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('API Worker', () => {
   it('should return health check status', async () => {
-    const req = createRequestWithEnv('http://localhost/health', {
+    const req = createRequest('http://localhost/health', {
       method: 'GET',
     });
 
-    const handler = toWebHandler();
+    const handler = createTestHandler();
     const res = await handler(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
@@ -81,7 +107,7 @@ describe('API Worker', () => {
       .fn()
       .mockResolvedValue(undefined);
 
-    const req = createRequestWithEnv(`http://localhost/submit/${formId}`, {
+    const req = createRequest(`http://localhost/submit/${formId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +116,7 @@ describe('API Worker', () => {
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler();
+    const handler = createTestHandler();
     const res = await handler(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
@@ -128,13 +154,13 @@ describe('API Worker', () => {
     // Mock the submission repository
     mockEnv.schemaRepository.getSchema = vi.fn().mockResolvedValue(null);
 
-    const req = createRequestWithEnv(`http://localhost/submit/${formId}`, {
+    const req = createRequest(`http://localhost/submit/${formId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler();
+    const handler = createTestHandler();
     const res = await handler(req);
     expect(res.status).toBe(404);
   });
@@ -162,13 +188,13 @@ describe('API Worker', () => {
       .fn()
       .mockResolvedValue(mockFormSchema);
 
-    const req = createRequestWithEnv(`http://localhost/submit/${formId}`, {
+    const req = createRequest(`http://localhost/submit/${formId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler();
+    const handler = createTestHandler();
     const res = await handler(req);
     expect(res.status).toBe(400);
   });
@@ -199,13 +225,13 @@ describe('API Worker', () => {
       .fn()
       .mockResolvedValue(undefined);
 
-    const req = createRequestWithEnv(`http://localhost/submit/${formId}`, {
+    const req = createRequest(`http://localhost/submit/${formId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(submissionData),
     });
 
-    const handler = toWebHandler();
+    const handler = createTestHandler();
     const res = await handler(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as {

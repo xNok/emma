@@ -5,20 +5,35 @@ export default defineNitroConfig({
   preset: 'cloudflare-worker',
 
   // Compatibility date for Cloudflare Workers
-  compatibilityDate: '2025-11-05',
+  compatibilityDate: '2024-11-05',
 
   // Entry point for the H3 app
   entry: './cloudflare-index.ts',
 
-  // Cloudflare-specific configuration
+  // Output directory - use dist/cloudflare for multi-provider support
+  output: {
+    dir: 'dist/cloudflare',
+  },
+
+  // Cloudflare-specific configuration with wrangler settings
   cloudflare: {
-    // D1 database binding
-    d1Databases: {
-      DB: process.env.D1_DATABASE_ID || '',
-    },
-    // KV namespace binding
-    kvNamespaces: {
-      SCHEMA_CACHE: process.env.KV_NAMESPACE_ID || '',
+    // Generate wrangler.json automatically
+    wrangler: {
+      // D1 database binding
+      d1_databases: [
+        {
+          binding: 'DB',
+          database_name: process.env.D1_DATABASE_NAME || 'emma-submissions',
+          database_id: process.env.D1_DATABASE_ID || '',
+        },
+      ],
+      // KV namespace binding
+      kv_namespaces: [
+        {
+          binding: 'SCHEMA_CACHE',
+          id: process.env.KV_NAMESPACE_ID || '',
+        },
+      ],
     },
   },
 

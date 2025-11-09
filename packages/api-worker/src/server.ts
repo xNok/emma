@@ -10,43 +10,76 @@ import {
 } from 'h3';
 import type { H3Event } from 'h3';
 import handleSubmit from './handlers/submit';
-import type { Env, RequestWithEnv } from './env';
+import { DatabaseBinding, KVBinding } from './types/bindings';
+import { SubmissionRepository } from './data/submission-repository';
+import {
+  SchemaRepository,
+  CdnSchemaRepository,
+  KvCacheSchemaRepository,
+} from './data/schema-repository';
 
 const app = createApp();
 const router = createRouter();
 
-// Temporary storage for current request env (used to pass env through H3's web handler)
-let currentRequestEnv: Env | undefined;
-
-// Create a web handler that properly extracts env from RequestWithEnv
-export function toWebHandler() {
-  const baseHandler = h3ToWebHandler(app);
-
-  return async (request: Request): Promise<Response> => {
-    // Extract env from RequestWithEnv before calling the handler
-    const reqWithEnv = request as RequestWithEnv;
-
-    // Store env in module scope temporarily so middleware can access it
-    if (reqWithEnv.__env) {
-      currentRequestEnv = reqWithEnv.__env;
-    }
-
-    const response = await baseHandler(request);
-
-    // Clean up
-    currentRequestEnv = undefined;
-
-    return response;
-  };
+// Define the structure of Cloudflare environment bindings
+interface CloudflareEnv {
+  DB: DatabaseBinding;
+  SCHEMA_CACHE: KVBinding;
+  CDN_URL?: string;
+  ENVIRONMENT?: string;
+  RATE_LIMIT_REQUESTS?: string;
+  RATE_LIMIT_WINDOW?: string;
+  MAX_SUBMISSION_SIZE?: string;
+  ALLOWED_ORIGINS?: string;
 }
 
-// Middleware to inject env from temporary storage into event context
+// Define the structure of Nitro's cloudflare context
+interface CloudflareContext {
+  env: CloudflareEnv;
+}
+
+// Create a web handler with Nitro bindings support
+export function toWebHandler() {
+  return h3ToWebHandler(app);
+}
+
+// Repository implementations
+import { D1SubmissionRepository } from './data/submission-repository';
+
+// Middleware to initialize repositories from Nitro bindings
 app.use(
   '/**',
   defineEventHandler((event) => {
-    if (currentRequestEnv) {
-      event.context.env = currentRequestEnv;
+    // Skip initialization if env is already set (for testing)
+    if (event.context.env) {
+      return;
     }
+
+    // Access Cloudflare bindings through Nitro's event.context.cloudflare
+    const cloudflare = event.context.cloudflare as
+      | CloudflareContext
+      | undefined;
+
+    if (cloudflare?.env) {
+      const env = cloudflare.env;
+
+      // Initialize repositories with Nitro bindings
+      const cdnSchemaRepository = new CdnSchemaRepository(env.CDN_URL || '');
+      const submissionRepository: SubmissionRepository =
+        new D1SubmissionRepository(env.DB);
+      const schemaRepository: SchemaRepository = new KvCacheSchemaRepository(
+        env.SCHEMA_CACHE,
+        cdnSchemaRepository
+      );
+
+      // Store repositories and env in event context for handlers
+      event.context.env = {
+        ...env,
+        submissionRepository,
+        schemaRepository,
+      };
+    }
+
     return;
   })
 );
@@ -56,7 +89,12 @@ app.use(
   '/**',
   defineEventHandler((event: H3Event) => {
     // Read allowed origins from environment variable
-    const env = event.context.env as Env | undefined;
+    const env = event.context.env as
+      | (CloudflareEnv & {
+          submissionRepository?: SubmissionRepository;
+          schemaRepository?: SchemaRepository;
+        })
+      | undefined;
     const allowedOriginsEnv: string =
       process.env.ALLOWED_ORIGINS || env?.ALLOWED_ORIGINS || '';
 
