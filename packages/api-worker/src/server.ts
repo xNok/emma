@@ -50,6 +50,11 @@ import { D1SubmissionRepository } from './data/submission-repository';
 app.use(
   '/**',
   defineEventHandler((event) => {
+    // Skip initialization if env is already set (for testing)
+    if (event.context.env) {
+      return;
+    }
+
     // Access Cloudflare bindings through Nitro's event.context.cloudflare
     const cloudflare = event.context.cloudflare as
       | CloudflareContext
