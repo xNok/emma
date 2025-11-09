@@ -302,9 +302,11 @@ export function createCloudflareProvider(
             console.log('');
             console.log(chalk.cyan('Deployment Details:'));
             console.log(`  Worker URL:    ${result.workerUrl}`);
+            console.log(`  Worker Version: v${result.workerVersion}`);
             console.log(
               `  Database:      ${result.databaseName} (${result.databaseId})`
             );
+            console.log(`  KV Namespace:  ${result.kvNamespaceId}`);
             console.log('');
 
             // Save worker URL to config
@@ -312,6 +314,7 @@ export function createCloudflareProvider(
               ...config.get('cloudflare'),
               workerUrl: result.workerUrl,
               databaseId: result.databaseId,
+              kvNamespaceId: result.kvNamespaceId,
             });
             await config.save();
 

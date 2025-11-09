@@ -5,11 +5,11 @@
   "type": "module",
   "main": "./src/cloudflare-index.ts",
   "scripts": {
-    "build": "nitro build",
+    "build": "yarn build:cloudflare && yarn build:node",
     "build:cloudflare": "nitro build --preset cloudflare",
     "build:node": "nitro build --preset node-server",
     "dev": "nitro dev",
-    "dev:cloudflare": "wrangler dev .output/server/index.mjs --site .output/public --remote",
+    "dev:cloudflare": "wrangler dev dist/cloudflare/server/index.mjs --site dist/cloudflare/public --remote",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest watch",

@@ -53,6 +53,7 @@ export interface CloudflareConfig {
   accountId?: string;
   databaseName?: string;
   databaseId?: string;
+  kvNamespaceId?: string;
   workerUrl?: string;
 }
 

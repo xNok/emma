@@ -17,8 +17,8 @@
   "onCreateCommand": [],
   "postStartCommand": {
     "submodule": "git submodule update --init --recursive",
-    "hugo-server": "cd website && hugo server -D --appendPort=false --baseURL https://$CODESPACE_NAME-1313.$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN &",
-    "install-1password-cli": "bin/install_1password_cli",
+    "hugo-server": "cd website && hugo server -D --appendPort=false --baseURL https://$CODESPACE_NAME-1313.$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN",
+    "install-1password-cli": "bash bin/install_1password_cli",
     "yarn": "yarn install && yarn build"
   },
   "forwardPorts": [1313],

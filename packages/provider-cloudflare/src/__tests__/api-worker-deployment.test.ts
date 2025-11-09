@@ -97,10 +97,11 @@ describe('ApiWorkerDeployment', () => {
       );
     });
 
-    it('should check for Nitro build output at .output/server/index.mjs', async () => {
+    it('should check for Nitro build output at dist/cloudflare/server/index.mjs', async () => {
       // Mock fs.pathExists - first check for api-worker package, second for migrations dir
       vi.mocked(fs.pathExists).mockResolvedValueOnce(true as never); // api-worker package exists
       vi.mocked(fs.pathExists).mockResolvedValueOnce(true as never); // migrations dir exists
+      vi.mocked(fs.pathExists).mockResolvedValueOnce(false as never); // worker script doesn't exist
 
       // Mock readdir for migrations
       vi.mocked(fs.readdir).mockResolvedValue([
@@ -126,7 +127,7 @@ describe('ApiWorkerDeployment', () => {
         })
       );
 
-      // Mock D1 list for executeD1Query to find the newly created database
+      // Mock D1 list for migrations to find the newly created database
       mockFetch.mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -147,29 +148,35 @@ describe('ApiWorkerDeployment', () => {
         })
       );
 
-      // Mock wrangler.toml path check
-      vi.mocked(fs.pathExists).mockResolvedValueOnce(true as never); // wrangler.toml exists
-
-      // Mock wrangler config update
-      vi.mocked(fs.readFile).mockResolvedValueOnce(
-        'database_id = "old-id"' as never
+      // Mock KV list (namespace doesn't exist)
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ result: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
       );
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
 
-      // Mock worker script path check - this should return false to trigger the error
-      vi.mocked(fs.pathExists).mockResolvedValueOnce(false as never); // worker script doesn't exist
+      // Mock KV namespace creation
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ result: { id: 'test-kv-id' } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
 
       try {
         await deployment.deploy({
           accountId: mockAccountId,
           apiToken: mockApiToken,
         });
+        // Should throw before reaching here
+        expect.fail('Expected error to be thrown');
       } catch (error) {
         // Expect specific error about worker script not found
         expect(error).toBeInstanceOf(Error);
         if (error instanceof Error) {
-          expect(error.message).toContain('.output/server/index.mjs');
-          expect(error.message).toContain('yarn build:cloudflare');
+          expect(error.message).toContain('dist/cloudflare/server/index.mjs');
+          expect(error.message).toContain('build');
         }
       }
     });
@@ -202,7 +209,7 @@ describe('ApiWorkerDeployment', () => {
         })
       );
 
-      // Mock D1 list for executeD1Query to find the newly created database
+      // Mock D1 list for migrations to find the newly created database
       mockFetch.mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -223,11 +230,21 @@ describe('ApiWorkerDeployment', () => {
         })
       );
 
-      // Mock wrangler config update
-      vi.mocked(fs.readFile).mockResolvedValueOnce(
-        'database_id = "old-id"' as never
+      // Mock KV list (namespace doesn't exist)
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ result: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
       );
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
+
+      // Mock KV namespace creation
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ result: { id: 'test-kv-id' } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
 
       // Mock worker script read
       vi.mocked(fs.readFile).mockResolvedValueOnce(
@@ -236,8 +253,17 @@ describe('ApiWorkerDeployment', () => {
 
       // Mock worker deployment
       mockFetch.mockResolvedValueOnce(
-        new Response('Success', {
+        new Response(JSON.stringify({ result: { id: 'worker-id' } }), {
           status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+
+      // Mock worker bindings configuration
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ result: { success: true } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
         })
       );
 

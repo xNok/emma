@@ -1,4 +1,4 @@
-import { D1Database } from '@cloudflare/workers-types';
+import { DatabaseBinding } from '../types/bindings';
 
 export interface SubmissionRepository {
   saveSubmission(
@@ -12,9 +12,9 @@ export interface SubmissionRepository {
 }
 
 export class D1SubmissionRepository implements SubmissionRepository {
-  private db: D1Database;
+  private db: DatabaseBinding;
 
-  constructor(db: D1Database) {
+  constructor(db: DatabaseBinding) {
     this.db = db;
   }
 
