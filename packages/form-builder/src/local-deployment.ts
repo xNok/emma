@@ -193,35 +193,42 @@ export class LocalDeployment {
     });
 
     // Server info endpoint
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.app.get('/api/info', async (_req, res) => {
-      const formIds = await this.config.listFormSchemas();
+    this.app.get('/api/info', (_req, res, next) => {
+      void (async () => {
+        try {
+          const formIds = await this.config.listFormSchemas();
 
-      const forms = await Promise.all(
-        formIds.map(async (id) => {
-          const schema = await this.config.loadFormSchema(id);
-          if (!schema) return null;
+          const forms = await Promise.all(
+            formIds.map(async (id) => {
+              const schema = await this.config.loadFormSchema(id);
+              if (!schema) return null;
 
-          const timestamp = schema.currentSnapshot;
-          const bundleName = timestamp ? `${id}-${timestamp}.js` : `${id}.js`;
-          const serverUrl = `http://${options.host}:${options.port}`;
+              const timestamp = schema.currentSnapshot;
+              const bundleName = timestamp
+                ? `${id}-${timestamp}.js`
+                : `${id}.js`;
+              const serverUrl = `http://${options.host}:${options.port}`;
 
-          return {
-            id: id,
-            name: schema.name || id,
-            url: `${serverUrl}/forms/${id}/`,
-            apiUrl: `${serverUrl}/api/submit/${id}`,
-            bundleUrl: `${serverUrl}/forms/${id}/${bundleName}`,
-          };
-        })
-      );
+              return {
+                id: id,
+                name: schema.name || id,
+                url: `${serverUrl}/forms/${id}/`,
+                apiUrl: `${serverUrl}/api/submit/${id}`,
+                bundleUrl: `${serverUrl}/forms/${id}/${bundleName}`,
+              };
+            })
+          );
 
-      res.json({
-        service: 'Emma Forms Local Server',
-        version: '0.1.0',
-        timestamp: new Date().toISOString(),
-        forms: forms.filter((f): f is NonNullable<typeof f> => f !== null),
-      });
+          res.json({
+            service: 'Emma Forms Local Server',
+            version: '0.1.0',
+            timestamp: new Date().toISOString(),
+            forms: forms.filter((f): f is NonNullable<typeof f> => f !== null),
+          });
+        } catch (error) {
+          next(error);
+        }
+      })();
     });
 
     // Root page with form listing
