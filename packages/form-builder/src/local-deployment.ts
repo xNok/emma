@@ -210,7 +210,7 @@ export class LocalDeployment {
               const serverUrl = `http://${options.host}:${options.port}`;
 
               return {
-                id: id,
+                id,
                 name: schema.name || id,
                 url: `${serverUrl}/forms/${id}/`,
                 apiUrl: `${serverUrl}/api/submit/${id}`,
