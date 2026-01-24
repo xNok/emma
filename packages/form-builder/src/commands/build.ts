@@ -50,13 +50,19 @@ export function buildCommand(config: EmmaConfig): Command {
           },
         });
 
-        watcher.on('change', async () => {
-          console.log(chalk.dim('\nFile changed, rebuilding...'));
-          await runBuild(formId, options, config);
+        watcher.on('change', () => {
+          void (async () => {
+            console.log(chalk.dim('\nFile changed, rebuilding...'));
+            await runBuild(formId, options, config);
+          })();
         });
 
         watcher.on('error', (error) => {
-          console.error(chalk.red(`Watcher error: ${error}`));
+          console.error(
+            chalk.red(
+              `Watcher error: ${error instanceof Error ? error.message : String(error)}`
+            )
+          );
         });
       }
     });
