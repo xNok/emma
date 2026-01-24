@@ -33,6 +33,8 @@ const PATTERN_PRESETS: Record<string, RegExp> = {
   tel: /^\+?[\d\s\-()]+$/,
 };
 
+const REGEX_CACHE: Record<string, RegExp> = {};
+
 /**
  * Validates a complete form schema
  */
@@ -248,8 +250,11 @@ function validateFieldValue(
       // Check if it's a preset
       if (rules.pattern in PATTERN_PRESETS) {
         regex = PATTERN_PRESETS[rules.pattern];
+      } else if (rules.pattern in REGEX_CACHE) {
+        regex = REGEX_CACHE[rules.pattern];
       } else {
         regex = new RegExp(rules.pattern);
+        REGEX_CACHE[rules.pattern] = regex;
       }
 
       if (!regex.test(strValue)) {
