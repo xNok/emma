@@ -20,7 +20,8 @@ describe('sanitizeInput', () => {
 
   it('should handle mixed content', () => {
     const input = '<div class="test">It\'s a/b</div>';
-    const expected = '&lt;div class=&quot;test&quot;&gt;It&#x27;s a&#x2F;b&lt;&#x2F;div&gt;';
+    const expected =
+      '&lt;div class=&quot;test&quot;&gt;It&#x27;s a&#x2F;b&lt;&#x2F;div&gt;';
     expect(sanitizeInput(input)).toBe(expected);
   });
 

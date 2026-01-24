@@ -44,7 +44,7 @@ const escapeMap: Record<string, string> = {
 };
 
 export function sanitizeInput(input: string): string {
-  return input.replace(/[<>"'/]/g, (match) => escapeMap[match]);
+  return input.replace(/[<>"'\/]/g, (match) => escapeMap[match]);
 }
 
 /**
