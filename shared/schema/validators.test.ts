@@ -45,5 +45,4 @@ describe('Validators', () => {
       message: 'Custom has an invalid format',
     });
   });
-
 });
