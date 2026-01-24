@@ -35,13 +35,16 @@ export function generateSubmissionId(): string {
 /**
  * Sanitizes user input to prevent XSS
  */
+const escapeMap: Record<string, string> = {
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '/': '&#x2F;',
+};
+
 export function sanitizeInput(input: string): string {
-  return input
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+  return input.replace(/[<>"'/]/g, (match) => escapeMap[match]);
 }
 
 /**
