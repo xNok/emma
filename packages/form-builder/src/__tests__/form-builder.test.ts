@@ -290,11 +290,6 @@ describe('FormBuilder', () => {
       // Let's verify that the call count increment is minimal compared to the first run.
       // Better: we can inspect the arguments to see if templates were read.
 
-      const templateCalls = readFileSpy.mock.calls.filter((args) => {
-        const filePath = String(args[0]);
-        return filePath.includes('.template.');
-      });
-
       // Clear the mock history to count fresh calls
       readFileSpy.mockClear();
 
