@@ -19,6 +19,17 @@ export interface BuildResult {
 export class FormBuilder {
   private static templateCache = new Map<string, string>();
 
+  /**
+   * Clear the in-memory template cache.
+   *
+   * This is primarily intended for development workflows (e.g. `yarn dev`
+   * or `yarn build --watch`) where template files may change while the
+   * process is running.
+   */
+  public static clearTemplateCache(): void {
+    FormBuilder.templateCache.clear();
+  }
+
   constructor(private config: EmmaConfig) {}
 
   /**

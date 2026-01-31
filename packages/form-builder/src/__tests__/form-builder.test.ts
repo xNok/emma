@@ -2,7 +2,7 @@
  * Form Builder Tests - Test form bundle generation
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
@@ -68,6 +68,8 @@ describe('FormBuilder', () => {
     config = new EmmaConfig(testDir);
     await config.initialize();
     builder = new FormBuilder(config);
+    // Clear static cache to ensure test isolation
+    FormBuilder.clearTemplateCache();
   });
 
   afterEach(async () => {
@@ -267,6 +269,96 @@ describe('FormBuilder', () => {
 
       // Should handle undefined properties gracefully
       expect(bundleContent).toContain('FORM_SCHEMA');
+    });
+  });
+
+  describe('caching', () => {
+    it('should use cache for subsequent builds', async () => {
+      // Spy on fs.readFileSync
+      const readFileSpy = vi.spyOn(fs, 'readFileSync');
+
+      // First build - should read templates from disk
+      await builder.build('cache-test-1', mockSchema);
+      const initialCallCount = readFileSpy.mock.calls.length;
+      expect(initialCallCount).toBeGreaterThan(0);
+
+      // Second build - should use cache
+      await builder.build('cache-test-2', mockSchema);
+      // fs.readFileSync is called for other things too (like ensuring dirs, copying assets),
+      // so we can't expect EXACTLY the same count, but we can check if it read the templates again.
+      // However, copying assets uses copy(), not readFileSync usually.
+      // Let's verify that the call count increment is minimal compared to the first run.
+      // Better: we can inspect the arguments to see if templates were read.
+
+      const templateCalls = readFileSpy.mock.calls.filter((args) => {
+        const filePath = String(args[0]);
+        return filePath.includes('.template.');
+      });
+
+      // Clear the mock history to count fresh calls
+      readFileSpy.mockClear();
+
+      await builder.build('cache-test-3', mockSchema);
+
+      const templateCallsAfterCache = readFileSpy.mock.calls.filter((args) => {
+        const filePath = String(args[0]);
+        return filePath.includes('.template.');
+      });
+
+      // Should be zero template reads from disk
+      expect(templateCallsAfterCache.length).toBe(0);
+
+      readFileSpy.mockRestore();
+    });
+
+    it('should clear cache when requested', async () => {
+      const readFileSpy = vi.spyOn(fs, 'readFileSync');
+
+      // Warm up cache
+      await builder.build('cache-test-warm', mockSchema);
+      readFileSpy.mockClear();
+
+      // Verify cache is working (no reads)
+      await builder.build('cache-test-cached', mockSchema);
+      const callsDuringCache = readFileSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('.template.')
+      );
+      expect(callsDuringCache.length).toBe(0);
+
+      // Clear cache
+      FormBuilder.clearTemplateCache();
+      readFileSpy.mockClear();
+
+      // Build again - should read from disk
+      await builder.build('cache-test-cleared', mockSchema);
+      const callsAfterClear = readFileSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('.template.')
+      );
+
+      expect(callsAfterClear.length).toBeGreaterThan(0);
+
+      readFileSpy.mockRestore();
+    });
+
+    it('should share cache across instances', async () => {
+      const readFileSpy = vi.spyOn(fs, 'readFileSync');
+
+      // Instance 1
+      await builder.build('instance-1', mockSchema);
+      readFileSpy.mockClear();
+
+      // Instance 2 - new instance, same config
+      const builder2 = new FormBuilder(config);
+      await builder2.build('instance-2', mockSchema);
+
+      const callsInstance2 = readFileSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('.template.')
+      );
+
+      // Should use static cache from Instance 1
+      expect(callsInstance2.length).toBe(0);
+
+      readFileSpy.mockRestore();
     });
   });
 });
