@@ -17,6 +17,8 @@ export interface BuildResult {
 }
 
 export class FormBuilder {
+  private static templateCache = new Map<string, string>();
+
   constructor(private config: EmmaConfig) {}
 
   /**
@@ -113,18 +115,26 @@ export class FormBuilder {
    * Read a template file from templates directory with dist fallback
    */
   private readTemplate(fileName: string): string {
+    if (FormBuilder.templateCache.has(fileName)) {
+      return FormBuilder.templateCache.get(fileName)!;
+    }
+
     const templatesDir = path.resolve(currentDir, './templates');
     const distTemplatesDir = path.resolve(currentDir, '../templates');
     const primaryPath = path.join(templatesDir, fileName);
     const distPath = path.join(distTemplatesDir, fileName);
 
+    let content: string;
     if (fs.existsSync(primaryPath)) {
-      return fs.readFileSync(primaryPath, 'utf8');
+      content = fs.readFileSync(primaryPath, 'utf8');
+    } else if (fs.existsSync(distPath)) {
+      content = fs.readFileSync(distPath, 'utf8');
+    } else {
+      throw new Error(`Template not found: ${fileName}`);
     }
-    if (fs.existsSync(distPath)) {
-      return fs.readFileSync(distPath, 'utf8');
-    }
-    throw new Error(`Template not found: ${fileName}`);
+
+    FormBuilder.templateCache.set(fileName, content);
+    return content;
   }
 
   /**
