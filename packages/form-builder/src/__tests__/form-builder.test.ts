@@ -269,4 +269,116 @@ describe('FormBuilder', () => {
       expect(bundleContent).toContain('FORM_SCHEMA');
     });
   });
+
+  describe('template caching', () => {
+    beforeEach(() => {
+      // Clear cache before each test to ensure clean state
+      FormBuilder.clearTemplateCache();
+    });
+
+    it('should cache templates after first read', async () => {
+      // Build once to populate cache
+      await builder.build('test-form-1', mockSchema);
+
+      // Access private cache for verification (TypeScript workaround)
+      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+
+      // Verify that all three templates are cached
+      expect(cache.has('bundle.template.js')).toBe(true);
+      expect(cache.has('preview.template.html')).toBe(true);
+      expect(cache.has('landing-page.template.html')).toBe(true);
+      expect(cache.size).toBe(3);
+    });
+
+    it('should use cached templates on subsequent reads', async () => {
+      // Build once to populate cache
+      await builder.build('test-form-1', mockSchema);
+
+      // Get cache reference
+      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+      const cachedBundle = cache.get('bundle.template.js');
+      const cachedPreview = cache.get('preview.template.html');
+      const cachedLanding = cache.get('landing-page.template.html');
+
+      // Verify cache was populated
+      expect(cachedBundle).toBeDefined();
+      expect(cachedPreview).toBeDefined();
+      expect(cachedLanding).toBeDefined();
+
+      // Build again - should use cached templates
+      await builder.build('test-form-2', mockSchema);
+
+      // Verify cache still has same references (not re-read)
+      expect(cache.get('bundle.template.js')).toBe(cachedBundle);
+      expect(cache.get('preview.template.html')).toBe(cachedPreview);
+      expect(cache.get('landing-page.template.html')).toBe(cachedLanding);
+    });
+
+    it('should share cache across FormBuilder instances', async () => {
+      // Build with first instance
+      await builder.build('test-form-1', mockSchema);
+
+      // Create second builder instance
+      const builder2 = new FormBuilder(config);
+
+      // Build with second instance
+      await builder2.build('test-form-2', mockSchema);
+
+      // Get cache reference
+      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+
+      // Cache should still only have 3 entries (shared across instances)
+      expect(cache.size).toBe(3);
+
+      // Both builds should produce valid output
+      const form1Path = path.join(
+        config.getBuildPath('test-form-1'),
+        'test-form-1.js'
+      );
+      const form2Path = path.join(
+        config.getBuildPath('test-form-2'),
+        'test-form-2.js'
+      );
+
+      expect(await fs.pathExists(form1Path)).toBe(true);
+      expect(await fs.pathExists(form2Path)).toBe(true);
+    });
+
+    it('should clear cache when clearTemplateCache is called', async () => {
+      // Build to populate cache
+      await builder.build('test-form-1', mockSchema);
+
+      // Verify cache is populated
+      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+      expect(cache.size).toBe(3);
+
+      // Clear cache
+      FormBuilder.clearTemplateCache();
+
+      // Verify cache is empty
+      expect(cache.size).toBe(0);
+
+      // Build again - should re-populate cache
+      await builder.build('test-form-2', mockSchema);
+      expect(cache.size).toBe(3);
+    });
+
+    it('should produce consistent output with and without cache', async () => {
+      // Build with empty cache
+      const result1 = await builder.build('test-form-1', mockSchema);
+      const content1 = await fs.readFile(result1.bundlePath, 'utf8');
+
+      // Build with populated cache
+      const result2 = await builder.build('test-form-2', mockSchema);
+      const content2 = await fs.readFile(result2.bundlePath, 'utf8');
+
+      // Both should have the same structure (different form IDs but same template)
+      expect(content1).toContain('FORM_SCHEMA');
+      expect(content2).toContain('FORM_SCHEMA');
+      expect(content1).toContain('function init()');
+      expect(content2).toContain('function init()');
+      expect(content1).toContain('import FormRenderer');
+      expect(content2).toContain('import FormRenderer');
+    });
+  });
 });

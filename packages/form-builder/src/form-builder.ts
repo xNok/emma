@@ -22,6 +22,17 @@ export class FormBuilder {
   constructor(private config: EmmaConfig) {}
 
   /**
+   * Clear the in-memory template cache.
+   *
+   * This is primarily intended for development workflows (e.g. `yarn dev`
+   * or `yarn build --watch`) where template files may change while the
+   * process is running.
+   */
+  public static clearTemplateCache(): void {
+    FormBuilder.templateCache.clear();
+  }
+
+  /**
    * Build a form bundle from schema
    * @param snapshotTimestamp Optional timestamp to build a specific snapshot
    */
