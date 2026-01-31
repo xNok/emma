@@ -271,6 +271,12 @@ describe('FormBuilder', () => {
   });
 
   describe('template caching', () => {
+    // Helper to access private cache for testing
+    const getTemplateCache = (): Map<string, string> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      return (FormBuilder as any).templateCache as Map<string, string>;
+    };
+
     beforeEach(() => {
       // Clear cache before each test to ensure clean state
       FormBuilder.clearTemplateCache();
@@ -280,8 +286,8 @@ describe('FormBuilder', () => {
       // Build once to populate cache
       await builder.build('test-form-1', mockSchema);
 
-      // Access private cache for verification (TypeScript workaround)
-      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+      // Access private cache for verification
+      const cache = getTemplateCache();
 
       // Verify that all three templates are cached
       expect(cache.has('bundle.template.js')).toBe(true);
@@ -295,7 +301,7 @@ describe('FormBuilder', () => {
       await builder.build('test-form-1', mockSchema);
 
       // Get cache reference
-      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+      const cache = getTemplateCache();
       const cachedBundle = cache.get('bundle.template.js');
       const cachedPreview = cache.get('preview.template.html');
       const cachedLanding = cache.get('landing-page.template.html');
@@ -325,7 +331,7 @@ describe('FormBuilder', () => {
       await builder2.build('test-form-2', mockSchema);
 
       // Get cache reference
-      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+      const cache = getTemplateCache();
 
       // Cache should still only have 3 entries (shared across instances)
       expect(cache.size).toBe(3);
@@ -349,7 +355,7 @@ describe('FormBuilder', () => {
       await builder.build('test-form-1', mockSchema);
 
       // Verify cache is populated
-      const cache = (FormBuilder as any).templateCache as Map<string, string>;
+      const cache = getTemplateCache();
       expect(cache.size).toBe(3);
 
       // Clear cache
