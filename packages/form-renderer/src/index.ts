@@ -25,10 +25,12 @@ export class FormRenderer {
   private schema: FormSchema;
   private form: HTMLFormElement | null = null;
   private options: RenderOptions;
+  private fieldsMap: Map<string, FormField>;
 
   constructor(options: RenderOptions) {
     this.options = options;
     this.schema = options.schema;
+    this.fieldsMap = new Map(this.schema.fields.map((f) => [f.id, f]));
 
     const container = document.getElementById(options.containerId);
     if (!container) {
@@ -520,7 +522,7 @@ export class FormRenderer {
    * Validates a single field
    */
   private validateField(fieldId: string): boolean {
-    const field = this.schema.fields.find((f) => f.id === fieldId);
+    const field = this.fieldsMap.get(fieldId);
     if (!field) return true;
 
     const input = this.form?.querySelector(
