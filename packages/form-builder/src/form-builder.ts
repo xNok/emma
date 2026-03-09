@@ -32,7 +32,7 @@ export class FormBuilder {
     await fs.ensureDir(outputDir);
 
     // Generate the form bundle JavaScript
-    const bundleContent = this.generateFormBundle(schema);
+    const bundleContent = await this.generateFormBundle(schema);
 
     // Determine bundle name based on snapshot
     const timestamp = snapshotTimestamp || schema.currentSnapshot;
@@ -49,12 +49,12 @@ export class FormBuilder {
     await this.copyRendererRuntime(outputDir);
 
     // Create a test HTML file for local preview
-    const testHtmlContent = this.generateTestHtml(schema);
+    const testHtmlContent = await this.generateTestHtml(schema);
     const testHtmlPath = path.join(outputDir, 'preview.html');
     await fs.writeFile(testHtmlPath, testHtmlContent, 'utf8');
 
     // Create a landing page HTML file
-    const landingPageHtmlContent = this.generateLandingPageHtml(
+    const landingPageHtmlContent = await this.generateLandingPageHtml(
       schema,
       bundleName
     );
@@ -74,8 +74,8 @@ export class FormBuilder {
   /**
    * Generate the JavaScript bundle content
    */
-  private generateFormBundle(schema: FormSchema): string {
-    const template = this.readTemplate('bundle.template.js');
+  private async generateFormBundle(schema: FormSchema): Promise<string> {
+    const template = await this.readTemplate('bundle.template.js');
     return template
       .replace('__FORM_SCHEMA__', JSON.stringify(schema, null, 2))
       .replace(/__FORM_ID__/g, schema.formId);
@@ -84,8 +84,8 @@ export class FormBuilder {
   /**
    * Generate test HTML file for preview
    */
-  private generateTestHtml(schema: FormSchema): string {
-    const template = this.readTemplate('preview.template.html');
+  private async generateTestHtml(schema: FormSchema): Promise<string> {
+    const template = await this.readTemplate('preview.template.html');
     return template
       .replace('__FORM_NAME__', schema.name)
       .replace(/__FORM_ID__/g, schema.formId)
@@ -97,11 +97,11 @@ export class FormBuilder {
   /**
    * Generate landing page HTML file
    */
-  private generateLandingPageHtml(
+  private async generateLandingPageHtml(
     schema: FormSchema,
     bundleName: string
-  ): string {
-    const template = this.readTemplate('landing-page.template.html');
+  ): Promise<string> {
+    const template = await this.readTemplate('landing-page.template.html');
     return template
       .replace('__FORM_NAME__', schema.name)
       .replace(/__FORM_ID__/g, schema.formId)
@@ -112,17 +112,17 @@ export class FormBuilder {
   /**
    * Read a template file from templates directory with dist fallback
    */
-  private readTemplate(fileName: string): string {
+  private async readTemplate(fileName: string): Promise<string> {
     const templatesDir = path.resolve(currentDir, './templates');
     const distTemplatesDir = path.resolve(currentDir, '../templates');
     const primaryPath = path.join(templatesDir, fileName);
     const distPath = path.join(distTemplatesDir, fileName);
 
-    if (fs.existsSync(primaryPath)) {
-      return fs.readFileSync(primaryPath, 'utf8');
+    if (await fs.pathExists(primaryPath)) {
+      return fs.readFile(primaryPath, 'utf8');
     }
-    if (fs.existsSync(distPath)) {
-      return fs.readFileSync(distPath, 'utf8');
+    if (await fs.pathExists(distPath)) {
+      return fs.readFile(distPath, 'utf8');
     }
     throw new Error(`Template not found: ${fileName}`);
   }
