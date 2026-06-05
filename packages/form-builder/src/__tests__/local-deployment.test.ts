@@ -18,10 +18,19 @@ interface ApiResponse {
   submissionId?: string;
 }
 
+interface FormInfo {
+  id: string;
+  name: string;
+  url: string;
+  apiUrl: string;
+  bundleUrl: string;
+}
+
 interface ServerInfo {
   service: string;
   version: string;
   timestamp: string;
+  forms: FormInfo[];
 }
 
 // Increase timeout for server operations
@@ -282,6 +291,19 @@ describe('LocalDeployment', () => {
         expect(info.service).toBe('Emma Forms Local Server');
         expect(info.version).toBe('0.1.0');
         expect(info.timestamp).toBeDefined();
+
+        expect(Array.isArray(info.forms)).toBe(true);
+        expect(info.forms.length).toBeGreaterThan(0);
+        const form = info.forms.find((f) => f.id === 'test-form-001');
+        expect(form).toBeDefined();
+        expect(form?.name).toBe('Test Form');
+        expect(form?.url).toBe('http://localhost:3339/forms/test-form-001/');
+        expect(form?.apiUrl).toBe(
+          'http://localhost:3339/api/submit/test-form-001'
+        );
+        expect(form?.bundleUrl).toBe(
+          'http://localhost:3339/forms/test-form-001/test-form-001.js'
+        );
       },
       TIMEOUT
     );
