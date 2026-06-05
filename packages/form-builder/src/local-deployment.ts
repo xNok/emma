@@ -195,35 +195,43 @@ export class LocalDeployment {
     // Server info endpoint
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.app.get('/api/info', async (req, res) => {
-      const formIds = await this.config.listFormSchemas();
-      const schemas = await Promise.all(
-        formIds.map((id) => this.config.loadFormSchema(id))
-      );
+      try {
+        const formIds = await this.config.listFormSchemas();
+        const schemas = await Promise.all(
+          formIds.map((id) => this.config.loadFormSchema(id))
+        );
 
-      const protocol = req.protocol;
-      const host = req.get('host');
-      const serverUrl = `${protocol}://${host}`;
+        const protocol = req.protocol;
+        const host = req.get('host') || 'localhost';
+        const serverUrl = `${protocol}://${host}`;
 
-      const forms = formIds.map((id, index) => {
-        const schema = schemas[index];
-        const timestamp = schema?.currentSnapshot;
-        const bundleName = timestamp ? `${id}-${timestamp}.js` : `${id}.js`;
+        const forms = formIds.map((id, index) => {
+          const schema = schemas[index];
+          const timestamp = schema?.currentSnapshot;
+          const bundleName = timestamp ? `${id}-${timestamp}.js` : `${id}.js`;
 
-        return {
-          id,
-          name: schema?.name || id,
-          url: `${serverUrl}/forms/${id}/`,
-          apiUrl: `${serverUrl}/api/submit/${id}`,
-          bundleUrl: `${serverUrl}/forms/${id}/${bundleName}`,
-        };
-      });
+          return {
+            id,
+            name: schema?.name || id,
+            url: `${serverUrl}/forms/${id}/`,
+            apiUrl: `${serverUrl}/api/submit/${id}`,
+            bundleUrl: `${serverUrl}/forms/${id}/${bundleName}`,
+          };
+        });
 
-      res.json({
-        service: 'Emma Forms Local Server',
-        version: '0.1.0',
-        timestamp: new Date().toISOString(),
-        forms,
-      });
+        res.json({
+          service: 'Emma Forms Local Server',
+          version: '0.1.0',
+          timestamp: new Date().toISOString(),
+          forms,
+        });
+      } catch (error) {
+        console.error('Error in /api/info:', error);
+        res.status(500).json({
+          error: 'Internal Server Error',
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
     });
 
     // Root page with form listing
