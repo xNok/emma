@@ -97,7 +97,7 @@ describe('ApiWorkerDeployment', () => {
       );
     });
 
-    it('should check for Nitro build output at dist/cloudflare/server/index.mjs', async () => {
+    it('should check for Nitro build output at dist/cloudflare-worker/server/index.mjs', async () => {
       // Mock fs.readJSON for package.json
       vi.mocked(fs.readJSON).mockResolvedValue({
         name: '@xnok/emma-api-worker',
@@ -182,7 +182,9 @@ describe('ApiWorkerDeployment', () => {
         // Expect specific error about worker script not found
         expect(error).toBeInstanceOf(Error);
         if (error instanceof Error) {
-          expect(error.message).toContain('dist/cloudflare/server/index.mjs');
+          expect(error.message).toContain(
+            'dist/cloudflare-worker/server/index.mjs'
+          );
           expect(error.message).toContain('built');
         }
       }
