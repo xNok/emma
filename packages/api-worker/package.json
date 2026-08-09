@@ -1,19 +1,20 @@
 {
   "name": "@xnok/emma-api-worker",
   "version": "0.4.0",
-  "description": "Cloudflare Worker for handling form submissions",
+  "description": "Provider-agnostic API worker for handling form submissions (Cloudflare, Vercel Edge, AWS Lambda, Node.js)",
   "type": "module",
-  "main": "./src/cloudflare-index.ts",
   "scripts": {
-    "build": "yarn build:cloudflare && yarn build:node",
-    "build:cloudflare": "nitro build --preset cloudflare",
-    "build:node": "nitro build --preset node-server",
+    "build": "yarn build:cloudflare && yarn build:node && yarn build:vercel && yarn build:aws",
+    "build:cloudflare": "NITRO_PRESET=cloudflare-worker nitro build",
+    "build:node": "NITRO_PRESET=node-server nitro build",
     "dev": "nitro dev",
-    "dev:cloudflare": "wrangler dev dist/cloudflare/server/index.mjs --site dist/cloudflare/public --remote",
+    "dev:cloudflare": "wrangler dev dist/cloudflare-worker/server/index.mjs --site dist/cloudflare-worker/public --remote",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "generate:types": "openapi-typescript openapi.yaml --output src/types.ts"
+    "generate:types": "openapi-typescript openapi.yaml --output src/types.ts",
+    "build:vercel": "NITRO_PRESET=vercel-edge nitro build",
+    "build:aws": "NITRO_PRESET=aws-lambda nitro build"
   },
   "dependencies": {
     "@xnok/emma-shared": "workspace:*",

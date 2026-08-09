@@ -4,7 +4,11 @@
  */
 
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface WorkerResolutionResult {
   scriptPath: string;
@@ -36,7 +40,16 @@ export async function resolveApiWorker(
   let packageJson: { name: string; version: string };
 
   try {
-    const packageJsonPath = require.resolve(`${packageName}/package.json`);
+    // We try to resolve first naturally
+    let packageJsonPath: string;
+    try {
+      packageJsonPath = require.resolve(`${packageName}/package.json`);
+    } catch (e) {
+      // If not found, use explicit paths
+      packageJsonPath = require.resolve(`${packageName}/package.json`, {
+        paths: [process.cwd(), __dirname],
+      });
+    }
     workerPackageDir = path.dirname(packageJsonPath);
     packageJson = (await fs.readJSON(packageJsonPath)) as {
       name: string;
@@ -49,18 +62,26 @@ export async function resolveApiWorker(
   }
 
   // 2. Find the pre-built script file
-  // This path matches the build output: dist/{platform}/server/index.mjs
+  // The path differs slightly depending on the Nitro preset target
+  let platformSubdir: string = options.platform;
+
+  if (options.platform === 'cloudflare') {
+    platformSubdir = 'cloudflare-worker';
+  } else if (options.platform === 'node') {
+    platformSubdir = 'node-server';
+  }
+
   const scriptPath = path.join(
     workerPackageDir,
     'dist',
-    options.platform,
+    platformSubdir,
     'server',
     'index.mjs'
   );
 
   if (!(await fs.pathExists(scriptPath))) {
     throw new Error(
-      `Error: Could not find pre-built file at ${scriptPath}. ` +
+      `Could not find pre-built file at ${scriptPath}. ` +
         `Make sure the package has been built for platform '${options.platform}'.`
     );
   }
@@ -93,7 +114,9 @@ export async function getApiWorkerVersion(
   packageName = '@xnok/emma-api-worker'
 ): Promise<string | null> {
   try {
-    const packageJsonPath = require.resolve(`${packageName}/package.json`);
+    const packageJsonPath = require.resolve(`${packageName}/package.json`, {
+      paths: [process.cwd(), __dirname],
+    });
     const packageJson = (await fs.readJSON(packageJsonPath)) as {
       version: string;
     };
