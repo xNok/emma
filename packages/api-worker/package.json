@@ -1,7 +1,7 @@
 {
   "name": "@xnok/emma-api-worker",
   "version": "0.4.0",
-  "description": "Cloudflare Worker for handling form submissions",
+  "description": "Provider-agnostic API worker for handling form submissions (Cloudflare, Vercel Edge, AWS Lambda, Node.js)",
   "type": "module",
   "scripts": {
     "build": "yarn build:cloudflare && yarn build:node && yarn build:vercel && yarn build:aws",
