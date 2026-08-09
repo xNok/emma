@@ -1,18 +1,20 @@
 import { defineNitroConfig } from 'nitropack/config';
 
+const preset = process.env.NITRO_PRESET || 'cloudflare-worker';
+
 export default defineNitroConfig({
   srcDir: 'src',
-  preset: 'cloudflare-worker',
+  preset: preset,
 
   // Compatibility date for Cloudflare Workers
   compatibilityDate: '2024-11-05',
 
-  // Entry point for the H3 app
-  entry: './cloudflare-index.ts',
+  // Use Nitro generic handlers rather than a hardcoded Cloudflare entry point
+  handlers: [{ route: '/**', handler: '~/server.ts' }],
 
-  // Output directory - use dist/cloudflare for multi-provider support
+  // Dynamically set output directory based on preset for multi-provider support
   output: {
-    dir: 'dist/cloudflare',
+    dir: `dist/${preset}`,
   },
 
   // Cloudflare-specific configuration with wrangler settings

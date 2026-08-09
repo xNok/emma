@@ -9,7 +9,6 @@ describe('API Worker Resolver', () => {
   let mockPackageDir: string;
 
   beforeEach(async () => {
-    // Create a temporary directory for testing
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'api-worker-test-'));
     mockPackageDir = path.join(
       tempDir,
@@ -18,32 +17,36 @@ describe('API Worker Resolver', () => {
       'emma-api-worker'
     );
 
-    // Create mock package structure
     await fs.ensureDir(mockPackageDir);
     await fs.ensureDir(
-      path.join(mockPackageDir, 'dist', 'cloudflare', 'server')
+      path.join(mockPackageDir, 'dist', 'cloudflare-worker', 'server')
     );
-    await fs.ensureDir(path.join(mockPackageDir, 'dist', 'node', 'server'));
+    await fs.ensureDir(
+      path.join(mockPackageDir, 'dist', 'node-server', 'server')
+    );
 
-    // Create mock package.json
     await fs.writeJSON(path.join(mockPackageDir, 'package.json'), {
       name: '@xnok/emma-api-worker',
-      version: '1.0.0',
+      version: '0.4.0',
     });
 
-    // Create mock worker scripts
     await fs.writeFile(
-      path.join(mockPackageDir, 'dist', 'cloudflare', 'server', 'index.mjs'),
+      path.join(
+        mockPackageDir,
+        'dist',
+        'cloudflare-worker',
+        'server',
+        'index.mjs'
+      ),
       'export default { fetch: () => new Response("cloudflare") };'
     );
     await fs.writeFile(
-      path.join(mockPackageDir, 'dist', 'node', 'server', 'index.mjs'),
+      path.join(mockPackageDir, 'dist', 'node-server', 'server', 'index.mjs'),
       'export default { fetch: () => new Response("node") };'
     );
   });
 
   afterEach(async () => {
-    // Clean up temporary directory
     if (tempDir) {
       await fs.remove(tempDir);
     }
@@ -51,51 +54,54 @@ describe('API Worker Resolver', () => {
 
   describe('resolveApiWorker', () => {
     it('should resolve cloudflare worker script', async () => {
-      // Mock require.resolve to return our test package
       const originalResolve = require.resolve;
-      require.resolve = ((id: string) => {
-        if (id === '@xnok/emma-api-worker/package.json') {
+      require.resolve = ((id: string, options?: { paths?: string[] }) => {
+        if (id.includes('@xnok/emma-api-worker')) {
           return path.join(mockPackageDir, 'package.json');
         }
-        return originalResolve(id);
+        return originalResolve(id, options);
       }) as typeof require.resolve;
 
       const result = await resolveApiWorker({ platform: 'cloudflare' });
 
-      expect(result.packageVersion).toBe('1.0.0');
+      expect(result.packageVersion).toBe('0.4.0');
       expect(result.scriptContent).toContain('cloudflare');
-      expect(result.scriptPath).toContain('dist/cloudflare/server/index.mjs');
+      expect(result.scriptPath).toContain(
+        'dist/cloudflare-worker/server/index.mjs'
+      );
       expect(result.packageDir).toBe(mockPackageDir);
 
-      // Restore original require.resolve
       require.resolve = originalResolve;
     });
 
     it('should resolve node worker script', async () => {
       const originalResolve = require.resolve;
-      require.resolve = ((id: string) => {
-        if (id === '@xnok/emma-api-worker/package.json') {
+      require.resolve = ((id: string, options?: { paths?: string[] }) => {
+        if (id.includes('@xnok/emma-api-worker')) {
           return path.join(mockPackageDir, 'package.json');
         }
-        return originalResolve(id);
+        return originalResolve(id, options);
       }) as typeof require.resolve;
 
       const result = await resolveApiWorker({ platform: 'node' });
 
-      expect(result.packageVersion).toBe('1.0.0');
+      expect(result.packageVersion).toBe('0.4.0');
       expect(result.scriptContent).toContain('node');
-      expect(result.scriptPath).toContain('dist/node/server/index.mjs');
+      expect(result.scriptPath).toContain('dist/node-server/server/index.mjs');
 
       require.resolve = originalResolve;
     });
 
     it('should throw error if package not found', async () => {
       const originalResolve = require.resolve;
-      require.resolve = ((id: string) => {
-        if (id === '@xnok/emma-api-worker/package.json') {
-          throw new Error('Cannot find module');
+      require.resolve = ((id: string, options?: { paths?: string[] }) => {
+        if (id.includes('@xnok/emma-api-worker')) {
+          throw Object.assign(
+            new Error("Cannot find module '@xnok/emma-api-worker'"),
+            { code: 'MODULE_NOT_FOUND' }
+          );
         }
-        return originalResolve(id);
+        return originalResolve(id, options);
       }) as typeof require.resolve;
 
       await expect(
@@ -107,15 +113,14 @@ describe('API Worker Resolver', () => {
 
     it('should throw error if built script not found', async () => {
       const originalResolve = require.resolve;
-      require.resolve = ((id: string) => {
-        if (id === '@xnok/emma-api-worker/package.json') {
+      require.resolve = ((id: string, options?: { paths?: string[] }) => {
+        if (id.includes('@xnok/emma-api-worker')) {
           return path.join(mockPackageDir, 'package.json');
         }
-        return originalResolve(id);
+        return originalResolve(id, options);
       }) as typeof require.resolve;
 
-      // Remove the built script
-      await fs.remove(path.join(mockPackageDir, 'dist', 'cloudflare'));
+      await fs.remove(path.join(mockPackageDir, 'dist', 'cloudflare-worker'));
 
       await expect(
         resolveApiWorker({ platform: 'cloudflare' })
@@ -130,20 +135,20 @@ describe('API Worker Resolver', () => {
         .spyOn(console, 'warn')
         .mockImplementation(() => {});
 
-      require.resolve = ((id: string) => {
-        if (id === '@xnok/emma-api-worker/package.json') {
+      require.resolve = ((id: string, options?: { paths?: string[] }) => {
+        if (id.includes('@xnok/emma-api-worker')) {
           return path.join(mockPackageDir, 'package.json');
         }
-        return originalResolve(id);
+        return originalResolve(id, options);
       }) as typeof require.resolve;
 
       await resolveApiWorker({
         platform: 'cloudflare',
-        version: '2.0.0', // Different from actual version
+        version: '2.0.0',
       });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Requested version 2.0.0 but found 1.0.0')
+        expect.stringContaining('Requested version 2.0.0 but found 0.4.0')
       );
 
       consoleWarnSpy.mockRestore();
@@ -154,26 +159,29 @@ describe('API Worker Resolver', () => {
   describe('getApiWorkerVersion', () => {
     it('should return package version', async () => {
       const originalResolve = require.resolve;
-      require.resolve = ((id: string) => {
-        if (id === '@xnok/emma-api-worker/package.json') {
+      require.resolve = ((id: string, options?: { paths?: string[] }) => {
+        if (id.includes('@xnok/emma-api-worker')) {
           return path.join(mockPackageDir, 'package.json');
         }
-        return originalResolve(id);
+        return originalResolve(id, options);
       }) as typeof require.resolve;
 
       const version = await getApiWorkerVersion();
-      expect(version).toBe('1.0.0');
+      expect(version).toBe('0.4.0');
 
       require.resolve = originalResolve;
     });
 
     it('should return null if package not found', async () => {
       const originalResolve = require.resolve;
-      require.resolve = ((id: string) => {
-        if (id === '@xnok/emma-api-worker/package.json') {
-          throw new Error('Cannot find module');
+      require.resolve = ((id: string, options?: { paths?: string[] }) => {
+        if (id.includes('@xnok/emma-api-worker')) {
+          throw Object.assign(
+            new Error("Cannot find module '@xnok/emma-api-worker'"),
+            { code: 'MODULE_NOT_FOUND' }
+          );
         }
-        return originalResolve(id);
+        return originalResolve(id, options);
       }) as typeof require.resolve;
 
       const version = await getApiWorkerVersion();
