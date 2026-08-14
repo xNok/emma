@@ -6,4 +6,4 @@
 - Refactored `packages/api-worker/src/handlers/submit.ts` to use H3's provider-agnostic `getRequestIP` method.
 - Verified that the modified `api-worker` successfully builds across all target environments (Cloudflare, Vercel, Node, AWS) via `nitropack`.
 - Executed the `api-worker` test suite to ensure the refactoring did not introduce any regressions.
-- Enforced build supply chain hardening by explicitly appending `enableScripts: false` to the `.yarnrc.yml` to prevent execution of potentially unsafe post-install scripts.
+- Corrected a build error caused by disabling yarn scripts; the monorepo requires postinstall scripts for native dependencies like esbuild.

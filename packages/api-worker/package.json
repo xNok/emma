@@ -24,7 +24,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231016.0",
     "@types/node": "^20.10.0",
-    "nitropack": "^2.13.4",
+    "nitropack": "^2.12.9",
     "openapi-typescript": "^7.10.1",
     "tsx": "^4.20.6",
     "typescript": "^5.3.3",
