@@ -1,4 +1,11 @@
-import { H3Event, readBody, getRouterParam, createError, getHeader, getRequestIP } from 'h3';
+import {
+  H3Event,
+  readBody,
+  getRouterParam,
+  createError,
+  getHeader,
+  getRequestIP,
+} from 'h3';
 import { SubmissionResponse } from '@xnok/emma-shared/types';
 import { validateSubmissionData } from '@xnok/emma-shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@xnok/emma-shared/utils';
