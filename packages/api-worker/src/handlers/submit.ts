@@ -1,4 +1,4 @@
-import { H3Event, readBody, getRouterParam, createError, getHeader } from 'h3';
+import { H3Event, readBody, getRouterParam, createError, getHeader, getRequestIP } from 'h3';
 import { SubmissionResponse } from '@xnok/emma-shared/types';
 import { validateSubmissionData } from '@xnok/emma-shared/schema';
 import { generateSubmissionId, sanitizeInput } from '@xnok/emma-shared/utils';
@@ -39,8 +39,8 @@ export default async function handleSubmit(
 
     const submissionData = validationResult.data;
 
-    // Get client IP from Cloudflare headers
-    const clientIP = getHeader(event, 'CF-Connecting-IP') || 'unknown';
+    // Get client IP using provider-agnostic method
+    const clientIP = getRequestIP(event, { xForwardedFor: true }) || 'unknown';
 
     // Get repositories from event context (set up in cloudflare-index.ts)
     const env = event.context.env as Env;
