@@ -5,46 +5,11 @@
 
 import { createServer } from 'node:http';
 import { toNodeListener, defineEventHandler } from 'h3';
-import type { FormSchema } from '@xnok/emma-shared/types';
 import app from './server.js';
 import type { Env } from './env.js';
 
-// Mock repositories for local development
-class MockSubmissionRepository {
-  saveSubmission(
-    submissionId: string,
-    formId: string,
-    data: Record<string, string | string[]>,
-    meta: Record<string, unknown>,
-    formSnapshot?: number,
-    formBundle?: string
-  ): Promise<void> {
-    console.log('📨 Submission saved (mock):');
-    console.log(`  ID: ${submissionId}`);
-    console.log(`  Form: ${formId}`);
-    console.log(`  Snapshot: ${formSnapshot || 'N/A'}`);
-    console.log(`  Bundle: ${formBundle || 'N/A'}`);
-    console.log(`  Data:`, data);
-    console.log(`  Meta:`, meta);
-    return Promise.resolve();
-  }
-}
-
-class MockSchemaRepository {
-  getSchema(formId: string): Promise<FormSchema> {
-    // Return a permissive schema for local testing
-    console.log(`📋 Loading schema for form: ${formId} (mock)`);
-    return Promise.resolve({
-      formId,
-      name: `Test Form ${formId}`,
-      fields: [], // Accept any fields for testing
-      theme: 'default',
-      version: '1.0.0',
-      apiEndpoint: `/api/submit/${formId}`,
-      currentSnapshot: Date.now(),
-    });
-  }
-}
+import { MockSubmissionRepository } from './data/submission-repository.js';
+import { MockSchemaRepository } from './data/schema-repository.js';
 
 // Create mock env
 const mockEnv: Env = {

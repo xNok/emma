@@ -11,6 +11,26 @@ export interface SubmissionRepository {
   ): Promise<void>;
 }
 
+export class MockSubmissionRepository implements SubmissionRepository {
+  saveSubmission(
+    submissionId: string,
+    formId: string,
+    data: Record<string, string | string[]>,
+    meta: Record<string, unknown>,
+    formSnapshot?: number,
+    formBundle?: string
+  ): Promise<void> {
+    console.log('📨 Submission saved (mock):');
+    console.log(`  ID: ${submissionId}`);
+    console.log(`  Form: ${formId}`);
+    console.log(`  Snapshot: ${formSnapshot || 'N/A'}`);
+    console.log(`  Bundle: ${formBundle || 'N/A'}`);
+    console.log(`  Data:`, data);
+    console.log(`  Meta:`, meta);
+    return Promise.resolve();
+  }
+}
+
 export class D1SubmissionRepository implements SubmissionRepository {
   private db: DatabaseBinding;
 

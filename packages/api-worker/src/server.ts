@@ -44,9 +44,13 @@ export function toWebHandler() {
 }
 
 // Repository implementations
-import { D1SubmissionRepository } from './data/submission-repository';
+import {
+  D1SubmissionRepository,
+  MockSubmissionRepository,
+} from './data/submission-repository';
+import { MockSchemaRepository } from './data/schema-repository';
 
-// Middleware to initialize repositories from Nitro bindings
+// Middleware to initialize repositories from Nitro bindings or environment fallback
 app.use(
   '/**',
   defineEventHandler((event) => {
@@ -63,7 +67,7 @@ app.use(
     if (cloudflare?.env) {
       const env = cloudflare.env;
 
-      // Initialize repositories with Nitro bindings
+      // Initialize Cloudflare-specific repositories with Nitro bindings
       const cdnSchemaRepository = new CdnSchemaRepository(env.CDN_URL || '');
       const submissionRepository: SubmissionRepository =
         new D1SubmissionRepository(env.DB);
@@ -77,6 +81,19 @@ app.use(
         ...env,
         submissionRepository,
         schemaRepository,
+      };
+    } else {
+      // Fallback for non-Cloudflare targets (e.g. Vercel, Node, AWS)
+      // Provide mock/generic implementations for local development only.
+      // In production non-Cloudflare environments without bindings, fail fast.
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('FATAL: Running in production without Cloudflare bindings or a generic repository factory configured. Form submissions cannot be saved persistently.');
+      }
+
+      event.context.env = {
+        ...(process.env as unknown as CloudflareEnv),
+        submissionRepository: new MockSubmissionRepository(),
+        schemaRepository: new MockSchemaRepository(),
       };
     }
 
