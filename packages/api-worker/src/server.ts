@@ -87,7 +87,9 @@ app.use(
       // Provide mock/generic implementations for local development only.
       // In production non-Cloudflare environments without bindings, fail fast.
       if (process.env.NODE_ENV === 'production') {
-        throw new Error('FATAL: Running in production without Cloudflare bindings or a generic repository factory configured. Form submissions cannot be saved persistently.');
+        throw new Error(
+          'FATAL: Running in production without Cloudflare bindings or a generic repository factory configured. Form submissions cannot be saved persistently.'
+        );
       }
 
       event.context.env = {
