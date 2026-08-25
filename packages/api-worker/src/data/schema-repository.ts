@@ -5,6 +5,22 @@ export interface SchemaRepository {
   getSchema(formId: string): Promise<FormSchema | null>;
 }
 
+export class MockSchemaRepository implements SchemaRepository {
+  getSchema(formId: string): Promise<FormSchema | null> {
+    // Return a permissive schema for local testing
+    console.log(`📋 Loading schema for form: ${formId} (mock)`);
+    return Promise.resolve({
+      formId,
+      name: `Test Form ${formId}`,
+      fields: [], // Accept any fields for testing
+      theme: 'default',
+      version: '1.0.0',
+      apiEndpoint: `/api/submit/${formId}`,
+      currentSnapshot: Date.now(),
+    });
+  }
+}
+
 export class CdnSchemaRepository implements SchemaRepository {
   private cdnUrl: string;
 
