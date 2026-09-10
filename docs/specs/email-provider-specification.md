@@ -1,23 +1,33 @@
-# Email Provider Specification
+# Email Provider Specification (Nitro / UnJS Extension Specification)
 
 **Status:** Proposed
-**Applies To:** `@xnok/emma-shared`, `@xnok/emma-api-worker`, custom email extensions
+**Applies To:** `@xnok/emma-shared`, `@xnok/emma-api-worker`, Nitro extension modules (`unemail`)
 
 ---
 
 ## 1. Overview
 
-This specification defines the contract, interfaces, runtime expectations, and configuration requirements for email providers in the `@xnok/emma` form ecosystem. Custom email driver implementations MUST adhere to this specification to ensure cross-platform compatibility across Cloudflare Workers, Node.js, Vercel, and AWS Lambda deployments.
+This specification defines the contract, interfaces, driver factory patterns, and configuration requirements for email providers in the `@xnok/emma` form ecosystem. Designed as a Nitro server extension (`unemail`), custom driver implementations MUST adhere to UnJS driver conventions (`defineEmailDriver`) to ensure compatibility across Cloudflare Workers, Node.js, Vercel, and AWS Lambda deployments.
 
 ---
 
-## 2. Core Provider Interface (`IEmailProvider`)
+## 2. Nitro Runtime Composable (`useEmail`)
 
-An Email Provider is responsible for outbound email transmission.
+The primary runtime interface available within Nitro server handlers:
 
 ```typescript
-export interface IEmailProvider {
-  /** Unique provider identifier (e.g. 'cloudflare', 'resend', 'sendgrid', 'smtp', 'mock') */
+export function useEmail(driverName?: string): EmailDriver;
+```
+
+---
+
+## 3. Driver Factory & Interface Specification (`defineEmailDriver`)
+
+Every email driver is produced via a factory created with `defineEmailDriver`:
+
+```typescript
+export interface EmailDriver {
+  /** Unique driver identifier (e.g. 'cloudflare', 'resend', 'sendgrid', 'smtp', 'mock') */
   readonly name: string;
 
   /**
@@ -29,11 +39,30 @@ export interface IEmailProvider {
   /**
    * Verify provider credentials and configuration status.
    */
-  verifyConfiguration(): Promise<boolean>;
+  verify?(): Promise<boolean>;
+}
+
+export type EmailDriverFactory<Options> = (options: Options) => EmailDriver;
+
+export function defineEmailDriver<Options>(
+  factory: EmailDriverFactory<Options>
+): EmailDriverFactory<Options>;
+```
+
+---
+
+## 4. Nitro Configuration Schema (`nitro.config.ts`)
+
+```typescript
+export interface NitroEmailConfig {
+  default?: string;
+  drivers?: Record<string, { driver: string; [key: string]: any }>;
 }
 ```
 
-### 2.1 Standardized Options (`SendEmailOptions`)
+---
+
+## 5. Standardized Types (`SendEmailOptions` & `SendEmailResult`)
 
 ```typescript
 export interface SendEmailOptions {
@@ -51,11 +80,7 @@ export interface SendEmailOptions {
   headers?: Record<string, string>;
   tags?: Record<string, string>;
 }
-```
 
-### 2.2 Standardized Result (`SendEmailResult`)
-
-```typescript
 export interface SendEmailResult {
   success: boolean;
   messageId: string;
@@ -71,45 +96,6 @@ export interface SendEmailResult {
 
 ---
 
-## 3. Required Driver Implementations
+## 6. Upstream Ecosystem Alignment
 
-| Driver ID    | Runtime Compatibility            | Direct Bindings / Protocol  | Key Configuration Parameters                       |
-| :----------- | :------------------------------- | :-------------------------- | :------------------------------------------------- |
-| `cloudflare` | Edge (Cloudflare Workers) / HTTP | `env.EMAIL.send` / REST API | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`    |
-| `resend`     | Universal (Edge + Node.js)       | HTTPS REST API              | `RESEND_API_KEY`                                   |
-| `sendgrid`   | Universal (Edge + Node.js)       | HTTPS REST API              | `SENDGRID_API_KEY`                                 |
-| `smtp`       | Node.js / Server                 | SMTPS / TLS Socket          | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` |
-| `mock`       | Universal / In-Memory            | Memory Array Queue          | None (optional delay simulation)                   |
-
----
-
-## 4. Error Handling & Retry Policies
-
-Providers MUST wrap driver-specific exceptions into standardized `EmailProviderError` objects:
-
-```typescript
-export class EmailProviderError extends Error {
-  constructor(
-    message: string,
-    public readonly code:
-      | 'INVALID_CREDENTIALS'
-      | 'RATE_LIMITED'
-      | 'UNVERIFIED_SENDER'
-      | 'INVALID_RECIPIENT'
-      | 'NETWORK_ERROR'
-      | 'UNKNOWN',
-    public readonly retryable: boolean = false,
-    public readonly originalError?: unknown
-  ) {
-    super(message);
-    this.name = 'EmailProviderError';
-  }
-}
-```
-
----
-
-## 5. Security & Domain Verification Guidelines
-
-1. **Sender Authentication**: All outbound emails MUST originate from domains with verified **SPF** (`v=spf1 include:email-provider.com ~all`), **DKIM** keys, and **DMARC** policy records.
-2. **Secret Hygiene**: Email API keys and tokens MUST NEVER be embedded in client-side form bundles (`@xnok/emma-form-renderer`). All email dispatch happens strictly on the backend API worker (`@xnok/emma-api-worker`).
+This specification is modeled after Nitro's `unstorage` and `un-db` packages, enabling future submission as an upstream UnJS core package (`unemail` / `nitro-email`).

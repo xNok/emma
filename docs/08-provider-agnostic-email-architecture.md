@@ -1,4 +1,4 @@
-# Provider-Agnostic Email Architecture & Design Document
+# Provider-Agnostic Email Architecture & Design Document (Nitro-Native Extension Model)
 
 **Document Number:** 08
 **Date:** March 30, 2026
@@ -21,211 +21,207 @@ Cloudflare provides first-class native email capabilities through **Cloudflare E
 
 ### 1.2 Goals
 
-- **Provider Portability**: Zero hard dependency on Cloudflare Workers. Support Cloudflare Email, Resend, SendGrid, Amazon SES, NodeMailer / SMTP, and Mock drivers seamlessly.
+- **Nitro-Native Semantics**: Mirror Nitro core primitives (`useStorage()`, `useDatabase()`) by designing `useEmail()` and `defineEmailDriver()` as a Nitro extension module.
+- **Upstream Contribution Ready**: Design the architecture as a standalone, framework-agnostic package (`unemail` / `nitro-email`) that can eventually be contributed back to the UnJS / Nitro ecosystem.
+- **Provider Portability**: Support Cloudflare Email Workers, Resend, SendGrid, Amazon SES, NodeMailer / SMTP, and Mock drivers seamlessly without runtime lock-in.
 - **Runtime Agnosticism**: Function across Nitropack multi-target serverless runtimes (Cloudflare Workers, Node.js/Express, Vercel Functions, AWS Lambda).
-- **Outbound & Inbound Support**: Standardize both outbound email delivery (`sendEmail`) and inbound message handling (`receiveEmail` / webhook adapter).
-- **Developer Experience**: Provide local development mocking (`MockEmailProvider`) and unit testing primitives without external dependencies.
-- **Form System Integration**: Seamless hook into `@xnok/emma-api-worker` submission pipeline and form template rendering.
-
-### 1.3 Analysis: Does Nitro / UnJS Cover Email Integrations?
-
-A critical question is whether **Nitropack** or the **UnJS ecosystem** already provides an email integration abstraction out-of-the-box:
-
-1. **Nitro Core Capabilities**:
-   - Nitro natively provides runtime-agnostic abstractions for **Key-Value Storage** (`useStorage()` / `unstorage`), **SQL Databases** (`useDatabase()`), and **HTTP/Server Event Handling** (`H3`).
-   - **Nitro does NOT natively include an email abstraction or mailing transport system** (there is no `useEmail()` or `useMailer()` primitive in Nitro core).
-
-2. **UnJS / Community Ecosystem**:
-   - The UnJS ecosystem includes low-level primitives like `mimetext` (for generating MIME-formatted email payloads without Node.js dependencies).
-   - Higher-level framework integrations (such as Nuxt modules or Nodemailer wrappers) exist for specific node environments, but they are not runtime-agnostic or built into Nitro serverless build targets.
-
-3. **How `@xnok/emma` Intersects with Nitro**:
-   - **Nitro as Runtime Host**: `@xnok/emma-api-worker` runs as a Nitro application, leveraging H3 event handlers for HTTP submission endpoints and webhooks.
-   - **Unstorage for Email Queuing**: Nitro's `useStorage()` can be used by `@xnok/emma` for buffering outbound emails or rate-limiting email dispatches across serverless deployments.
-   - **`@xnok/emma` Custom Email Layer**: Because Nitro lacks a native email primitive, `@xnok/emma` defines its own `IEmailProvider` driver architecture. This ensures that whether `@xnok/emma-api-worker` is built for Cloudflare Workers, Node.js, Vercel, or AWS Lambda, email dispatch remains 100% unified and agnostic.
+- **Outbound & Inbound Support**: Standardize both outbound email delivery (`useEmail().send()`) and inbound message handling (`receiveEmail` / webhook adapter).
 
 ---
 
-## 2. Cloudflare Email Capability Analysis & Mapping
+## 2. Nitro-Native Architecture & Extension Model
 
-Cloudflare Email Workers offer powerful edge capabilities:
+To seamlessly integrate with Nitro and provide a developer experience identical to `useStorage()` (Unstorage) and `useDatabase()` (Un-db), we model email integration using Nitro's composable and driver factory conventions.
 
-1. **`env.EMAIL.send(options)`**: Direct Worker binding to send emails via Cloudflare Email Routing.
-2. **`email(message, env, ctx)`**: Exported event handler to intercept incoming emails routed to the domain (`message.from`, `message.to`, `message.raw`, `message.forward()`, `message.reply()`).
-3. **Cloudflare REST API & SMTP Endpoint**: HTTPS endpoints (`https://api.cloudflare.com/client/v4/accounts/{account_id}/email/sending/send`) and SMTPS (`smtps://smtp.mx.cloudflare.net:465`).
-
-### Mapping Matrix: Vendor Native vs Agnostic Abstraction
-
-| Feature              | Cloudflare Workers Native                           | Agnostic `@xnok/emma` Abstraction               | Alternative Drivers (Resend, SendGrid, SMTP) |
-| :------------------- | :-------------------------------------------------- | :---------------------------------------------- | :------------------------------------------- |
-| **Outbound Sending** | `env.EMAIL.send({ to, from, subject, html, text })` | `IEmailProvider.send(options)`                  | API POST (`/emails`), SMTP Transport         |
-| **Inbound Handling** | `export default { email(msg, env, ctx) }`           | `IEmailReceiver.handleInbound(event)`           | Webhook Handler (`/api/v1/emails/inbound`)   |
-| **Email Parsing**    | `mimetext` / raw stream parsing                     | `InboundEmailEvent` normalized payload          | Webhook JSON payload / `mailparser`          |
-| **Forwarding/Reply** | `message.forward()`, `message.reply()`              | Normalized `replyTo` and delivery orchestration | API Reply / Forward calls                    |
-| **Local Mocking**    | Wrangler local simulation                           | `MockEmailProvider` in-memory queue             | Local SMTP test server / Memory adapter      |
-
----
-
-## 3. Core Abstraction & Interface Design
-
-All email abstractions reside in `@xnok/emma-shared` or `@xnok/emma-api-worker/src/email/`.
-
-```typescript
-/**
- * Normalized Email Message Options for Outbound Delivery
- */
-export interface SendEmailOptions {
-  to: string | string[];
-  from: string | { name?: string; email: string };
-  replyTo?: string | string[];
-  cc?: string | string[];
-  bcc?: string | string[];
-  subject: string;
-  text?: string;
-  html?: string;
-  templateId?: string;
-  templateData?: Record<string, unknown>;
-  attachments?: EmailAttachment[];
-  headers?: Record<string, string>;
-  tags?: Record<string, string>;
-}
-
-export interface EmailAttachment {
-  filename: string;
-  content: string | Uint8Array; // Base64 or binary buffer
-  contentType: string;
-  disposition?: 'inline' | 'attachment';
-  contentId?: string;
-}
-
-export interface SendEmailResult {
-  success: boolean;
-  messageId: string;
-  provider: string;
-  rawResponse?: unknown;
-  error?: {
-    code: string;
-    message: string;
-    retryable: boolean;
-  };
-}
-
-/**
- * Normalized Inbound Email Payload
- */
-export interface InboundEmailEvent {
-  id: string;
-  from: string;
-  to: string[];
-  subject: string;
-  text?: string;
-  html?: string;
-  raw?: Uint8Array | string;
-  headers: Record<string, string>;
-  attachments?: EmailAttachment[];
-  receivedAt: Date;
-}
-
-/**
- * Outbound Email Provider Contract
- */
-export interface IEmailProvider {
-  readonly name: string;
-  send(options: SendEmailOptions): Promise<SendEmailResult>;
-  verifyConfiguration(): Promise<boolean>;
-}
-
-/**
- * Inbound Email Receiver Contract
- */
-export interface IEmailReceiver {
-  readonly name: string;
-  parseInboundRequest(event: unknown): Promise<InboundEmailEvent>;
-  handleInbound(email: InboundEmailEvent): Promise<void>;
-}
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    Nitro Server / API Worker Runtime                    │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│    Nitro Config (nitro.config.ts)                                        │
+│    └── email: { default: 'resend', drivers: { resend: ..., cf: ... } }  │
+│                                                                         │
+│    Runtime Composable: useEmail('resend') / useEmail()                 │
+│    ├── .send(options)                                                  │
+│    └── .verify()                                                       │
+│                                                                         │
+│    Driver Registry (defineEmailDriver)                                  │
+│    ├── cloudflareDriver()  ──► env.EMAIL.send / REST API                │
+│    ├── resendDriver()      ──► HTTPS REST API                           │
+│    ├── sendgridDriver()    ──► HTTPS REST API                           │
+│    ├── smtpDriver()        ──► SMTPS / TLS Socket                       │
+│    └── mockDriver()        ──► In-Memory Queue (Testing/CLI)            │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
----
+### 2.1 Nitro Configuration Integration (`nitro.config.ts`)
 
-## 4. Drivers & Provider Architectures
-
-### 4.1 Cloudflare Workers Driver (`CloudflareEmailProvider`)
-
-Utilizes the Cloudflare Worker `env.EMAIL` binding when running inside Cloudflare Workers or falls back to Cloudflare REST API when running outside Workers.
+In `nitro.config.ts` or `emma.config.ts`, email drivers are mounted under the `email` options key, exactly like storage drivers:
 
 ```typescript
-export class CloudflareEmailProvider implements IEmailProvider {
-  readonly name = 'cloudflare';
+// nitro.config.ts
+import { defineNitroConfig } from 'nitro/config';
 
-  constructor(
-    private env?: {
-      EMAIL?: { send: (msg: any) => Promise<{ messageId: string }> };
+export default defineNitroConfig({
+  // Nitro-style email configuration
+  email: {
+    default: process.env.EMAIL_PROVIDER || 'resend',
+    drivers: {
+      cloudflare: {
+        driver: 'cloudflare',
+        accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+        apiToken: process.env.CLOUDFLARE_API_TOKEN,
+      },
+      resend: {
+        driver: 'resend',
+        apiKey: process.env.RESEND_API_KEY,
+      },
+      smtp: {
+        driver: 'smtp',
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT || 587),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      },
+      mock: {
+        driver: 'mock',
+      },
     },
-    private apiToken?: string,
-    private accountId?: string
-  ) {}
+  },
+});
+```
 
-  async send(options: SendEmailOptions): Promise<SendEmailResult> {
-    // 1. Native Worker Binding execution path
-    if (this.env?.EMAIL) {
-      const res = await this.env.EMAIL.send({
-        to: Array.isArray(options.to) ? options.to : [options.to],
-        from:
-          typeof options.from === 'string' ? options.from : options.from.email,
-        subject: options.subject,
-        text: options.text || '',
-        html: options.html,
-      });
-      return { success: true, messageId: res.messageId, provider: this.name };
-    }
+### 2.2 The `useEmail()` Composable Primitive
 
-    // 2. Cloudflare REST API fallback execution path
-    if (this.apiToken && this.accountId) {
-      const response = await fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/email/sending/send`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${this.apiToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(options),
-        }
-      );
-      const data = await response.json();
-      return {
-        success: data.success,
-        messageId: data.result?.id || '',
-        provider: this.name,
-      };
-    }
+Within Nitro event handlers (`/api/submit`), developers use `useEmail()` to access the configured email driver:
 
-    throw new Error(
-      'Cloudflare Email Provider misconfigured: Missing EMAIL binding or API token.'
-    );
-  }
+```typescript
+// server/api/submit.ts
+import { eventHandler, readBody } from 'h3';
+import { useEmail } from 'nitro/email'; // or @xnok/emma-api-worker/email
 
-  async verifyConfiguration(): Promise<boolean> {
-    return Boolean(this.env?.EMAIL || (this.apiToken && this.accountId));
-  }
+export default eventHandler(async (event) => {
+  const body = await readBody(event);
+  const email = useEmail(); // Uses default driver from nitro.config.ts
+
+  await email.send({
+    to: 'admin@example.com',
+    from: 'noreply@example.com',
+    subject: `New Form Submission: ${body.formId}`,
+    html: `<h1>Submission Received</h1><pre>${JSON.stringify(body.data, null, 2)}</pre>`,
+  });
+
+  return { success: true };
+});
+```
+
+---
+
+## 3. Driver Interface & `defineEmailDriver` Factory
+
+Following UnJS/Unstorage conventions, each driver is defined using `defineEmailDriver`:
+
+```typescript
+/**
+ * Driver Factory Pattern (UnJS style)
+ */
+export interface EmailDriver {
+  name: string;
+  send(options: SendEmailOptions): Promise<SendEmailResult>;
+  verify?(): Promise<boolean>;
+}
+
+export type EmailDriverFactory<Options> = (options: Options) => EmailDriver;
+
+export function defineEmailDriver<Options>(
+  factory: EmailDriverFactory<Options>
+): EmailDriverFactory<Options> {
+  return factory;
 }
 ```
 
-### 4.2 Resend Driver (`ResendEmailProvider`)
+### 3.1 Cloudflare Driver (`cloudflareDriver`)
 
-High-performance HTTPS API driver compatible with Edge and Node.js runtimes.
+Supports native Worker bindings (`env.EMAIL.send`) when deployed on Cloudflare Workers, and falls back to Cloudflare REST API for edge/node targets outside Workers:
 
 ```typescript
-export class ResendEmailProvider implements IEmailProvider {
-  readonly name = 'resend';
+import { defineEmailDriver } from './driver';
 
-  constructor(private apiKey: string) {}
+export interface CloudflareDriverOptions {
+  accountId?: string;
+  apiToken?: string;
+}
 
-  async send(options: SendEmailOptions): Promise<SendEmailResult> {
+export const cloudflareDriver = defineEmailDriver<CloudflareDriverOptions>(
+  (opts) => {
+    return {
+      name: 'cloudflare',
+      async send(options) {
+        // Access global env inside Cloudflare Workers
+        const globalEnv = (globalThis as any).__env__ || (globalThis as any);
+
+        // 1. Native Worker binding
+        if (globalEnv?.EMAIL) {
+          const res = await globalEnv.EMAIL.send({
+            to: Array.isArray(options.to) ? options.to : [options.to],
+            from:
+              typeof options.from === 'string'
+                ? options.from
+                : options.from.email,
+            subject: options.subject,
+            text: options.text || '',
+            html: options.html,
+          });
+          return {
+            success: true,
+            messageId: res.messageId,
+            provider: 'cloudflare',
+          };
+        }
+
+        // 2. REST API fallback
+        if (opts.accountId && opts.apiToken) {
+          const res = await fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${opts.accountId}/email/sending/send`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${opts.apiToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(options),
+            }
+          );
+          const data = await res.json();
+          return {
+            success: data.success,
+            messageId: data.result?.id || '',
+            provider: 'cloudflare',
+          };
+        }
+
+        throw new Error(
+          'Cloudflare email driver missing EMAIL binding or accountId/apiToken'
+        );
+      },
+    };
+  }
+);
+```
+
+### 3.2 Resend Driver (`resendDriver`)
+
+```typescript
+export const resendDriver = defineEmailDriver<{ apiKey: string }>((opts) => ({
+  name: 'resend',
+  async send(options) {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${opts.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -237,39 +233,24 @@ export class ResendEmailProvider implements IEmailProvider {
         subject: options.subject,
         html: options.html,
         text: options.text,
-        reply_to: options.replyTo,
       }),
     });
     const data = await res.json();
     return {
       success: res.ok,
       messageId: data.id,
-      provider: this.name,
+      provider: 'resend',
       rawResponse: data,
     };
-  }
-
-  async verifyConfiguration(): Promise<boolean> {
-    return Boolean(this.apiKey && this.apiKey.startsWith('re_'));
-  }
-}
+  },
+}));
 ```
-
-### 4.3 SMTP Driver (`SmtpEmailProvider`) & Mock Driver (`MockEmailProvider`)
-
-- **`SmtpEmailProvider`**: Uses standard Node.js SMTP transport for traditional server deployments.
-- **`MockEmailProvider`**: In-memory queue storing dispatched emails for local testing and CLI development.
 
 ---
 
-## 5. Inbound Email Routing & Nitropack Serverless Integration
+## 4. Inbound Email Handling & Nitro Webhook Integration
 
-Inbound email delivery varies across cloud providers:
-
-- **Cloudflare**: Native `email(message, env, ctx)` handler.
-- **Resend / SendGrid / Postmark**: HTTP POST Webhooks (`/api/v1/emails/inbound`).
-
-To maintain provider-agnostic architecture, `@xnok/emma-api-worker` wraps both mechanisms into unified H3 event handlers.
+Inbound email handling uses a Nitro / H3 event handler adapter:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -280,85 +261,58 @@ To maintain provider-agnostic architecture, `@xnok/emma-api-worker` wraps both m
          ▼                                                 ▼
 ┌────────────────────────────────┐               ┌──────────────────┐
 │ Cloudflare Worker email() Event│               │ HTTP Webhook POST│
-└────────────────────────────────┘               └──────────────────┐
+└────────────────────────────────┘               └──────────────────┘
                  │                                         │
                  ▼                                         ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                  EmailReceiverAdapter.normalize(event)                  │
+│                  createEmailInboundHandler(receiver)                    │
 └─────────────────────────────────────────────────────────────────────────┘
                                   │
                                   ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │              InboundEmailEvent (Normalized Payload)                    │
 └─────────────────────────────────────────────────────────────────────────┘
-                                  │
-                                  ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│          Form Workflow Engine (Notification / Support Ticket)           │
-└─────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 5. Upstream Contribution Strategy (`unemail` Proposal)
+
+By designing this module to follow UnJS standards (`unstorage`, `un-db`, `unhead`):
+
+1. **Standalone Package (`unemail`)**: Implement the core types, `defineEmailDriver`, and drivers (`resendDriver`, `cloudflareDriver`, `smtpDriver`, `mockDriver`) in a decoupled workspace package.
+2. **Nitro Core Primitive (`useEmail()`)**: Provide a Nitro plugin that registers `useEmail()` into Nitro server context.
+3. **Open Source Contribution**: Submit `unemail` to the UnJS ecosystem as a candidate for standard Nitro mailing abstraction.
 
 ---
 
 ## 6. Architecture Decision Record (ADR)
 
-### ADR 0008: Strategy / Driver Pattern for Email Integration
+### ADR 0008: Nitro-Native Composable Architecture (`useEmail`) for Email Integration
 
 #### Context & Problem
 
-Form notifications and transactional emails require an email service. Direct binding to Cloudflare Email Workers (`env.EMAIL.send`) binds the application strictly to Cloudflare infrastructure, preventing deployment on Vercel, Node.js servers, or AWS.
+Direct Cloudflare `env.EMAIL` binding causes vendor lock-in. Custom ad-hoc wrappers create unnecessary cognitive overhead for developers familiar with Nitro's composables like `useStorage()` and `useDatabase()`.
 
-Furthermore, while Nitro provides native abstractions for storage (`unstorage`) and database (`useDatabase()`), it lacks a native email primitive.
+#### Decision
 
-#### Decision Drivers
+Adopt Nitro-native semantics:
 
-1. **Portability**: Must support multiple cloud targets without code changes.
-2. **Unified API**: Single `sendEmail()` interface across all packages.
-3. **Local DX**: Seamless offline testability without mock cloud APIs.
-4. **Security**: Centralized verification of SPF/DKIM/DMARC configurations.
+- Provide `useEmail()` composable for runtime email access.
+- Provide `defineEmailDriver()` for UnJS-compliant driver definitions.
+- Support `nitro.config.ts` configuration under the `email` key.
 
-#### Evaluated Alternatives
+#### Consequences & Benefits
 
-1. **Direct Cloudflare `env.EMAIL` Binding**: Rejected due to Cloudflare vendor lock-in.
-2. **Generic NodeMailer Only**: Rejected because NodeMailer relies on Node.js `net`/`tls` sockets incompatible with Edge runtimes (Cloudflare Workers, Vercel Edge).
-3. **Strategy / Driver Architecture with HTTP API Fallbacks**: **Selected**. Uses native fetch-compatible REST APIs for Edge environments, bindings where available, and SMTP for traditional Node.js.
-
-#### Decision Outcome
-
-Adopt the Strategy / Driver architecture with `IEmailProvider` and `IEmailReceiver`. `@xnok/emma-api-worker` dynamically instantiates the appropriate driver based on environment variables (`EMAIL_PROVIDER=cloudflare|resend|sendgrid|smtp|mock`).
+- **Zero Vendor Lock-in**: Works across Cloudflare, Resend, SendGrid, and SMTP.
+- **Consistent DX**: Developer experience matches native Nitro primitives.
+- **Upstream Contribution**: Positioned for future integration into Nitropack / UnJS core.
 
 ---
 
-## 7. Configuration Schema & Environment Variables
+## 7. Implementation Roadmap
 
-```bash
-# General Email Selection
-EMAIL_PROVIDER="resend" # Options: cloudflare | resend | sendgrid | smtp | mock
-EMAIL_FROM_ADDRESS="notifications@example.com"
-EMAIL_FROM_NAME="Emma Form System"
-
-# Cloudflare Email Provider Settings
-CLOUDFLARE_ACCOUNT_ID="your-account-id"
-CLOUDFLARE_API_TOKEN="your-api-token"
-
-# Resend Settings
-RESEND_API_KEY="re_123456789"
-
-# SendGrid Settings
-SENDGRID_API_KEY="SG.123456789"
-
-# SMTP Settings (Node.js target)
-SMTP_HOST="smtp.mailtrap.io"
-SMTP_PORT="587"
-SMTP_USER="username"
-SMTP_PASS="password"
-```
-
----
-
-## 8. Implementation Roadmap
-
-- **Phase 1 (Core Interfaces & Mock Driver)**: Add `IEmailProvider`, `SendEmailOptions`, and `MockEmailProvider` to `@xnok/emma-shared`.
-- **Phase 2 (Cloudflare & Resend Drivers)**: Implement `CloudflareEmailProvider` and `ResendEmailProvider` in `@xnok/emma-api-worker`.
-- **Phase 3 (Inbound Webhook Routing)**: Create H3 event handler `/api/v1/emails/inbound` and Cloudflare `email()` handler adapter.
-- **Phase 4 (Form Integration)**: Add email notification triggers on form submission in `@xnok/emma-api-worker`.
+- **Phase 1 (Unemail Primitives)**: Define `defineEmailDriver`, `useEmail()`, and `mockDriver` in `@xnok/emma-shared`.
+- **Phase 2 (Drivers & Nitro Plugin)**: Implement `cloudflareDriver`, `resendDriver`, and Nitro auto-import plugin.
+- **Phase 3 (Form Notification Wiring)**: Integrate `useEmail()` into `@xnok/emma-api-worker` submission pipeline.
+- **Phase 4 (Upstream Documentation)**: Draft RFC for UnJS / Nitro community submission.
