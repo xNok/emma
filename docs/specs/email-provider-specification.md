@@ -73,13 +73,13 @@ export interface SendEmailResult {
 
 ## 3. Required Driver Implementations
 
-| Driver ID | Runtime Compatibility | Direct Bindings / Protocol | Key Configuration Parameters |
-| :--- | :--- | :--- | :--- |
-| `cloudflare` | Edge (Cloudflare Workers) / HTTP | `env.EMAIL.send` / REST API | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` |
-| `resend` | Universal (Edge + Node.js) | HTTPS REST API | `RESEND_API_KEY` |
-| `sendgrid` | Universal (Edge + Node.js) | HTTPS REST API | `SENDGRID_API_KEY` |
-| `smtp` | Node.js / Server | SMTPS / TLS Socket | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` |
-| `mock` | Universal / In-Memory | Memory Array Queue | None (optional delay simulation) |
+| Driver ID    | Runtime Compatibility            | Direct Bindings / Protocol  | Key Configuration Parameters                       |
+| :----------- | :------------------------------- | :-------------------------- | :------------------------------------------------- |
+| `cloudflare` | Edge (Cloudflare Workers) / HTTP | `env.EMAIL.send` / REST API | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`    |
+| `resend`     | Universal (Edge + Node.js)       | HTTPS REST API              | `RESEND_API_KEY`                                   |
+| `sendgrid`   | Universal (Edge + Node.js)       | HTTPS REST API              | `SENDGRID_API_KEY`                                 |
+| `smtp`       | Node.js / Server                 | SMTPS / TLS Socket          | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` |
+| `mock`       | Universal / In-Memory            | Memory Array Queue          | None (optional delay simulation)                   |
 
 ---
 
@@ -91,7 +91,13 @@ Providers MUST wrap driver-specific exceptions into standardized `EmailProviderE
 export class EmailProviderError extends Error {
   constructor(
     message: string,
-    public readonly code: 'INVALID_CREDENTIALS' | 'RATE_LIMITED' | 'UNVERIFIED_SENDER' | 'INVALID_RECIPIENT' | 'NETWORK_ERROR' | 'UNKNOWN',
+    public readonly code:
+      | 'INVALID_CREDENTIALS'
+      | 'RATE_LIMITED'
+      | 'UNVERIFIED_SENDER'
+      | 'INVALID_RECIPIENT'
+      | 'NETWORK_ERROR'
+      | 'UNKNOWN',
     public readonly retryable: boolean = false,
     public readonly originalError?: unknown
   ) {
