@@ -29,6 +29,7 @@ module.exports = {
     'node_modules/',
     'website/tests/',
     'website/playwright.config.ts',
+    'examples/',
   ],
   env: {
     node: true,

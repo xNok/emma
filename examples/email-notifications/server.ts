@@ -53,7 +53,10 @@ export default eventHandler(async (event) => {
   });
 
   if (!adminNotification.success) {
-    console.error('Failed to send admin notification email:', adminNotification.error);
+    console.error(
+      'Failed to send admin notification email:',
+      adminNotification.error
+    );
   }
 
   // 2. Dispatch Auto-Responder Email to Form Submitter

@@ -5,6 +5,7 @@ This example demonstrates how to process form submissions and send email notific
 ## Architecture Overview
 
 When a user submits a form:
+
 1. The submission endpoint receives the payload.
 2. The submission data is validated.
 3. The Cloudflare email driver sends:

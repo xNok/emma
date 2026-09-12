@@ -1,12 +1,24 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { cloudflareEmailDriver, cloudflareDriver } from '../email.js';
+import {
+  cloudflareEmailDriver,
+  cloudflareDriver,
+  type CloudflareWorkerBinding,
+} from '../email.js';
+
+interface GlobalScopeWithEnv {
+  __env__?: {
+    EMAIL?: CloudflareWorkerBinding;
+  };
+  EMAIL?: CloudflareWorkerBinding;
+}
 
 describe('Cloudflare Email Driver', () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
-    delete (globalThis as any).__env__;
-    delete (globalThis as any).EMAIL;
+    const scope = globalThis as unknown as GlobalScopeWithEnv;
+    delete scope.__env__;
+    delete scope.EMAIL;
   });
 
   afterEach(() => {
@@ -28,7 +40,8 @@ describe('Cloudflare Email Driver', () => {
     });
 
     it('should return true if global binding EMAIL is present', async () => {
-      (globalThis as any).EMAIL = { send: vi.fn() };
+      const scope = globalThis as unknown as GlobalScopeWithEnv;
+      scope.EMAIL = { send: vi.fn() };
       const driver = cloudflareEmailDriver({});
       const isVerified = await driver.verify?.();
       expect(isVerified).toBe(true);
@@ -132,15 +145,17 @@ describe('Cloudflare Email Driver', () => {
 
   describe('send() with REST API fallback', () => {
     it('should call Cloudflare REST API when credentials are provided', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      const mockResponse = {
         ok: true,
         status: 200,
-        json: async () => ({
-          success: true,
-          result: { id: 'api-msg-789' },
-        }),
-      });
-      global.fetch = mockFetch as any;
+        json: () =>
+          Promise.resolve({
+            success: true,
+            result: { id: 'api-msg-789' },
+          }),
+      } as Response;
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
+      global.fetch = mockFetch;
 
       const driver = cloudflareEmailDriver({
         accountId: 'test-account',
@@ -183,15 +198,17 @@ describe('Cloudflare Email Driver', () => {
     });
 
     it('should handle Cloudflare API error response', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      const mockResponse = {
         ok: false,
         status: 400,
-        json: async () => ({
-          success: false,
-          errors: [{ code: 1001, message: 'Invalid recipient domain' }],
-        }),
-      });
-      global.fetch = mockFetch as any;
+        json: () =>
+          Promise.resolve({
+            success: false,
+            errors: [{ code: 1001, message: 'Invalid recipient domain' }],
+          }),
+      } as Response;
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
+      global.fetch = mockFetch;
 
       const driver = cloudflareEmailDriver({
         accountId: 'test-account',
@@ -221,7 +238,8 @@ describe('Cloudflare Email Driver', () => {
     });
 
     it('should catch network errors in REST API fallback', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error('Network offline')) as any;
+      const mockFetch = vi.fn().mockRejectedValue(new Error('Network offline'));
+      global.fetch = mockFetch;
 
       const driver = cloudflareEmailDriver({
         accountId: 'test-account',

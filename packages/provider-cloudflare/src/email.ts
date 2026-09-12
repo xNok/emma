@@ -51,15 +51,31 @@ export function defineEmailDriver<Options>(
   return factory;
 }
 
+export interface CloudflareWorkerBinding {
+  send(
+    message: Record<string, unknown>
+  ): Promise<{ messageId?: string } | void>;
+}
+
 export interface CloudflareDriverOptions {
   accountId?: string;
   apiToken?: string;
   /**
    * Optional Cloudflare Worker native SendEmail binding (env.EMAIL)
    */
-  binding?: {
-    send(message: Record<string, unknown>): Promise<any>;
+  binding?: CloudflareWorkerBinding;
+}
+
+interface GlobalScopeWithEnv {
+  __env__?: {
+    EMAIL?: CloudflareWorkerBinding;
   };
+  EMAIL?: CloudflareWorkerBinding;
+}
+
+function getGlobalBinding(): CloudflareWorkerBinding | undefined {
+  const scope = globalThis as unknown as GlobalScopeWithEnv;
+  return scope.__env__?.EMAIL || scope.EMAIL;
 }
 
 /**
@@ -72,8 +88,7 @@ export const cloudflareEmailDriver: EmailDriverFactory<CloudflareDriverOptions> 
       name: 'cloudflare',
 
       async send(options: SendEmailOptions): Promise<SendEmailResult> {
-        const globalEnv = (globalThis as any).__env__ || (globalThis as any);
-        const binding = opts.binding || globalEnv?.EMAIL;
+        const binding = opts.binding || getGlobalBinding();
 
         const formattedFrom =
           typeof options.from === 'string'
@@ -97,10 +112,15 @@ export const cloudflareEmailDriver: EmailDriverFactory<CloudflareDriverOptions> 
               headers: options.headers,
             });
 
+            const resMessageId =
+              res && typeof res === 'object' && 'messageId' in res
+                ? res.messageId
+                : undefined;
+
             return {
               success: true,
               messageId:
-                res?.messageId ||
+                resMessageId ||
                 `cf-worker-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
               provider: 'cloudflare',
               rawResponse: res,
@@ -199,8 +219,7 @@ export const cloudflareEmailDriver: EmailDriverFactory<CloudflareDriverOptions> 
 
       // eslint-disable-next-line @typescript-eslint/require-await
       async verify(): Promise<boolean> {
-        const globalEnv = (globalThis as any).__env__ || (globalThis as any);
-        const binding = opts.binding || globalEnv?.EMAIL;
+        const binding = opts.binding || getGlobalBinding();
 
         if (binding && typeof binding.send === 'function') {
           return true;
