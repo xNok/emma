@@ -1,6 +1,6 @@
 /**
  * Cloudflare Provider for Emma Forms
- * Exports deployment and submission providers for Cloudflare R2 and D1
+ * Exports deployment, submission, and email providers for Cloudflare
  */
 
 import type { ProviderManifest } from '@xnok/emma-shared/types';
@@ -26,6 +26,19 @@ export {
 
 // Export provider definition (for CLI)
 export { cloudflareProvider, createCloudflareProvider } from './provider.js';
+
+// Export email driver implementation
+export {
+  cloudflareEmailDriver,
+  cloudflareDriver,
+  defineEmailDriver,
+  type CloudflareDriverOptions,
+  type EmailDriver,
+  type EmailDriverFactory,
+  type SendEmailOptions,
+  type SendEmailResult,
+  type EmailAttachment,
+} from './email.js';
 
 /**
  * Provider manifest for Cloudflare

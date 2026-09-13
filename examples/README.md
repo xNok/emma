@@ -7,6 +7,7 @@ Example forms, configurations, and integrations.
 - `contact-form.yaml` - Simple contact form
 - `newsletter.yaml` - Newsletter signup form
 - `survey.yaml` - Multi-step survey form
+- `email-notifications/` - Post-submission email notifications with Cloudflare Email driver
 - `hugo-site/` - Example Hugo site with Emma integration
 - `themes/` - Custom theme examples
 

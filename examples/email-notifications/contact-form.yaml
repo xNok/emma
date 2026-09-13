@@ -1,0 +1,36 @@
+formId: contact-with-email
+name: Contact Form with Email Notifications
+version: 1.0.0
+theme: default
+apiEndpoint: /api/submit
+fields:
+  - id: name
+    type: text
+    label: Full Name
+    placeholder: Jane Doe
+    required: true
+    validation:
+      minLength: 2
+  - id: email
+    type: email
+    label: Email Address
+    placeholder: jane@example.com
+    required: true
+  - id: subject
+    type: text
+    label: Subject
+    placeholder: Inquiry about services
+    required: true
+  - id: message
+    type: textarea
+    label: Message
+    placeholder: Type your message here...
+    required: true
+    rows: 4
+settings:
+  submitButtonText: Send Message
+  successMessage: Thank you! Your message has been sent successfully.
+  errorMessage: Something went wrong. Please try again.
+  honeypot:
+    enabled: true
+    fieldName: website
