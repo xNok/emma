@@ -15,6 +15,10 @@ function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
+function sanitizeText(value: unknown): string {
+  return String(value ?? '').replace(/[\r\n]/g, ' ');
+}
+
 // Initialize Cloudflare Email Driver
 // Options pick up environment variables when running in Node or worker bindings when on Cloudflare Workers
 const emailDriver = cloudflareEmailDriver({
@@ -50,7 +54,7 @@ export default eventHandler(async (event) => {
     from: { name: 'Emma Form System', email: 'noreply@example.com' },
     replyTo: email,
     subject: `[New Contact Submission] ${subject || 'New Message'}`,
-    text: `You received a new submission from ${name} (${email}):\n\n${message}`,
+    text: `You received a new submission from ${sanitizeText(name)} (${sanitizeText(email)}):\n\n${message}`,
     html: `
       <h2>New Contact Form Submission</h2>
       <p><strong>From:</strong> ${escapeHtml(name)} (&lt;${escapeHtml(email)}&gt;)</p>
@@ -73,7 +77,7 @@ export default eventHandler(async (event) => {
     to: email,
     from: { name: 'Support Team', email: 'support@example.com' },
     subject: 'We received your message!',
-    text: `Hi ${name},\n\nThank you for reaching out to us. We have received your message and will get back to you shortly.\n\nBest regards,\nThe Team`,
+    text: `Hi ${sanitizeText(name)},\n\nThank you for reaching out to us. We have received your message and will get back to you shortly.\n\nBest regards,\nThe Team`,
     html: `
       <h3>Hello ${escapeHtml(name)},</h3>
       <p>Thank you for reaching out to us! We have received your message regarding "<strong>${escapeHtml(subject) || 'your inquiry'}</strong>".</p>
