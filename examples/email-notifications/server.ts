@@ -6,6 +6,15 @@
 import { eventHandler, readBody, createError } from 'h3';
 import { cloudflareEmailDriver } from '@xnok/emma-provider-cloudflare';
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Initialize Cloudflare Email Driver
 // Options pick up environment variables when running in Node or worker bindings when on Cloudflare Workers
 const emailDriver = cloudflareEmailDriver({
@@ -44,11 +53,11 @@ export default eventHandler(async (event) => {
     text: `You received a new submission from ${name} (${email}):\n\n${message}`,
     html: `
       <h2>New Contact Form Submission</h2>
-      <p><strong>From:</strong> ${name} (&lt;${email}&gt;)</p>
-      <p><strong>Subject:</strong> ${subject || 'N/A'}</p>
+      <p><strong>From:</strong> ${escapeHtml(name)} (&lt;${escapeHtml(email)}&gt;)</p>
+      <p><strong>Subject:</strong> ${escapeHtml(subject) || 'N/A'}</p>
       <hr />
       <h3>Message:</h3>
-      <p>${String(message).replace(/\n/g, '<br/>')}</p>
+      <p>${escapeHtml(message).replace(/\n/g, '<br/>')}</p>
     `,
   });
 
@@ -66,8 +75,8 @@ export default eventHandler(async (event) => {
     subject: 'We received your message!',
     text: `Hi ${name},\n\nThank you for reaching out to us. We have received your message and will get back to you shortly.\n\nBest regards,\nThe Team`,
     html: `
-      <h3>Hello ${name},</h3>
-      <p>Thank you for reaching out to us! We have received your message regarding "<strong>${subject || 'your inquiry'}</strong>".</p>
+      <h3>Hello ${escapeHtml(name)},</h3>
+      <p>Thank you for reaching out to us! We have received your message regarding "<strong>${escapeHtml(subject) || 'your inquiry'}</strong>".</p>
       <p>Our team will review your submission and respond as soon as possible.</p>
       <br/>
       <p>Best regards,<br/><strong>The Team</strong></p>

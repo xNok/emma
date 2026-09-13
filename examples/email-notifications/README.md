@@ -40,7 +40,7 @@ send_email = [
 ]
 ```
 
-Inside your Cloudflare Worker, `env.EMAIL` is automatically detected by `cloudflareEmailDriver()`.
+Inside your Cloudflare Worker, `cloudflareEmailDriver()` detects the `EMAIL` binding via `globalThis.__env__.EMAIL` or `globalThis.EMAIL`; pass `{ binding: env.EMAIL }` if you prefer to supply the binding explicitly.
 
 ### Option B: Cloudflare REST API Fallback
 

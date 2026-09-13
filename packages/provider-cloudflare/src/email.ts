@@ -164,11 +164,26 @@ export const cloudflareEmailDriver: EmailDriverFactory<CloudflareDriverOptions> 
               }
             );
 
-            const data = (await res.json()) as {
+            let data: {
               success?: boolean;
               result?: { id?: string; message_id?: string };
               errors?: Array<{ code?: number | string; message?: string }>;
             };
+
+            try {
+              data = (await res.json()) as typeof data;
+            } catch {
+              return {
+                success: false,
+                messageId: '',
+                provider: 'cloudflare',
+                error: {
+                  code: 'CLOUDFLARE_API_ERROR',
+                  message: `Cloudflare API returned a non-JSON response (status ${res.status})`,
+                  retryable: res.status >= 500 || res.status === 429,
+                },
+              };
+            }
 
             if (res.ok && data.success) {
               return {
