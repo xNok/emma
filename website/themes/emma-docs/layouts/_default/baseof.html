@@ -38,5 +38,15 @@
   
   <!-- JavaScript -->
   <script src="{{ "js/main.js" | relURL }}"></script>
+  
+  <!-- Mermaid Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'strict'
+    });
+  </script>
 </body>
 </html>
