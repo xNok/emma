@@ -1,7 +1,9 @@
 {{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
 
 {{ define "sidebar" }}
-  {{ partial "sidebar.html" . }}
+  {{ if eq .Section "docs" }}
+    {{ partial "sidebar.html" . }}
+  {{ end }}
 {{ end }}
 
 {{ define "main" }}
@@ -13,9 +15,11 @@
       {{ end }}
     </header>
     
+    {{ with .Content }}
     <div class="content-body">
-      {{ .Content }}
+      {{ . }}
     </div>
+    {{ end }}
     
     {{ if .Pages }}
     <section class="page-list">
@@ -27,8 +31,10 @@
         {{ with .Description }}
         <p class="page-list-description">{{ . }}</p>
         {{ end }}
-        {{ with .Params.weight }}
-        <span class="page-list-meta text-muted text-small">Section {{ . }}</span>
+        {{ with .Params.date }}
+        <span class="page-list-meta text-muted text-small">
+          <time datetime="{{ .Format "2006-01-02" }}">{{ .Format "January 2, 2006" }}</time>
+        </span>
         {{ end }}
       </article>
       {{ end }}
@@ -36,3 +42,4 @@
     {{ end }}
   </div>
 {{ end }}
+

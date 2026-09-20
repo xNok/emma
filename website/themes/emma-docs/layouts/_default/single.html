@@ -1,23 +1,20 @@
 {{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
 
 {{ define "sidebar" }}
-  {{ partial "sidebar.html" . }}
+  {{ if eq .Section "docs" }}
+    {{ partial "sidebar.html" . }}
+  {{ end }}
 {{ end }}
 
 {{ define "main" }}
   <article class="content">
     <header class="content-header">
       <h1 class="page-title">{{ .Title }}</h1>
-      {{ if or .Params.date .Params.weight }}
+      {{ with .Params.date }}
       <div class="page-meta">
-        {{ with .Params.date }}
         <span class="meta-item">
           <time datetime="{{ .Format "2006-01-02" }}">{{ .Format "January 2, 2006" }}</time>
         </span>
-        {{ end }}
-        {{ with .Params.weight }}
-        <span class="meta-item">Section {{ . }}</span>
-        {{ end }}
       </div>
       {{ end }}
     </header>
@@ -44,3 +41,4 @@
     {{ end }}
   </article>
 {{ end }}
+
