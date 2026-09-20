@@ -8,7 +8,7 @@
         <ul>
           {{ range .Children }}
           <li>
-            <a href="{{ .URL }}" 
+            <a href="{{ .URL | relURL }}" 
                class="{{ if $currentPage.IsMenuCurrent "docs" . }}active{{ end }}">
               {{ .Name }}
             </a>
@@ -19,8 +19,12 @@
     {{ else }}
       {{ $section := .Site.GetPage "section" "docs" }}
       {{ with $section }}
-        {{ range .Sections }}
-          <h3 class="sidebar-section-title">{{ .Title }}</h3>
+        {{ range .Sections.ByWeight }}
+          <h3 class="sidebar-section-title">
+            <a href="{{ .Permalink }}" class="{{ if eq $currentPage.Permalink .Permalink }}active{{ end }}">
+              {{ .Title }}
+            </a>
+          </h3>
           <ul>
             {{ range .Pages.ByWeight }}
             <li>
@@ -36,3 +40,4 @@
     {{ end }}
   </nav>
 </aside>
+

@@ -15,7 +15,7 @@
     <section class="home-sections">
       <div class="section-grid">
         {{ range .Site.Menus.main }}
-        <a href="{{ .URL }}" class="section-card card">
+        <a href="{{ .URL | relURL }}" class="section-card card">
           <h2 class="section-card-title">{{ .Name }}</h2>
           {{ with .Post }}
           <p class="section-card-description text-muted">{{ . }}</p>
@@ -40,7 +40,7 @@ emma init</code></pre>
         </div>
         <div class="quick-start-step card">
           <h3>3. Embed in Hugo</h3>
-          <pre><code>{{`{{< embed-form "contact-form-001" >}}`}}</code></pre>
+          <pre><code>&lbrace;&lbrace;&lt; embed-form "contact-form-001" &gt;&rbrace;&rbrace;</code></pre>
         </div>
       </div>
     </section>
@@ -48,9 +48,9 @@ emma init</code></pre>
   
   <style>
     .home-header {
+      padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
       text-align: center;
-      padding: var(--spacing-3xl) var(--spacing-lg);
-      margin-bottom: var(--spacing-2xl);
     }
     
     .home-title {
@@ -63,6 +63,12 @@ emma init</code></pre>
       margin: 0 auto;
       font-size: var(--font-size-lg);
       color: var(--color-text-light);
+      text-align: left;
+    }
+
+    .home-content h2 {
+      text-align: center;
+      margin-top: var(--spacing-xl);
     }
     
     .section-grid {
@@ -114,3 +120,4 @@ emma init</code></pre>
     }
   </style>
 {{ end }}
+

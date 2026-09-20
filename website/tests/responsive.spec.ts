@@ -21,7 +21,7 @@ test.describe('Responsive Design - Mobile', () => {
   });
 
   test('should open and close mobile menu', async ({ page }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Sidebar should be hidden initially on mobile
     const sidebar = page.locator('aside.sidebar');
@@ -43,7 +43,7 @@ test.describe('Responsive Design - Mobile', () => {
   });
 
   test('should have readable text size on mobile', async ({ page }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Get body text
     const content = page.locator('.content-area');
@@ -86,7 +86,7 @@ test.describe('Responsive Design - Tablet', () => {
   test.use({ viewport: { width: 768, height: 1024 } }); // iPad size
 
   test('should display sidebar on tablet', async ({ page }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Sidebar should be visible on tablet
     const sidebar = page.locator('aside.sidebar');
@@ -108,7 +108,7 @@ test.describe('Responsive Design - Desktop', () => {
   test('should display full sidebar navigation on desktop', async ({
     page,
   }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Sidebar should be visible
     const sidebar = page.locator('aside.sidebar');
@@ -141,10 +141,11 @@ test.describe('Responsive Design - Desktop', () => {
 
     // Should have navigation links
     await expect(
-      page.getByRole('link', { name: 'Documentation' })
+      page.getByRole('link', { name: 'Getting Started' })
     ).toBeVisible();
     await expect(page.getByRole('link', { name: /GitHub/ })).toBeVisible();
   });
+
 });
 
 test.describe('Responsive Images and Media', () => {

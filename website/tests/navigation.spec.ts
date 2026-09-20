@@ -26,11 +26,11 @@ test.describe('Navigation', () => {
   test('should navigate to documentation from homepage', async ({ page }) => {
     await page.goto('/');
 
-    // Click on Documentation link in header
-    await page.getByRole('link', { name: 'Documentation' }).first().click();
+    // Click on Getting Started link in header
+    await page.getByRole('link', { name: 'Getting Started' }).first().click();
 
     // Should navigate to docs page
-    await expect(page).toHaveURL(/\/docs\//);
+    await expect(page).toHaveURL(/\/docs\/getting-started\//);
   });
 
   test('should navigate to the blog', async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe('Navigation', () => {
     await page.goto('/');
 
     // Click on Installation link
-    await page.getByRole('link', { name: 'Installation' }).click();
+    await page.getByRole('link', { name: 'Installation' }).first().click();
 
     // Should be on installation page
     await expect(page).toHaveURL(/\/installation\//);
@@ -83,7 +83,7 @@ test.describe('Navigation', () => {
 
 test.describe('Documentation Pages', () => {
   test('should display sidebar navigation on docs pages', async ({ page }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Check that sidebar is present
     const sidebar = page.locator('aside.sidebar');
@@ -96,7 +96,7 @@ test.describe('Documentation Pages', () => {
   });
 
   test('should highlight active page in sidebar', async ({ page }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Find the Installation link in sidebar
     const installationLink = page
@@ -108,7 +108,7 @@ test.describe('Documentation Pages', () => {
   });
 
   test('should have pagination between pages', async ({ page }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Look for pagination nav
     const pagination = page.getByRole('navigation', {
@@ -124,7 +124,7 @@ test.describe('Documentation Pages', () => {
   });
 
   test('should display code blocks with copy buttons', async ({ page }) => {
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
 
     // Check for code blocks
     const codeBlock = page.locator('pre code').first();
@@ -147,7 +147,7 @@ test.describe('Header Navigation', () => {
     await expect(header).toBeVisible();
 
     // Check docs page
-    await page.goto('/docs/user-guide/installation/');
+    await page.goto('/docs/getting-started/installation/');
     header = page.locator('header.site-header');
     await expect(header).toBeVisible();
 
@@ -156,6 +156,7 @@ test.describe('Header Navigation', () => {
     await expect(logo).toBeVisible();
     await expect(logo).toHaveAttribute('href', /\//);
   });
+
 
   test('should have sticky header that remains visible on scroll', async ({
     page,

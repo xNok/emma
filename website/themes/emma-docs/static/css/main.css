@@ -216,6 +216,11 @@ li {
   padding: 0 var(--spacing-lg);
 }
 
+.header-brand {
+  display: flex;
+  align-items: center;
+}
+
 .site-logo {
   display: flex;
   align-items: center;
@@ -230,6 +235,12 @@ li {
   text-decoration: none;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
 /* Navigation */
 .site-nav {
   display: flex;
@@ -238,6 +249,8 @@ li {
 }
 
 .nav-link {
+  display: inline-flex;
+  align-items: center;
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--color-text-light);
@@ -252,6 +265,45 @@ li {
 
 .nav-link--active {
   color: var(--color-primary);
+  font-weight: 600;
+}
+
+.nav-github-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-light);
+}
+
+/* Mobile Nav Drawer */
+.mobile-nav-drawer {
+  display: none;
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.mobile-nav-drawer.active {
+  display: block;
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.mobile-nav-link {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-text);
+  padding: var(--spacing-xs) 0;
+  text-decoration: none;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link--active {
+  color: var(--color-primary);
+  text-decoration: none;
 }
 
 /* Main Content Layout */
@@ -276,13 +328,20 @@ li {
 }
 
 .sidebar-nav {
-  list-style: none;
   margin: 0;
   padding: 0;
 }
 
+.sidebar-nav ul {
+  list-style: none;
+  margin: 0 0 var(--spacing-md);
+  padding: 0;
+}
+
 .sidebar-nav li {
-  margin-bottom: var(--spacing-sm);
+  list-style: none;
+  margin-bottom: var(--spacing-xs);
+  padding: 0;
 }
 
 .sidebar-nav a {
@@ -312,8 +371,21 @@ li {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-lighter);
-  margin: var(--spacing-lg) 0 var(--spacing-sm);
+  margin: var(--spacing-lg) 0 var(--spacing-xs);
 }
+
+.sidebar-section-title a {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+.sidebar-section-title a:hover,
+.sidebar-section-title a.active {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
 
 /* Content Area */
 .content-area {
@@ -553,18 +625,21 @@ button:focus-visible,
 /* Skip to content link for screen readers */
 .skip-to-content {
   position: absolute;
-  top: -40px;
+  top: 0;
   left: 0;
+  transform: translateY(-100%);
   background: var(--color-primary);
   color: white;
   padding: var(--spacing-sm) var(--spacing-md);
   text-decoration: none;
   z-index: 1000;
+  transition: transform var(--transition-fast);
 }
 
 .skip-to-content:focus {
-  top: 0;
+  transform: translateY(0);
 }
+
 
 /* ============================================
    Page Navigation
