@@ -1,11 +1,12 @@
 ---
-title: "Breaking Free from Form SaaS: Building Multi-Cloud Static Forms with Nitro and UnJS"
+title: 'Breaking Free from Form SaaS: Building Multi-Cloud Static Forms with Nitro and UnJS'
 date: 2026-09-20T20:45:00Z
 draft: true
-description: "How the search for a lightweight, vendor-agnostic contact form solution for static Hugo websites led to the UnJS ecosystem, Nitro server engine, and Project Emma."
-tags: ["nitro", "unjs", "hugo", "serverless", "cloudflare", "emma", "forms"]
+description: 'How the search for a lightweight, vendor-agnostic contact form solution for static Hugo websites led to the UnJS ecosystem, Nitro server engine, and Project Emma.'
+tags: ['nitro', 'unjs', 'hugo', 'serverless', 'cloudflare', 'emma', 'forms']
 ---
-I wanted to have forms and email management for my side projects. While there are a lot of email marketing and form backend tools out there, I thought they were all overpriced for the simple static Hugo websites I maintain. 
+
+I wanted to have forms and email management for my side projects. While there are a lot of email marketing and form backend tools out there, I thought they were all overpriced for the simple static Hugo websites I maintain.
 
 I started looking at Cloudflare's offerings (Workers, D1, KV), but I was scared to commit to a single provider when building my solutions.
 
@@ -22,7 +23,7 @@ flowchart TD
     class E ideal;
 ```
 
-But how to achieve that? 
+But how to achieve that?
 
 I immediately thought about WebAssembly (WASM) and compiling the runtime to WASM for the form. But then came the issue of storage: a submission needs to be persisted either in a database or a blob store (after all, we don't care that much which one, as long as we can retrieve it later).
 
@@ -35,9 +36,11 @@ This is when **Nitro** and the **UnJS** ecosystem came into my line of sight.
 If you haven't explored the [UnJS](https://unjs.io/) ecosystem yet, it represents one of the most elegant architectural movements in modern JavaScript and TypeScript tooling.
 
 ### What is UnJS?
-**UnJS** (Unified JavaScript Tools) is a collection of modular, compact, zero-dependency utility libraries designed from the ground up to be **runtime-agnostic**. 
+
+**UnJS** (Unified JavaScript Tools) is a collection of modular, compact, zero-dependency utility libraries designed from the ground up to be **runtime-agnostic**.
 
 Instead of writing code that assumes a standard Node.js environment (with `fs`, `http`, or global `process`), UnJS packages are built to run seamlessly across:
+
 - **Node.js & Bun**
 - **Deno**
 - **Cloudflare Workers & Vercel Edge** (V8 Isolates)
@@ -45,12 +48,14 @@ Instead of writing code that assumes a standard Node.js environment (with `fs`, 
 - **Browsers & Web Workers**
 
 Some of the standout packages in the ecosystem include:
+
 - **`h3`**: An ultra-fast, composable, runtime-agnostic HTTP framework (the engine underneath Nitro).
 - **`unstorage`**: A unified key-value and blob storage layer with 30+ driver adapters (Memory, LocalStorage, Redis, Cloudflare KV/R2, S3, MongoDB, etc.).
 - **`unenv`**: Configurable polyfills that let Node.js modules run in non-Node environments like Cloudflare Workers.
 - **`consola`**, **`c12`**, **`ofetch`**: Universal logging, configuration loaders, and HTTP clients.
 
 ### What is Nitro?
+
 **[Nitro](https://nitro.build/)** is the next-generation web server engine built on top of UnJS (famous for powering Nuxt, but completely usable as a standalone backend framework).
 
 Nitro acts as both a **runtime framework** and a **smart build system**:
@@ -105,7 +110,7 @@ sequenceDiagram
     Dev->>CLI: emma create contact-form
     CLI-->>Dev: Generates schema & bundles JS
     Dev->>Hugo: Adds embed-form shortcode to page
-    
+
     User->>Hugo: Loads contact page
     Hugo->>FormJS: Renders form & client-side validation
     User->>FormJS: Submits form
@@ -144,7 +149,7 @@ In your Hugo markdown content, you simply drop the shortcode:
 
 ```markdown
 ---
-title: "Get in Touch"
+title: 'Get in Touch'
 ---
 
 Feel free to reach out to us using the form below:
@@ -163,31 +168,36 @@ import { SubmissionSchema } from './validation';
 
 const app = createApp();
 
-app.use('/api/submit/:formId', defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  
-  // 1. Zod Validation & Honeypot Check
-  const result = SubmissionSchema.safeParse(body);
-  if (!result.success || body._gotcha) {
-    throw createError({ statusCode: 400, message: 'Invalid submission' });
-  }
+app.use(
+  '/api/submit/:formId',
+  defineEventHandler(async (event) => {
+    const body = await readBody(event);
 
-  // 2. Access the abstracted repository injected into event context
-  const repo = event.context.submissionRepository;
-  await repo.saveSubmission(event.context.params.formId, result.data);
+    // 1. Zod Validation & Honeypot Check
+    const result = SubmissionSchema.safeParse(body);
+    if (!result.success || body._gotcha) {
+      throw createError({ statusCode: 400, message: 'Invalid submission' });
+    }
 
-  return { success: true, message: 'Submission received!' };
-}));
+    // 2. Access the abstracted repository injected into event context
+    const repo = event.context.submissionRepository;
+    await repo.saveSubmission(event.context.params.formId, result.data);
+
+    return { success: true, message: 'Submission received!' };
+  })
+);
 
 export default app;
 ```
 
 When building for local development or a self-hosted server:
+
 ```bash
 yarn nitro build --preset node-server
 ```
 
 When deploying to Cloudflare Workers:
+
 ```bash
 yarn nitro build --preset cloudflare-worker
 ```
@@ -209,7 +219,7 @@ Where does Emma stand today?
 
 ## Conclusion
 
-You don't need a heavy SaaS subscription or vendor-locked infrastructure just to put a contact form on a personal static website. 
+You don't need a heavy SaaS subscription or vendor-locked infrastructure just to put a contact form on a personal static website.
 
 By combining the speed of static site generators like Hugo with the flexibility of **UnJS** and **Nitro**, we can build developer tooling that is cost-free, privacy-friendly, and portable across any cloud.
 
