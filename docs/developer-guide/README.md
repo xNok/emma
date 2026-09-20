@@ -7,6 +7,7 @@ Welcome to the Emma Forms developer documentation. This guide is split into focu
 ### Getting Started
 
 - **[Quick Start](./quick-start.md)** - Get up and running in 5 minutes
+- **[Nix Environment](./nix-environment.md)** - Reproducible development shell with Flakes & Direnv
 - **[Package Overview](./packages.md)** - Understanding the monorepo structure
 
 ### Core Concepts
