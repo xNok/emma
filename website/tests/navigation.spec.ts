@@ -157,7 +157,6 @@ test.describe('Header Navigation', () => {
     await expect(logo).toHaveAttribute('href', /\//);
   });
 
-
   test('should have sticky header that remains visible on scroll', async ({
     page,
   }) => {

@@ -145,7 +145,6 @@ test.describe('Responsive Design - Desktop', () => {
     ).toBeVisible();
     await expect(page.getByRole('link', { name: /GitHub/ })).toBeVisible();
   });
-
 });
 
 test.describe('Responsive Images and Media', () => {

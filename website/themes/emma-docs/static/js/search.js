@@ -9,7 +9,7 @@
 
   let index;
   let pages = [];
-  const indexUrl = searchContainer?.getAttribute('data-index-url') || '/index.json';
+  const indexUrl = searchContainer?.getAttribute('data-index-url') || 'index.json';
 
   fetch(indexUrl)
     .then(response => {
