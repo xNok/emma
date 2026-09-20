@@ -104,7 +104,7 @@ sequenceDiagram
 
     Dev->>CLI: emma create contact-form
     CLI-->>Dev: Generates schema & bundles JS
-    Dev->>Hugo: {{< embed-form "contact-form-001" >}}
+    Dev->>Hugo: Adds embed-form shortcode to page
     
     User->>Hugo: Loads contact page
     Hugo->>FormJS: Renders form & client-side validation
@@ -149,7 +149,7 @@ title: "Get in Touch"
 
 Feel free to reach out to us using the form below:
 
-{{< embed-form "contact-form-001" >}}
+{{</* embed-form "contact-form-001" */>}}
 ```
 
 ### How Nitro Made the Backend Truly Multi-Provider
