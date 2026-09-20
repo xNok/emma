@@ -5,46 +5,28 @@ draft: true
 description: "How the search for a lightweight, vendor-agnostic contact form solution for static Hugo websites led to the UnJS ecosystem, Nitro server engine, and Project Emma."
 tags: ["nitro", "unjs", "hugo", "serverless", "cloudflare", "emma", "forms"]
 ---
+I wanted to have forms and email management for my side projects. While there are a lot of email marketing and form backend tools out there, I thought they were all overpriced for the simple static Hugo websites I maintain. 
 
-Every developer who maintains side projects knows the feeling: you spin up a clean, lightning-fast static website using Hugo. It costs practically nothing to host on GitHub Pages or Cloudflare Pages, loads in milliseconds, and requires zero maintenance. 
+I started looking at Cloudflare's offerings (Workers, D1, KV), but I was scared to commit to a single provider when building my solutions.
 
-Then comes the inevitable requirement: **"I need a contact form."**
-
-Suddenly, you are faced with a frustrating dilemma. The form-backend and email marketing tools currently on the market are either ridiculously overpriced for low-traffic hobby sites, push you into recurring subscriptions, or slap third-party branding all over your pages. 
-
-I wanted something simple: whenever I launch a new static website and need a contact page, I just want to run a CLI command and have the form ready. No high-traffic enterprise baggage, no monthly fees, and a solution that comfortably fits inside the free tier of almost any cloud provider—from **Cloudflare to AWS, GCP, Azure, or DigitalOcean**.
-
-Here is the story of how that search led me down the rabbit hole of WebAssembly, storage hurdles, and ultimately the discovery of **UnJS** and **Nitro**—and how they became the foundation for my open-source project, **Emma**.
-
----
-
-## The Provider Lock-in Trap & The Storage Dilemma
-
-My initial thought was to look at Cloudflare's serverless offering. Between Cloudflare Workers, D1 (SQL database), and KV, you get an incredible free tier. 
-
-However, building a solution tightly coupled to Cloudflare felt restrictive. Committing to proprietary APIs and platform-specific bindings creates vendor lock-in. What if someone wants to host their form backend on an AWS Lambda function, a DigitalOcean droplet, or a self-hosted Node/Docker container?
+I want something simple: whenever I create a new small website and want a contact page, I just want to run a CLI and have the contact page ready. I don't need to manage high traffic or a large number of users, and the solution should fit in most cloud providers' free tiers—from Cloudflare to GCP, AWS, Azure, or DigitalOcean.
 
 ```mermaid
 flowchart TD
-    A["Static Site (Hugo)"] --> B{"Needs Form Backend"}
-    B -->|"Option 1"| C["Overpriced Form SaaS\n- Monthly subscriptions\n- Vendor lock-in\n- Third-party branding"]
-    B -->|"Option 2"| D["Provider-Locked Serverless\n- Tied to single ecosystem\n- Non-portable APIs\n- Bundler complexity"]
-    B -->|"The Ideal Goal"| E["Universal & Free-Tier Friendly\n- Run CLI to scaffold\n- Portable across clouds\n- Zero monthly cost"]
+    A["Static Site (Hugo)"] --> B{"Needs Form & Email Management"}
+    B -->|"Option 1"| C["Overpriced SaaS Tools\n- Expensive monthly fees\n- Overkill for side projects\n- Third-party branding"]
+    B -->|"Option 2"| D["Single Cloud Provider\n- Scared to commit/lock-in\n- Proprietary APIs\n- Hard to move"]
+    B -->|"My Goal"| E["Simple CLI + Multi-Cloud Free Tier\n- Run CLI -> Contact page ready\n- Cloudflare, GCP, AWS, Azure, DigitalOcean\n- Zero maintenance / zero cost"]
 
     classDef ideal fill:#e0f2fe,stroke:#0284c7,stroke-width:2px;
     class E ideal;
 ```
 
-At first, I even considered compiling a form runtime to **WebAssembly (WASM)**. But while WASM solves portable compute, it doesn't solve **state and persistence**. 
+But how to achieve that? 
 
-When a visitor submits a contact form:
-1. The payload needs validation and spam protection (honeypots and rate limiting).
-2. The submission must be persisted somewhere—whether that is SQLite/D1, Postgres, a KV store, or an S3/R2 blob store (after all, we don't care that much about the underlying storage engine as long as we can reliably store and retrieve it later).
-3. An email notification or webhook should be dispatched.
+I immediately thought about WebAssembly (WASM) and compiling the runtime to WASM for the form. But then came the issue of storage: a submission needs to be persisted either in a database or a blob store (after all, we don't care that much which one, as long as we can retrieve it later).
 
-How do you write a single backend codebase that handles HTTP routing, runs anywhere, talks to heterogeneous storage backends, and compiles to different platform targets without drowning in complex bundler configurations?
-
-That’s when **Nitro** and **UnJS** came into my line of sight.
+This is when **Nitro** and the **UnJS** ecosystem came into my line of sight.
 
 ---
 
