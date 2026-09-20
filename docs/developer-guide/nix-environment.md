@@ -42,6 +42,7 @@ If you use [`direnv`](https://direnv.net/) (optionally with [`nix-direnv`](https
 # Allow the repository .envrc once
 direnv allow
 ```
+
 Whenever you `cd` into the project directory, all tooling, Node runtimes, Hugo, and environment variables are loaded automatically. If `nix-direnv` is not installed, `.envrc` automatically falls back to standard `use nix`.
 
 ---
