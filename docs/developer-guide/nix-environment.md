@@ -36,13 +36,13 @@ nix-shell
 
 ### Option 3: Direnv (Automatic Shell Activation)
 
-If you use [`direnv`](https://direnv.net/):
+If you use [`direnv`](https://direnv.net/) (optionally with [`nix-direnv`](https://github.com/nix-community/nix-direnv) for fast flake evaluation):
 
 ```bash
 # Allow the repository .envrc once
 direnv allow
 ```
-Whenever you `cd` into the project directory, all tooling, Node runtimes, Hugo, and environment variables are loaded automatically.
+Whenever you `cd` into the project directory, all tooling, Node runtimes, Hugo, and environment variables are loaded automatically. If `nix-direnv` is not installed, `.envrc` automatically falls back to standard `use nix`.
 
 ---
 

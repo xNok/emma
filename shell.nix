@@ -13,7 +13,6 @@ pkgs.mkShell {
     # Runtime & Package Management
     nodejs_22
     corepack
-    yarn
 
     # Static Site & Hugo Integration
     hugo
