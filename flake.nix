@@ -37,12 +37,22 @@
             # Quality Assurance & Tooling
             actionlint
             gh
-            git
+            # End-to-end Testing Browsers
+            playwright-driver.browsers
           ];
+
+          env = {
+            PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+            PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = "${pkgs.playwright-driver.browsers}/chromium-1243/chrome-linux64/chrome";
+            PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
+          };
 
           shellHook = ''
             export COREPACK_ENABLE_STRICT=0
             export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+            export PLAYWRIGHT_BROWSERS_PATH="${pkgs.playwright-driver.browsers}"
+            export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="${pkgs.playwright-driver.browsers}/chromium-1243/chrome-linux64/chrome"
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS="true"
           '';
         };
       }
