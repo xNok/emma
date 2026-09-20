@@ -9,21 +9,28 @@
   // Mobile menu toggle
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
   const sidebar = document.getElementById('sidebar');
+  const mobileNavDrawer = document.getElementById('mobile-nav-drawer');
   
-  if (mobileMenuToggle && sidebar) {
+  if (mobileMenuToggle) {
     mobileMenuToggle.addEventListener('click', function() {
       const isExpanded = this.getAttribute('aria-expanded') === 'true';
       
       // Toggle aria-expanded
       this.setAttribute('aria-expanded', !isExpanded);
       
-      // Toggle sidebar visibility
-      sidebar.classList.toggle('active');
+      // Toggle sidebar and drawer visibility
+      if (sidebar) {
+        sidebar.classList.toggle('active');
+      }
+      if (mobileNavDrawer) {
+        mobileNavDrawer.classList.toggle('active');
+      }
       
-      // Update button icon if needed
+      // Update button icon
       const icon = this.querySelector('svg');
       if (icon) {
-        if (sidebar.classList.contains('active')) {
+        const isActive = (sidebar && sidebar.classList.contains('active')) || (mobileNavDrawer && mobileNavDrawer.classList.contains('active'));
+        if (isActive) {
           // Change to X icon
           icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
         } else {
@@ -33,14 +40,16 @@
       }
     });
     
-    // Close sidebar when clicking outside on mobile
+    // Close sidebar/drawer when clicking outside on mobile
     document.addEventListener('click', function(event) {
       if (window.innerWidth <= 768) {
-        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
+        const isClickInsideDrawer = mobileNavDrawer && mobileNavDrawer.contains(event.target);
         const isClickOnToggle = mobileMenuToggle.contains(event.target);
         
-        if (!isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('active')) {
-          sidebar.classList.remove('active');
+        if (!isClickInsideSidebar && !isClickInsideDrawer && !isClickOnToggle) {
+          if (sidebar) sidebar.classList.remove('active');
+          if (mobileNavDrawer) mobileNavDrawer.classList.remove('active');
           mobileMenuToggle.setAttribute('aria-expanded', 'false');
           
           // Reset icon
@@ -52,6 +61,7 @@
       }
     });
   }
+
   
   // Smooth scroll for anchor links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
