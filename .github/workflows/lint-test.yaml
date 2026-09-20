@@ -16,32 +16,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
-          node-version: '20'
-          cache: 'yarn'
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Nix Flake
+        run: nix flake check
 
       - name: Install dependencies
-        run: yarn install
+        run: nix develop --command yarn install
 
       - name: Build all packages
-        run: yarn build
+        run: nix develop --command yarn build
 
       - name: Run linting
-        run: yarn lint
+        run: nix develop --command yarn lint
 
       - name: Run tests
-        run: yarn test
+        run: nix develop --command yarn test
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: nix develop --command npx playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: yarn test:e2e:ci
+        run: nix develop --command yarn test:e2e:ci
 
       - name: Check formatting
-        run: yarn format:check
+        run: nix develop --command yarn format:check
 
       - name: Check types
-        run: yarn typecheck
+        run: nix develop --command yarn typecheck
