@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.x"
+          node-version: "22.x"
           registry-url: "https://npm.pkg.github.com"
           cache: "yarn"
 
@@ -31,9 +31,9 @@ jobs:
 
       - name: Create Release Pull Request or Publish to GitHub Packages
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          publish: yarn release
+          publish-script: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
