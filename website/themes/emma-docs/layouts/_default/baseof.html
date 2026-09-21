@@ -18,6 +18,9 @@
   {{ with .OutputFormats.Get "RSS" }}
   <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .Permalink }}">
   {{ end }}
+  
+  <!-- Google Analytics -->
+  {{ template "_internal/google_analytics.html" . }}
 </head>
 <body>
   <a href="#main-content" class="skip-to-content">Skip to main content</a>

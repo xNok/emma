@@ -3,6 +3,11 @@ languageCode = 'en-us'
 title = 'Emma Forms'
 theme = 'emma-docs'
 
+# Google Analytics
+[services]
+  [services.googleAnalytics]
+    id = 'G-7SVKSWE06H'
+
 # Site description
 [params]
   description = 'Embeddable Forms for Hugo - Create, deploy, and embed forms with ease'
